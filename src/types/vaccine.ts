@@ -12,15 +12,11 @@ export interface VaccineRecord {
   veterinarian: string | null;
   notes: string | null;
   attachmentUrl: string | null;
+  /** Whether reminders should be generated for this vaccine's `nextDueDate`. See VaccineReminder. */
   notificationEnabled: boolean;
-  /** Scheduled local-notification ids for this record, tracked to avoid duplicate reminders. */
-  notificationIds: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-export type CreateVaccineInput = Omit<
-  VaccineRecord,
-  'id' | 'createdAt' | 'updatedAt' | 'notificationIds'
->;
+export type CreateVaccineInput = Omit<VaccineRecord, 'id' | 'createdAt' | 'updatedAt'>;
 export type UpdateVaccineInput = Partial<CreateVaccineInput>;

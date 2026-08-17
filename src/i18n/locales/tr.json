@@ -5,7 +5,14 @@
     "cancel": "Vazgeç",
     "save": "Kaydet",
     "retry": "Tekrar dene",
-    "comingSoon": "Yakında"
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "comingSoon": "Yakında",
+    "errors": {
+      "loadFailed": "Yüklenemedi. Lütfen tekrar dene.",
+      "saveFailed": "Değişiklikler kaydedilemedi. Lütfen tekrar dene.",
+      "deleteFailed": "Silinemedi. Lütfen tekrar dene."
+    }
   },
   "auth": {
     "signIn": {
@@ -25,6 +32,7 @@
       "fullNameLabel": "Ad Soyad",
       "emailLabel": "E-posta",
       "passwordLabel": "Şifre",
+      "roleLabel": "Ben bir",
       "submit": "Hesap oluştur",
       "haveAccount": "Zaten hesabın var mı?",
       "signIn": "Giriş yap"
@@ -57,10 +65,80 @@
     "title": "Ana Sayfa",
     "emptyFeed": "Diğer evcil hayvanları takip etmeye başladığında akışın burada görünecek."
   },
+  "species": {
+    "dog": "Köpek",
+    "cat": "Kedi",
+    "bird": "Kuş",
+    "rabbit": "Tavşan",
+    "rodent": "Kemirgen",
+    "reptile": "Sürüngen",
+    "fish": "Balık",
+    "horse": "At",
+    "other": "Diğer"
+  },
+  "genders": {
+    "male": "Erkek",
+    "female": "Dişi",
+    "unknown": "Bilinmiyor"
+  },
+  "vaccineTypes": {
+    "core": "Temel",
+    "non_core": "Ek",
+    "other": "Diğer"
+  },
   "pets": {
     "title": "Evcil hayvanlarım",
     "empty": "Henüz evcil hayvan eklemedin.",
-    "addPet": "Evcil hayvan ekle"
+    "addPet": "Evcil hayvan ekle",
+    "detailTitle": "Evcil Hayvan",
+    "editTitle": "Evcil hayvanı düzenle",
+    "deleteConfirmTitle": "Bu evcil hayvan silinsin mi?",
+    "deleteConfirmMessage": "Aşı ve sağlık kayıtları da silinecek. Bu işlem geri alınamaz.",
+    "detail": {
+      "bornOn": "Doğum tarihi {{date}}",
+      "weight": "{{weight}} kg"
+    },
+    "form": {
+      "nameLabel": "İsim",
+      "speciesLabel": "Tür",
+      "breedLabel": "Irk",
+      "genderLabel": "Cinsiyet",
+      "dateOfBirthLabel": "Doğum tarihi",
+      "weightLabel": "Ağırlık (kg)",
+      "microchipLabel": "Mikroçip numarası",
+      "descriptionLabel": "Açıklama",
+      "errors": {
+        "nameRequired": "İsim zorunludur",
+        "invalidDate": "YYYY-AA-GG biçiminde geçerli bir tarih gir",
+        "invalidWeight": "Geçerli bir ağırlık gir"
+      }
+    }
+  },
+  "vaccines": {
+    "title": "Aşılar",
+    "empty": "Henüz aşı kaydı yok.",
+    "addVaccine": "Aşı ekle",
+    "editTitle": "Aşıyı düzenle",
+    "nextDue": "Sonraki tarih {{date}}",
+    "deleteConfirmTitle": "Bu aşı kaydı silinsin mi?",
+    "deleteConfirmMessage": "İlgili hatırlatıcılar da silinecek. Bu işlem geri alınamaz.",
+    "form": {
+      "nameLabel": "Aşı adı",
+      "typeLabel": "Tür",
+      "administeredDateLabel": "Uygulama tarihi",
+      "nextDueDateLabel": "Sonraki tarih",
+      "repeatIntervalLabel": "Tekrar aralığı (gün)",
+      "repeatIntervalPlaceholder": "örn. 365",
+      "veterinarianLabel": "Veteriner",
+      "notesLabel": "Notlar",
+      "remindersLabel": "Tarih yaklaşınca hatırlat",
+      "errors": {
+        "nameRequired": "Aşı adı zorunludur",
+        "invalidAdministeredDate": "YYYY-AA-GG biçiminde geçerli bir tarih gir",
+        "invalidNextDueDate": "YYYY-AA-GG biçiminde geçerli bir tarih gir",
+        "invalidRepeatInterval": "Geçerli bir gün sayısı gir"
+      }
+    }
   },
   "profile": {
     "title": "Profil",

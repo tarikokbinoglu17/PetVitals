@@ -1,9 +1,10 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
+import { ChipSelector } from '@/components/ui/ChipSelector';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { TextField } from '@/components/ui/TextField';
 import { useAuth } from '@/hooks/useAuth';
@@ -75,27 +76,15 @@ export default function SignUpScreen() {
           autoComplete="password-new"
         />
 
-        <View style={styles.roleRow}>
-          {(['pet_owner', 'veterinarian'] as const).map((option) => (
-            <Pressable
-              key={option}
-              onPress={() => setRole(option)}
-              style={[
-                styles.roleChip,
-                {
-                  borderColor: colors.primary,
-                  backgroundColor: role === option ? colors.primary : 'transparent',
-                },
-              ]}
-            >
-              <Text
-                style={{ color: role === option ? '#FFFFFF' : colors.primary, fontWeight: '600' }}
-              >
-                {t(`roles.${option}`)}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <ChipSelector
+          label={t('auth.signUp.roleLabel')}
+          value={role}
+          onChange={setRole}
+          options={[
+            { value: 'pet_owner', label: t('roles.pet_owner') },
+            { value: 'veterinarian', label: t('roles.veterinarian') },
+          ]}
+        />
 
         {errorMessage ? (
           <Text style={[styles.errorText, { color: colors.danger }]}>{errorMessage}</Text>
@@ -119,13 +108,5 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 15 },
   form: { gap: 16 },
   errorText: { fontSize: 13 },
-  roleRow: { flexDirection: 'row', gap: 12 },
-  roleChip: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
 });

@@ -87,7 +87,6 @@ export interface Database {
           notes: string | null;
           attachment_url: string | null;
           notification_enabled: boolean;
-          notification_ids: string[];
           created_at: string;
           updated_at: string;
         };
@@ -102,7 +101,6 @@ export interface Database {
           notes?: string | null;
           attachment_url?: string | null;
           notification_enabled?: boolean;
-          notification_ids?: string[];
         };
         Update: Partial<{
           vaccine_name: string;
@@ -114,7 +112,32 @@ export interface Database {
           notes: string | null;
           attachment_url: string | null;
           notification_enabled: boolean;
-          notification_ids: string[];
+        }>;
+        Relationships: [];
+      };
+      vaccine_reminders: {
+        Row: {
+          id: string;
+          vaccine_id: string;
+          offset_days: number;
+          scheduled_date: string;
+          status: 'pending' | 'sent' | 'cancelled';
+          notification_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          vaccine_id: string;
+          offset_days: number;
+          scheduled_date: string;
+          status?: 'pending' | 'sent' | 'cancelled';
+          notification_id?: string | null;
+        };
+        Update: Partial<{
+          offset_days: number;
+          scheduled_date: string;
+          status: 'pending' | 'sent' | 'cancelled';
+          notification_id: string | null;
         }>;
         Relationships: [];
       };

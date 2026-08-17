@@ -5,7 +5,14 @@
     "cancel": "Cancel",
     "save": "Save",
     "retry": "Retry",
-    "comingSoon": "Coming soon"
+    "edit": "Edit",
+    "delete": "Delete",
+    "comingSoon": "Coming soon",
+    "errors": {
+      "loadFailed": "Couldn't load this. Please try again.",
+      "saveFailed": "Couldn't save your changes. Please try again.",
+      "deleteFailed": "Couldn't delete this. Please try again."
+    }
   },
   "auth": {
     "signIn": {
@@ -25,6 +32,7 @@
       "fullNameLabel": "Full name",
       "emailLabel": "Email",
       "passwordLabel": "Password",
+      "roleLabel": "I am a",
       "submit": "Create account",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in"
@@ -57,10 +65,80 @@
     "title": "Home",
     "emptyFeed": "Your feed will appear here once you follow other pets."
   },
+  "species": {
+    "dog": "Dog",
+    "cat": "Cat",
+    "bird": "Bird",
+    "rabbit": "Rabbit",
+    "rodent": "Rodent",
+    "reptile": "Reptile",
+    "fish": "Fish",
+    "horse": "Horse",
+    "other": "Other"
+  },
+  "genders": {
+    "male": "Male",
+    "female": "Female",
+    "unknown": "Unknown"
+  },
+  "vaccineTypes": {
+    "core": "Core",
+    "non_core": "Non-core",
+    "other": "Other"
+  },
   "pets": {
     "title": "My pets",
     "empty": "You haven't added any pets yet.",
-    "addPet": "Add pet"
+    "addPet": "Add pet",
+    "detailTitle": "Pet",
+    "editTitle": "Edit pet",
+    "deleteConfirmTitle": "Delete this pet?",
+    "deleteConfirmMessage": "This also deletes its vaccine and health records. This can't be undone.",
+    "detail": {
+      "bornOn": "Born {{date}}",
+      "weight": "{{weight}} kg"
+    },
+    "form": {
+      "nameLabel": "Name",
+      "speciesLabel": "Species",
+      "breedLabel": "Breed",
+      "genderLabel": "Gender",
+      "dateOfBirthLabel": "Date of birth",
+      "weightLabel": "Weight (kg)",
+      "microchipLabel": "Microchip ID",
+      "descriptionLabel": "Description",
+      "errors": {
+        "nameRequired": "Name is required",
+        "invalidDate": "Enter a valid date as YYYY-MM-DD",
+        "invalidWeight": "Enter a valid weight"
+      }
+    }
+  },
+  "vaccines": {
+    "title": "Vaccines",
+    "empty": "No vaccine records yet.",
+    "addVaccine": "Add vaccine",
+    "editTitle": "Edit vaccine",
+    "nextDue": "Next due {{date}}",
+    "deleteConfirmTitle": "Delete this vaccine record?",
+    "deleteConfirmMessage": "Its reminders will be removed too. This can't be undone.",
+    "form": {
+      "nameLabel": "Vaccine name",
+      "typeLabel": "Type",
+      "administeredDateLabel": "Date administered",
+      "nextDueDateLabel": "Next due date",
+      "repeatIntervalLabel": "Repeat every (days)",
+      "repeatIntervalPlaceholder": "e.g. 365",
+      "veterinarianLabel": "Veterinarian",
+      "notesLabel": "Notes",
+      "remindersLabel": "Remind me before it's due",
+      "errors": {
+        "nameRequired": "Vaccine name is required",
+        "invalidAdministeredDate": "Enter a valid date as YYYY-MM-DD",
+        "invalidNextDueDate": "Enter a valid date as YYYY-MM-DD",
+        "invalidRepeatInterval": "Enter a valid number of days"
+      }
+    }
   },
   "profile": {
     "title": "Profile",

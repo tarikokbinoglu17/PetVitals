@@ -5,7 +5,14 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "retry": "Reintentar",
-    "comingSoon": "Próximamente"
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "comingSoon": "Próximamente",
+    "errors": {
+      "loadFailed": "No se pudo cargar. Inténtalo de nuevo.",
+      "saveFailed": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      "deleteFailed": "No se pudo eliminar. Inténtalo de nuevo."
+    }
   },
   "auth": {
     "signIn": {
@@ -25,6 +32,7 @@
       "fullNameLabel": "Nombre completo",
       "emailLabel": "Correo electrónico",
       "passwordLabel": "Contraseña",
+      "roleLabel": "Soy",
       "submit": "Crear cuenta",
       "haveAccount": "¿Ya tienes una cuenta?",
       "signIn": "Iniciar sesión"
@@ -57,10 +65,80 @@
     "title": "Inicio",
     "emptyFeed": "Tu feed aparecerá aquí cuando sigas a otras mascotas."
   },
+  "species": {
+    "dog": "Perro",
+    "cat": "Gato",
+    "bird": "Ave",
+    "rabbit": "Conejo",
+    "rodent": "Roedor",
+    "reptile": "Reptil",
+    "fish": "Pez",
+    "horse": "Caballo",
+    "other": "Otro"
+  },
+  "genders": {
+    "male": "Macho",
+    "female": "Hembra",
+    "unknown": "Desconocido"
+  },
+  "vaccineTypes": {
+    "core": "Esencial",
+    "non_core": "Complementaria",
+    "other": "Otra"
+  },
   "pets": {
     "title": "Mis mascotas",
     "empty": "Todavía no has añadido ninguna mascota.",
-    "addPet": "Añadir mascota"
+    "addPet": "Añadir mascota",
+    "detailTitle": "Mascota",
+    "editTitle": "Editar mascota",
+    "deleteConfirmTitle": "¿Eliminar esta mascota?",
+    "deleteConfirmMessage": "También se eliminarán sus vacunas y registros de salud. Esta acción no se puede deshacer.",
+    "detail": {
+      "bornOn": "Nacido el {{date}}",
+      "weight": "{{weight}} kg"
+    },
+    "form": {
+      "nameLabel": "Nombre",
+      "speciesLabel": "Especie",
+      "breedLabel": "Raza",
+      "genderLabel": "Sexo",
+      "dateOfBirthLabel": "Fecha de nacimiento",
+      "weightLabel": "Peso (kg)",
+      "microchipLabel": "Número de microchip",
+      "descriptionLabel": "Descripción",
+      "errors": {
+        "nameRequired": "El nombre es obligatorio",
+        "invalidDate": "Introduce una fecha válida como AAAA-MM-DD",
+        "invalidWeight": "Introduce un peso válido"
+      }
+    }
+  },
+  "vaccines": {
+    "title": "Vacunas",
+    "empty": "Todavía no hay registros de vacunas.",
+    "addVaccine": "Añadir vacuna",
+    "editTitle": "Editar vacuna",
+    "nextDue": "Próxima fecha {{date}}",
+    "deleteConfirmTitle": "¿Eliminar este registro de vacuna?",
+    "deleteConfirmMessage": "Sus recordatorios también se eliminarán. Esta acción no se puede deshacer.",
+    "form": {
+      "nameLabel": "Nombre de la vacuna",
+      "typeLabel": "Tipo",
+      "administeredDateLabel": "Fecha de administración",
+      "nextDueDateLabel": "Próxima fecha",
+      "repeatIntervalLabel": "Repetir cada (días)",
+      "repeatIntervalPlaceholder": "p. ej. 365",
+      "veterinarianLabel": "Veterinario",
+      "notesLabel": "Notas",
+      "remindersLabel": "Recordarme antes de la fecha",
+      "errors": {
+        "nameRequired": "El nombre de la vacuna es obligatorio",
+        "invalidAdministeredDate": "Introduce una fecha válida como AAAA-MM-DD",
+        "invalidNextDueDate": "Introduce una fecha válida como AAAA-MM-DD",
+        "invalidRepeatInterval": "Introduce un número de días válido"
+      }
+    }
   },
   "profile": {
     "title": "Perfil",

@@ -18,7 +18,6 @@ function mapRowToVaccine(row: VaccineRow): VaccineRecord {
     notes: row.notes,
     attachmentUrl: row.attachment_url,
     notificationEnabled: row.notification_enabled,
-    notificationIds: row.notification_ids,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -32,6 +31,16 @@ export async function listVaccinesForPet(petId: string): Promise<VaccineRecord[]
     .order('administered_date', { ascending: false });
   if (error) throw error;
   return data.map(mapRowToVaccine);
+}
+
+export async function getVaccine(vaccineId: string): Promise<VaccineRecord> {
+  const { data, error } = await supabase
+    .from('vaccine_records')
+    .select('*')
+    .eq('id', vaccineId)
+    .single();
+  if (error) throw error;
+  return mapRowToVaccine(data);
 }
 
 export async function createVaccine(input: CreateVaccineInput): Promise<VaccineRecord> {
@@ -80,18 +89,6 @@ export async function updateVaccine(
     .single();
   if (error) throw error;
   return mapRowToVaccine(data);
-}
-
-/** Persists the local-notification ids scheduled for this record, so reminders are never duplicated. */
-export async function setVaccineNotificationIds(
-  vaccineId: string,
-  notificationIds: string[],
-): Promise<void> {
-  const { error } = await supabase
-    .from('vaccine_records')
-    .update({ notification_ids: notificationIds })
-    .eq('id', vaccineId);
-  if (error) throw error;
 }
 
 export async function deleteVaccine(vaccineId: string): Promise<void> {

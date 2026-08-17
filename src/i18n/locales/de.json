@@ -5,7 +5,14 @@
     "cancel": "Abbrechen",
     "save": "Speichern",
     "retry": "Erneut versuchen",
-    "comingSoon": "Demnächst verfügbar"
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "comingSoon": "Demnächst verfügbar",
+    "errors": {
+      "loadFailed": "Konnte nicht geladen werden. Bitte versuche es erneut.",
+      "saveFailed": "Änderungen konnten nicht gespeichert werden. Bitte versuche es erneut.",
+      "deleteFailed": "Konnte nicht gelöscht werden. Bitte versuche es erneut."
+    }
   },
   "auth": {
     "signIn": {
@@ -25,6 +32,7 @@
       "fullNameLabel": "Vollständiger Name",
       "emailLabel": "E-Mail",
       "passwordLabel": "Passwort",
+      "roleLabel": "Ich bin",
       "submit": "Konto erstellen",
       "haveAccount": "Bereits ein Konto?",
       "signIn": "Anmelden"
@@ -57,10 +65,80 @@
     "title": "Start",
     "emptyFeed": "Dein Feed erscheint hier, sobald du anderen Haustieren folgst."
   },
+  "species": {
+    "dog": "Hund",
+    "cat": "Katze",
+    "bird": "Vogel",
+    "rabbit": "Kaninchen",
+    "rodent": "Nagetier",
+    "reptile": "Reptil",
+    "fish": "Fisch",
+    "horse": "Pferd",
+    "other": "Andere"
+  },
+  "genders": {
+    "male": "Männlich",
+    "female": "Weiblich",
+    "unknown": "Unbekannt"
+  },
+  "vaccineTypes": {
+    "core": "Grundimpfung",
+    "non_core": "Zusatzimpfung",
+    "other": "Andere"
+  },
   "pets": {
     "title": "Meine Haustiere",
     "empty": "Du hast noch keine Haustiere hinzugefügt.",
-    "addPet": "Haustier hinzufügen"
+    "addPet": "Haustier hinzufügen",
+    "detailTitle": "Haustier",
+    "editTitle": "Haustier bearbeiten",
+    "deleteConfirmTitle": "Dieses Haustier löschen?",
+    "deleteConfirmMessage": "Impf- und Gesundheitsdaten werden ebenfalls gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "detail": {
+      "bornOn": "Geboren am {{date}}",
+      "weight": "{{weight}} kg"
+    },
+    "form": {
+      "nameLabel": "Name",
+      "speciesLabel": "Tierart",
+      "breedLabel": "Rasse",
+      "genderLabel": "Geschlecht",
+      "dateOfBirthLabel": "Geburtsdatum",
+      "weightLabel": "Gewicht (kg)",
+      "microchipLabel": "Mikrochip-Nummer",
+      "descriptionLabel": "Beschreibung",
+      "errors": {
+        "nameRequired": "Name ist erforderlich",
+        "invalidDate": "Gib ein gültiges Datum im Format JJJJ-MM-TT ein",
+        "invalidWeight": "Gib ein gültiges Gewicht ein"
+      }
+    }
+  },
+  "vaccines": {
+    "title": "Impfungen",
+    "empty": "Noch keine Impfeinträge.",
+    "addVaccine": "Impfung hinzufügen",
+    "editTitle": "Impfung bearbeiten",
+    "nextDue": "Nächster Termin {{date}}",
+    "deleteConfirmTitle": "Diesen Impfeintrag löschen?",
+    "deleteConfirmMessage": "Zugehörige Erinnerungen werden ebenfalls gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "form": {
+      "nameLabel": "Impfstoffname",
+      "typeLabel": "Typ",
+      "administeredDateLabel": "Datum der Verabreichung",
+      "nextDueDateLabel": "Nächster Termin",
+      "repeatIntervalLabel": "Wiederholung alle (Tage)",
+      "repeatIntervalPlaceholder": "z. B. 365",
+      "veterinarianLabel": "Tierarzt",
+      "notesLabel": "Notizen",
+      "remindersLabel": "Vor Fälligkeit erinnern",
+      "errors": {
+        "nameRequired": "Impfstoffname ist erforderlich",
+        "invalidAdministeredDate": "Gib ein gültiges Datum im Format JJJJ-MM-TT ein",
+        "invalidNextDueDate": "Gib ein gültiges Datum im Format JJJJ-MM-TT ein",
+        "invalidRepeatInterval": "Gib eine gültige Anzahl von Tagen ein"
+      }
+    }
   },
   "profile": {
     "title": "Profil",
