@@ -56,6 +56,11 @@
     "pet_owner": "Pet Owner",
     "veterinarian": "Veterinarian"
   },
+  "system": {
+    "connectionChecking": "Checking Supabase connection…",
+    "connectionOk": "Supabase connected",
+    "connectionError": "Supabase connection error"
+  },
   "navigation": {
     "home": "Home",
     "pets": "Pets",

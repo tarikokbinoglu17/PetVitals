@@ -56,6 +56,11 @@
     "pet_owner": "Tierhalter",
     "veterinarian": "Tierarzt"
   },
+  "system": {
+    "connectionChecking": "Supabase-Verbindung wird geprüft…",
+    "connectionOk": "Supabase connected",
+    "connectionError": "Supabase-Verbindungsfehler"
+  },
   "navigation": {
     "home": "Start",
     "pets": "Haustiere",

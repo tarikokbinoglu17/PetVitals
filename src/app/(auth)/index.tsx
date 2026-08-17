@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { SupabaseConnectionStatus } from '@/components/system/SupabaseConnectionStatus';
 import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { TextField } from '@/components/ui/TextField';
@@ -38,6 +39,7 @@ export default function SignInScreen() {
 
   return (
     <ScreenContainer scrollable>
+      <SupabaseConnectionStatus />
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>{t('auth.signIn.title')}</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
