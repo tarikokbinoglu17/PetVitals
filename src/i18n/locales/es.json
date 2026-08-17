@@ -1,0 +1,69 @@
+{
+  "common": {
+    "appName": "PetVitals",
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "retry": "Reintentar",
+    "comingSoon": "Próximamente"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Iniciar sesión",
+      "subtitle": "Bienvenido de nuevo a PetVitals",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "passwordLabel": "Contraseña",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿No tienes una cuenta?",
+      "createAccount": "Crear una cuenta",
+      "forgotPassword": "¿Olvidaste tu contraseña?"
+    },
+    "signUp": {
+      "title": "Crear cuenta",
+      "subtitle": "Únete a PetVitals para gestionar la salud de tus mascotas",
+      "fullNameLabel": "Nombre completo",
+      "emailLabel": "Correo electrónico",
+      "passwordLabel": "Contraseña",
+      "submit": "Crear cuenta",
+      "haveAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Iniciar sesión"
+    },
+    "forgotPassword": {
+      "title": "Restablecer contraseña",
+      "subtitle": "Te enviaremos un enlace para restablecerla",
+      "emailLabel": "Correo electrónico",
+      "submit": "Enviar enlace",
+      "backToSignIn": "Volver a iniciar sesión"
+    },
+    "errors": {
+      "invalidEmail": "Introduce una dirección de correo válida",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+      "genericSignIn": "No se pudo iniciar sesión. Revisa tus datos e inténtalo de nuevo.",
+      "genericSignUp": "No se pudo crear la cuenta. Inténtalo de nuevo.",
+      "genericReset": "No se pudo enviar el enlace. Inténtalo de nuevo."
+    }
+  },
+  "roles": {
+    "pet_owner": "Dueño de mascota",
+    "veterinarian": "Veterinario"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "pets": "Mascotas",
+    "profile": "Perfil"
+  },
+  "home": {
+    "title": "Inicio",
+    "emptyFeed": "Tu feed aparecerá aquí cuando sigas a otras mascotas."
+  },
+  "pets": {
+    "title": "Mis mascotas",
+    "empty": "Todavía no has añadido ninguna mascota.",
+    "addPet": "Añadir mascota"
+  },
+  "profile": {
+    "title": "Perfil",
+    "signOut": "Cerrar sesión"
+  }
+}

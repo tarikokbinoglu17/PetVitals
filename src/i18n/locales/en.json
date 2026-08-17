@@ -1,0 +1,69 @@
+{
+  "common": {
+    "appName": "PetVitals",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "retry": "Retry",
+    "comingSoon": "Coming soon"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "subtitle": "Welcome back to PetVitals",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create one",
+      "forgotPassword": "Forgot password?"
+    },
+    "signUp": {
+      "title": "Create account",
+      "subtitle": "Join PetVitals to manage your pets' health",
+      "fullNameLabel": "Full name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset password",
+      "subtitle": "We'll email you a reset link",
+      "emailLabel": "Email",
+      "submit": "Send reset link",
+      "backToSignIn": "Back to sign in"
+    },
+    "errors": {
+      "invalidEmail": "Enter a valid email address",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "genericSignIn": "Could not sign in. Check your credentials and try again.",
+      "genericSignUp": "Could not create your account. Please try again.",
+      "genericReset": "Could not send the reset link. Please try again."
+    }
+  },
+  "roles": {
+    "pet_owner": "Pet Owner",
+    "veterinarian": "Veterinarian"
+  },
+  "navigation": {
+    "home": "Home",
+    "pets": "Pets",
+    "profile": "Profile"
+  },
+  "home": {
+    "title": "Home",
+    "emptyFeed": "Your feed will appear here once you follow other pets."
+  },
+  "pets": {
+    "title": "My pets",
+    "empty": "You haven't added any pets yet.",
+    "addPet": "Add pet"
+  },
+  "profile": {
+    "title": "Profile",
+    "signOut": "Sign out"
+  }
+}

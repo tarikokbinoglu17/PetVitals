@@ -1,0 +1,69 @@
+{
+  "common": {
+    "appName": "PetVitals",
+    "loading": "Yükleniyor...",
+    "cancel": "Vazgeç",
+    "save": "Kaydet",
+    "retry": "Tekrar dene",
+    "comingSoon": "Yakında"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Giriş yap",
+      "subtitle": "PetVitals'a tekrar hoş geldin",
+      "emailLabel": "E-posta",
+      "emailPlaceholder": "sen@ornek.com",
+      "passwordLabel": "Şifre",
+      "submit": "Giriş yap",
+      "noAccount": "Hesabın yok mu?",
+      "createAccount": "Hesap oluştur",
+      "forgotPassword": "Şifreni mi unuttun?"
+    },
+    "signUp": {
+      "title": "Hesap oluştur",
+      "subtitle": "Evcil hayvanının sağlığını yönetmek için PetVitals'a katıl",
+      "fullNameLabel": "Ad Soyad",
+      "emailLabel": "E-posta",
+      "passwordLabel": "Şifre",
+      "submit": "Hesap oluştur",
+      "haveAccount": "Zaten hesabın var mı?",
+      "signIn": "Giriş yap"
+    },
+    "forgotPassword": {
+      "title": "Şifreyi sıfırla",
+      "subtitle": "Sana bir sıfırlama bağlantısı gönderelim",
+      "emailLabel": "E-posta",
+      "submit": "Sıfırlama bağlantısı gönder",
+      "backToSignIn": "Girişe dön"
+    },
+    "errors": {
+      "invalidEmail": "Geçerli bir e-posta adresi gir",
+      "passwordTooShort": "Şifre en az 8 karakter olmalı",
+      "genericSignIn": "Giriş yapılamadı. Bilgilerini kontrol edip tekrar dene.",
+      "genericSignUp": "Hesap oluşturulamadı. Lütfen tekrar dene.",
+      "genericReset": "Sıfırlama bağlantısı gönderilemedi. Lütfen tekrar dene."
+    }
+  },
+  "roles": {
+    "pet_owner": "Evcil Hayvan Sahibi",
+    "veterinarian": "Veteriner Hekim"
+  },
+  "navigation": {
+    "home": "Ana Sayfa",
+    "pets": "Evcil Hayvanlarım",
+    "profile": "Profil"
+  },
+  "home": {
+    "title": "Ana Sayfa",
+    "emptyFeed": "Diğer evcil hayvanları takip etmeye başladığında akışın burada görünecek."
+  },
+  "pets": {
+    "title": "Evcil hayvanlarım",
+    "empty": "Henüz evcil hayvan eklemedin.",
+    "addPet": "Evcil hayvan ekle"
+  },
+  "profile": {
+    "title": "Profil",
+    "signOut": "Çıkış yap"
+  }
+}
