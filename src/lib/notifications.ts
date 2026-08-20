@@ -59,10 +59,17 @@ export async function scheduleVaccineNotifications({
   now?: Date;
 }) {
   const granted = await ensureNotificationPermission();
-  if (!granted) return { granted: false, notificationIds: [] as string[] };
+  if (!granted) {
+    return {
+      granted: false,
+      notificationIds: [] as string[],
+      notifications: [] as { offsetDays: number; notificationId: string }[],
+    };
+  }
 
   const plan = buildVaccineReminderPlan(nextDueDate, now);
   const notificationIds: string[] = [];
+  const notifications: { offsetDays: number; notificationId: string }[] = [];
 
   try {
     for (const reminder of plan) {
@@ -87,13 +94,14 @@ export async function scheduleVaccineNotifications({
         },
       });
       notificationIds.push(notificationId);
+      notifications.push({ offsetDays: reminder.offsetDays, notificationId });
     }
   } catch (error) {
     await cancelVaccineNotifications(notificationIds);
     throw error;
   }
 
-  return { granted: true, notificationIds };
+  return { granted: true, notificationIds, notifications };
 }
 
 export async function cancelVaccineNotifications(notificationIds: string[]) {

@@ -4,6 +4,7 @@ import { demoPets, demoRecords } from '../data/demo';
 import { cancelVaccineNotifications, scheduleVaccineNotifications } from '../lib/notifications';
 import { validatePetDraft } from '../lib/pets';
 import { supabase } from '../lib/supabase';
+import { getPetPhotoUrl, removePetPhoto, uploadPetPhoto } from '../lib/storage';
 import { validateVaccineDraft } from '../lib/vaccineReminders';
 import type {
   HealthRecord,
@@ -17,23 +18,7 @@ import type {
 
 const DEMO_VACCINES_KEY = '@petvitals/demo-vaccines/v1';
 const DEMO_PETS_KEY = '@petvitals/demo-pets/v1';
-const HEALTH_RECORD_SELECT = [
-  'id',
-  'pet_id',
-  'title',
-  'category',
-  'date',
-  'notes',
-  'vaccine_type',
-  'administered_date',
-  'next_due_date',
-  'repeat_interval_months',
-  'veterinarian',
-  'attachment_url',
-  'notification_enabled',
-  'notification_status',
-  'notification_ids',
-].join(',');
+const VACCINE_SELECT = 'id,pet_id,vaccine_name,vaccine_type,administered_date,next_due_date,repeat_interval_months,veterinarian,notes,document_url,notifications_enabled,reminder_30_days_id,reminder_7_days_id,reminder_1_day_id,reminder_same_day_id,created_at';
 
 type PetRow = {
   id: string;
@@ -42,30 +27,31 @@ type PetRow = {
   breed: string | null;
   birth_date: string | null;
   weight: number | string | null;
+  photo_url: string | null;
 };
 
-type HealthRecordRow = {
+type VaccineRow = {
   id: string;
   pet_id: string;
-  title: string;
-  category: string;
-  date: string;
+  vaccine_name: string;
+  vaccine_type: string | null;
+  administered_date: string | null;
+  next_due_date: string | null;
+  repeat_interval_months: number | null;
+  veterinarian: string | null;
   notes: string | null;
-  vaccine_type?: string | null;
-  administered_date?: string | null;
-  next_due_date?: string | null;
-  repeat_interval_months?: number | null;
-  veterinarian?: string | null;
-  attachment_url?: string | null;
-  notification_enabled?: boolean | null;
-  notification_status?: VaccineNotificationStatus | null;
-  notification_ids?: string[] | null;
+  document_url: string | null;
+  notifications_enabled: boolean;
+  reminder_30_days_id: string | null;
+  reminder_7_days_id: string | null;
+  reminder_1_day_id: string | null;
+  reminder_same_day_id: string | null;
+  created_at: string;
 };
 
 const petSpecies: Pet['species'][] = ['Kedi', 'Köpek', 'Diğer'];
-const recordCategories: HealthRecord['category'][] = ['Aşı', 'Kontrol', 'İlaç'];
 
-function mapPet(row: PetRow): Pet {
+function mapPet(row: PetRow, photoUrl?: string): Pet {
   const species = petSpecies.includes(row.species as Pet['species'])
     ? (row.species as Pet['species'])
     : 'Diğer';
@@ -77,30 +63,37 @@ function mapPet(row: PetRow): Pet {
     breed: row.breed ?? '',
     birthDate: row.birth_date ?? '',
     weight: Number(row.weight ?? 0),
+    photoPath: row.photo_url ?? undefined,
+    photoUrl,
   };
 }
 
-function mapRecord(row: HealthRecordRow): HealthRecord {
-  const category = recordCategories.includes(row.category as HealthRecord['category'])
-    ? (row.category as HealthRecord['category'])
-    : 'Kontrol';
+function mapVaccine(row: VaccineRow): HealthRecord {
+  const notificationIds = [
+    row.reminder_30_days_id,
+    row.reminder_7_days_id,
+    row.reminder_1_day_id,
+    row.reminder_same_day_id,
+  ].filter((value): value is string => Boolean(value));
 
   return {
     id: row.id,
     petId: row.pet_id,
-    title: row.title,
-    category,
-    date: row.date,
+    title: row.vaccine_name,
+    category: 'Aşı',
+    date: row.next_due_date ?? row.administered_date ?? row.created_at.slice(0, 10),
     notes: row.notes ?? undefined,
     vaccineType: row.vaccine_type ?? undefined,
     administeredDate: row.administered_date ?? undefined,
     nextDueDate: row.next_due_date ?? undefined,
     repeatIntervalMonths: row.repeat_interval_months ?? undefined,
     veterinarian: row.veterinarian ?? undefined,
-    attachmentUrl: row.attachment_url ?? undefined,
-    notificationEnabled: row.notification_enabled ?? false,
-    notificationStatus: row.notification_status ?? undefined,
-    notificationIds: row.notification_ids ?? [],
+    attachmentUrl: row.document_url ?? undefined,
+    notificationEnabled: row.notifications_enabled,
+    notificationStatus: row.notifications_enabled
+      ? (notificationIds.length > 0 ? 'scheduled' : 'no_future_dates')
+      : 'disabled',
+    notificationIds,
   };
 }
 
@@ -126,9 +119,27 @@ function getNotificationMessage(status: VaccineNotificationStatus, count: number
   return 'Aşı kaydı başarıyla eklendi.';
 }
 
+function getReminderNotificationColumns(
+  notifications: { offsetDays: number; notificationId: string }[],
+) {
+  const getId = (offsetDays: number) =>
+    notifications.find(notification => notification.offsetDays === offsetDays)?.notificationId ?? null;
+
+  return {
+    reminder_30_days_id: getId(30),
+    reminder_7_days_id: getId(7),
+    reminder_1_day_id: getId(1),
+    reminder_same_day_id: getId(0),
+  };
+}
+
 async function scheduleForRecord(recordId: string, pet: Pet, draft: VaccineDraft) {
   if (!draft.notificationEnabled) {
-    return { notificationIds: [] as string[], notificationStatus: 'disabled' as const };
+    return {
+      notificationIds: [] as string[],
+      notificationStatus: 'disabled' as const,
+      notifications: [] as { offsetDays: number; notificationId: string }[],
+    };
   }
 
   try {
@@ -141,15 +152,24 @@ async function scheduleForRecord(recordId: string, pet: Pet, draft: VaccineDraft
     });
 
     if (!result.granted) {
-      return { notificationIds: [], notificationStatus: 'denied' as const };
+      return {
+        notificationIds: [],
+        notificationStatus: 'denied' as const,
+        notifications: [] as { offsetDays: number; notificationId: string }[],
+      };
     }
 
     return {
       notificationIds: result.notificationIds,
       notificationStatus: result.notificationIds.length > 0 ? ('scheduled' as const) : ('no_future_dates' as const),
+      notifications: result.notifications,
     };
   } catch {
-    return { notificationIds: [] as string[], notificationStatus: 'failed' as const };
+    return {
+      notificationIds: [],
+      notificationStatus: 'failed' as const,
+      notifications: [] as { offsetDays: number; notificationId: string }[],
+    };
   }
 }
 
@@ -211,14 +231,14 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
       const [petsResult, recordsResult] = await Promise.all([
         client
           .from('pets')
-          .select('id,name,species,breed,birth_date,weight')
-          .eq('user_id', userId)
+          .select('id,name,species,breed,birth_date,weight,photo_url')
+          .eq('owner_id', userId)
           .order('created_at', { ascending: true }),
         client
-          .from('health_records')
-          .select(HEALTH_RECORD_SELECT)
-          .eq('user_id', userId)
-          .order('date', { ascending: true }),
+          .from('vaccines')
+          .select(VACCINE_SELECT)
+          .eq('owner_id', userId)
+          .order('next_due_date', { ascending: true, nullsFirst: false }),
       ]);
 
       if (!active) return;
@@ -229,8 +249,13 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
         setRecords([]);
         setError('Sağlık bilgileri yüklenemedi. Lütfen daha sonra tekrar deneyin.');
       } else {
-        setPets(((petsResult.data ?? []) as PetRow[]).map(mapPet));
-        setRecords(((recordsResult.data ?? []) as HealthRecordRow[]).map(mapRecord));
+        const petRows = (petsResult.data ?? []) as PetRow[];
+        const mappedPets = await Promise.all(
+          petRows.map(async row => mapPet(row, await getPetPhotoUrl(client, row.photo_url))),
+        );
+        if (!active) return;
+        setPets(mappedPets);
+        setRecords(((recordsResult.data ?? []) as VaccineRow[]).map(mapVaccine));
       }
       setLoading(false);
     };
@@ -255,6 +280,7 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
           breed: draft.breed?.trim() || '',
           birthDate: draft.birthDate || '',
           weight: draft.weight ?? 0,
+          photoUrl: draft.photo?.uri,
         };
         const customPets = [...pets.filter(item => item.id.startsWith('demo-pet-')), pet];
         try {
@@ -268,27 +294,47 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
 
       const client = supabase;
       if (!client || !userId) return { error: 'Oturum bulunamadı. Lütfen yeniden giriş yapın.' };
+      let uploadedPhotoPath: string | undefined;
 
-      const result = await client
-        .from('pets')
-        .insert({
-          user_id: userId,
-          name: draft.name.trim(),
-          species: draft.species,
-          breed: draft.breed?.trim() || null,
-          birth_date: draft.birthDate || null,
-          weight: draft.weight ?? null,
-        })
-        .select('id,name,species,breed,birth_date,weight')
-        .single();
+      try {
+        if (draft.photo) {
+          uploadedPhotoPath = await uploadPetPhoto(client, userId, draft.photo);
+        }
 
-      if (result.error || !result.data) {
-        return { error: 'Dost profili eklenemedi. Supabase tablo ayarlarını kontrol edin.' };
+        const result = await client
+          .from('pets')
+          .insert({
+            owner_id: userId,
+            name: draft.name.trim(),
+            species: draft.species,
+            breed: draft.breed?.trim() || null,
+            birth_date: draft.birthDate || null,
+            weight: draft.weight ?? null,
+            photo_url: uploadedPhotoPath ?? null,
+          })
+          .select('id,name,species,breed,birth_date,weight,photo_url')
+          .single();
+
+        if (result.error || !result.data) {
+          await removePetPhoto(client, uploadedPhotoPath);
+          return { error: 'Dost profili eklenemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin.' };
+        }
+
+        const signedPhotoUrl = draft.photo?.uri ?? await getPetPhotoUrl(client, uploadedPhotoPath);
+        const pet = mapPet(result.data as PetRow, signedPhotoUrl);
+        setPets(previous => [...previous, pet]);
+        return { message: `${pet.name} başarıyla eklendi.` };
+      } catch (uploadError) {
+        await removePetPhoto(client, uploadedPhotoPath);
+        if (uploadError instanceof Error && uploadError.message === 'PHOTO_TOO_LARGE') {
+          return { error: 'Fotoğraf 10 MB’den küçük olmalı.' };
+        }
+        return {
+          error: draft.photo
+            ? 'Fotoğraf yüklenemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin.'
+            : 'Dost profili eklenemedi. Lütfen tekrar deneyin.',
+        };
       }
-
-      const pet = mapPet(result.data as PetRow);
-      setPets(previous => [...previous, pet]);
-      return { message: `${pet.name} başarıyla eklendi.` };
     } finally {
       setSavingPet(false);
     }
@@ -340,41 +386,34 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
       if (!client || !userId) return { error: 'Oturum bulunamadı. Lütfen yeniden giriş yapın.' };
 
       const insertResult = await client
-        .from('health_records')
+        .from('vaccines')
         .insert({
-          user_id: userId,
+          owner_id: userId,
           pet_id: draft.petId,
-          title: draft.vaccineName.trim(),
-          category: 'Aşı',
-          date: draft.nextDueDate,
-          notes: draft.notes?.trim() || null,
+          vaccine_name: draft.vaccineName.trim(),
           vaccine_type: draft.vaccineType?.trim() || null,
           administered_date: draft.administeredDate,
           next_due_date: draft.nextDueDate,
           repeat_interval_months: draft.repeatIntervalMonths ?? null,
           veterinarian: draft.veterinarian?.trim() || null,
-          attachment_url: draft.attachmentUrl?.trim() || null,
-          notification_enabled: draft.notificationEnabled,
-          notification_status: draft.notificationEnabled ? 'pending' : 'disabled',
-          notification_ids: [],
+          notes: draft.notes?.trim() || null,
+          document_url: draft.attachmentUrl?.trim() || null,
+          notifications_enabled: draft.notificationEnabled,
         })
-        .select(HEALTH_RECORD_SELECT)
+        .select(VACCINE_SELECT)
         .single();
 
       if (insertResult.error || !insertResult.data) {
-        return { error: 'Aşı kaydı eklenemedi. Supabase tablo ayarlarını kontrol edin.' };
+        return { error: 'Aşı kaydı eklenemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin.' };
       }
 
-      const insertedRecord = mapRecord(insertResult.data as HealthRecordRow);
+      const insertedRecord = mapVaccine(insertResult.data as VaccineRow);
       const schedule = await scheduleForRecord(insertedRecord.id, pet, draft);
       const updateResult = await client
-        .from('health_records')
-        .update({
-          notification_status: schedule.notificationStatus,
-          notification_ids: schedule.notificationIds,
-        })
+        .from('vaccines')
+        .update(getReminderNotificationColumns(schedule.notifications))
         .eq('id', insertedRecord.id)
-        .eq('user_id', userId);
+        .eq('owner_id', userId);
 
       if (updateResult.error) {
         await cancelVaccineNotifications(schedule.notificationIds);
