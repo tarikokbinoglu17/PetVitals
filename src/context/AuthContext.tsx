@@ -1,6 +1,7 @@
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { signInWithSocialProvider, SocialProvider } from '../lib/socialAuth';
 
 type AuthResult = { error?: string; message?: string };
 type AuthContextValue = {
@@ -9,6 +10,7 @@ type AuthContextValue = {
   loading: boolean;
   demoMode: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
+  signInWithSocial: (provider: SocialProvider) => Promise<AuthResult>;
   signUp: (name: string, email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   enterDemo: () => void;
@@ -40,6 +42,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     loading,
     demoMode,
     enterDemo: () => setDemoMode(true),
+    signInWithSocial: signInWithSocialProvider,
     signIn: async (email, password) => {
       if (!supabase) return { error: 'Supabase ayarları eksik. Demo modu ile devam edebilirsiniz.' };
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
@@ -69,4 +72,3 @@ export function useAuth() {
   if (!value) throw new Error('useAuth, AuthProvider içinde kullanılmalıdır.');
   return value;
 }
-

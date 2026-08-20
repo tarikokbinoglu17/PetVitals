@@ -3,6 +3,8 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Pr
 import { useAuth } from '../context/AuthContext';
 import { FormField } from '../components/FormField';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { SocialAuthButtons } from '../components/SocialAuthButtons';
+import type { SocialProvider } from '../lib/socialAuth';
 import { colors } from '../theme';
 
 export function AuthScreen() {
@@ -11,8 +13,9 @@ export function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [socialBusy, setSocialBusy] = useState<SocialProvider | null>(null);
   const [error, setError] = useState('');
-  const { signIn, signUp, enterDemo } = useAuth();
+  const { signIn, signInWithSocial, signUp, enterDemo } = useAuth();
 
   const submit = async () => {
     setError('');
@@ -26,6 +29,15 @@ export function AuthScreen() {
     if (result.message) Alert.alert('Kayıt tamamlandı', result.message);
   };
 
+  const submitSocial = async (provider: SocialProvider) => {
+    setError('');
+    setSocialBusy(provider);
+    const result = await signInWithSocial(provider);
+    setSocialBusy(null);
+    if (result.error) setError(result.error);
+    if (result.message) Alert.alert('Giriş seçeneği hazır', result.message);
+  };
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.root}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -35,6 +47,12 @@ export function AuthScreen() {
         <View style={styles.card}>
           <Text style={styles.title}>{register ? 'Hesap oluştur' : 'Tekrar hoş geldiniz'}</Text>
           <Text style={styles.subtitle}>{register ? 'Evcil dostlarınızı takip etmeye başlayın.' : 'Bilgilerinize ulaşmak için giriş yapın.'}</Text>
+          <SocialAuthButtons busyProvider={socialBusy} disabled={busy} onPress={submitSocial} />
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>veya e-posta ile</Text>
+            <View style={styles.dividerLine} />
+          </View>
           {register ? <FormField autoCapitalize="words" label="Ad soyad" onChangeText={setName} placeholder="Adınız Soyadınız" value={name} /> : null}
           <FormField autoCapitalize="none" autoComplete="email" keyboardType="email-address" label="E-posta" onChangeText={setEmail} placeholder="ornek@eposta.com" value={email} />
           <FormField autoCapitalize="none" autoComplete={register ? 'new-password' : 'current-password'} label="Şifre" onChangeText={setPassword} placeholder="En az 6 karakter" secureTextEntry value={password} />
@@ -55,6 +73,6 @@ const styles = StyleSheet.create({
   logo: { alignItems: 'center', alignSelf: 'center', backgroundColor: colors.primarySoft, borderRadius: 28, height: 72, justifyContent: 'center', width: 72 }, logoIcon: { fontSize: 34 },
   brand: { color: colors.primaryDark, fontSize: 34, fontWeight: '900', marginTop: 12, textAlign: 'center' }, tagline: { color: colors.muted, fontSize: 15, marginBottom: 28, marginTop: 5, textAlign: 'center' },
   card: { backgroundColor: colors.surface, borderRadius: 24, padding: 22 }, title: { color: colors.text, fontSize: 23, fontWeight: '800' }, subtitle: { color: colors.muted, lineHeight: 20, marginBottom: 22, marginTop: 6 },
+  divider: { alignItems: 'center', flexDirection: 'row', gap: 10, marginVertical: 18 }, dividerLine: { backgroundColor: colors.border, flex: 1, height: 1 }, dividerText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
   error: { color: colors.danger, fontSize: 13, marginBottom: 12 }, switch: { alignItems: 'center', padding: 14 }, switchText: { color: colors.primary, fontWeight: '700' }, demo: { color: colors.muted, fontWeight: '700', marginTop: 22, textAlign: 'center' },
 });
-
