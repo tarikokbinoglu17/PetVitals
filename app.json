@@ -6,11 +6,19 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "petvitals",
-    "ios": {
-      "supportsTablet": true
-    },
+    "ios": { "supportsTablet": true },
     "android": {
-      "predictiveBackGestureEnabled": false
-    }
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#1C735B",
+          "defaultChannel": "vaccine-reminders"
+        }
+      ]
+    ]
   }
 }

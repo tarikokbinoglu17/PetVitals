@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePetData } from '../hooks/usePetData';
-import { TabName } from '../types';
+import type { TabName } from '../types';
 import { colors, shadow } from '../theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { PetsScreen } from '../screens/PetsScreen';
@@ -18,7 +18,7 @@ const tabs: { key: TabName; label: string; icon: string }[] = [
 
 export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: string }) {
   const [tab, setTab] = useState<TabName>('home');
-  const { pets, records, loading, error } = usePetData({ demoMode, userId });
+  const { pets, records, loading, error, addPet, addVaccine, savingPet, savingVaccine } = usePetData({ demoMode, userId });
 
   const screen = (() => {
     if (tab === 'profile') return <ProfileScreen />;
@@ -38,14 +38,27 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
         </View>
       );
     }
-    if (tab === 'pets') return <PetsScreen pets={pets} />;
-    if (tab === 'health') return <HealthScreen pets={pets} records={records} />;
+    if (tab === 'pets') {
+      return <PetsScreen onAddPet={addPet} pets={pets} savingPet={savingPet} />;
+    }
+    if (tab === 'health') {
+      return (
+        <HealthScreen
+          onAddVaccine={addVaccine}
+          pets={pets}
+          records={records}
+          savingVaccine={savingVaccine}
+        />
+      );
+    }
     return <HomeScreen pets={pets} records={records} />;
   })();
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scroll}>{screen}</ScrollView>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        {screen}
+      </ScrollView>
       <View style={styles.tabs}>
         {tabs.map(item => (
           <Pressable

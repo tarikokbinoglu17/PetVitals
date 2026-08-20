@@ -7,6 +7,19 @@ export type Pet = {
   weight: number;
 };
 
+export type PetDraft = {
+  name: string;
+  species: Pet['species'];
+  breed?: string;
+  birthDate?: string;
+  weight?: number;
+};
+
+export type SavePetResult = {
+  error?: string;
+  message?: string;
+};
+
 export type HealthRecord = {
   id: string;
   petId: string;
@@ -14,7 +27,41 @@ export type HealthRecord = {
   category: 'Aşı' | 'Kontrol' | 'İlaç';
   date: string;
   notes?: string;
+  vaccineType?: string;
+  administeredDate?: string;
+  nextDueDate?: string;
+  repeatIntervalMonths?: number;
+  veterinarian?: string;
+  attachmentUrl?: string;
+  notificationEnabled?: boolean;
+  notificationStatus?: VaccineNotificationStatus;
+  notificationIds?: string[];
+};
+
+export type VaccineNotificationStatus =
+  | 'disabled'
+  | 'pending'
+  | 'scheduled'
+  | 'denied'
+  | 'failed'
+  | 'no_future_dates';
+
+export type VaccineDraft = {
+  petId: string;
+  vaccineName: string;
+  vaccineType?: string;
+  administeredDate: string;
+  nextDueDate: string;
+  repeatIntervalMonths?: number;
+  veterinarian?: string;
+  notes?: string;
+  attachmentUrl?: string;
+  notificationEnabled: boolean;
+};
+
+export type SaveVaccineResult = {
+  error?: string;
+  message?: string;
 };
 
 export type TabName = 'home' | 'pets' | 'health' | 'profile';
-
