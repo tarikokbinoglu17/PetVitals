@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "PetVitals",
+    "slug": "petvitals",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "petvitals",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "predictiveBackGestureEnabled": false
+    }
+  }
+}
