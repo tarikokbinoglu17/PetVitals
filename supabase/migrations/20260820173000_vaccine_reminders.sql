@@ -49,46 +49,75 @@ create index if not exists health_records_next_due_date_idx on public.health_rec
 alter table public.pets enable row level security;
 alter table public.health_records enable row level security;
 
+-- Data API access is explicit for projects using the secure 2026 defaults.
+-- Signed-out clients receive no table privileges; signed-in clients are still
+-- restricted to their own rows by the RLS policies below.
+revoke all on table public.pets, public.health_records from anon;
+grant usage on schema public to authenticated, service_role;
+grant select, insert, update, delete on table public.pets, public.health_records to authenticated, service_role;
+
 drop policy if exists pets_owner_select on public.pets;
 create policy pets_owner_select on public.pets
-  for select using (auth.uid() = user_id);
+  for select
+  to authenticated
+  using ((select auth.uid()) = user_id);
 
 drop policy if exists pets_owner_insert on public.pets;
 create policy pets_owner_insert on public.pets
-  for insert with check (auth.uid() = user_id);
+  for insert
+  to authenticated
+  with check ((select auth.uid()) = user_id);
 
 drop policy if exists pets_owner_update on public.pets;
 create policy pets_owner_update on public.pets
-  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  for update
+  to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 drop policy if exists pets_owner_delete on public.pets;
 create policy pets_owner_delete on public.pets
-  for delete using (auth.uid() = user_id);
+  for delete
+  to authenticated
+  using ((select auth.uid()) = user_id);
 
 drop policy if exists health_records_owner_select on public.health_records;
 create policy health_records_owner_select on public.health_records
-  for select using (auth.uid() = user_id);
+  for select
+  to authenticated
+  using ((select auth.uid()) = user_id);
 
 drop policy if exists health_records_owner_insert on public.health_records;
 create policy health_records_owner_insert on public.health_records
-  for insert with check (
-    auth.uid() = user_id
+  for insert
+  to authenticated
+  with check (
+    (select auth.uid()) = user_id
     and exists (
-      select 1 from public.pets
-      where pets.id = health_records.pet_id and pets.user_id = auth.uid()
+      select 1
+      from public.pets
+      where pets.id = health_records.pet_id
+        and pets.user_id = (select auth.uid())
     )
   );
 
 drop policy if exists health_records_owner_update on public.health_records;
 create policy health_records_owner_update on public.health_records
-  for update using (auth.uid() = user_id) with check (
-    auth.uid() = user_id
+  for update
+  to authenticated
+  using ((select auth.uid()) = user_id)
+  with check (
+    (select auth.uid()) = user_id
     and exists (
-      select 1 from public.pets
-      where pets.id = health_records.pet_id and pets.user_id = auth.uid()
+      select 1
+      from public.pets
+      where pets.id = health_records.pet_id
+        and pets.user_id = (select auth.uid())
     )
   );
 
 drop policy if exists health_records_owner_delete on public.health_records;
 create policy health_records_owner_delete on public.health_records
-  for delete using (auth.uid() = user_id);
+  for delete
+  to authenticated
+  using ((select auth.uid()) = user_id);
