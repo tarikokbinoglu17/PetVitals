@@ -1,5 +1,5 @@
 import { formatDashboardDate, getUpcomingRecords } from '../lib/dashboard';
-import { HealthRecord } from '../types';
+import type { HealthRecord } from '../types';
 
 const records: HealthRecord[] = [
   { id: 'past', petId: '1', title: 'Geçmiş', category: 'Kontrol', date: '2026-08-19' },
