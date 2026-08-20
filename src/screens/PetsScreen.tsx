@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { PetForm } from '../components/PetForm';
 import type { Pet, PetDraft, SavePetResult } from '../types';
 import { colors, shadow } from '../theme';
@@ -37,7 +37,11 @@ export function PetsScreen({
       {pets.map((pet, index) => (
         <View key={pet.id} style={styles.card}>
           <View style={[styles.avatar, { backgroundColor: index ? '#FDE8DF' : colors.primarySoft }]}>
-            <Text style={styles.emoji}>{pet.species === 'Kedi' ? '🐱' : pet.species === 'Köpek' ? '🐶' : '🐾'}</Text>
+            {pet.photoUrl ? (
+              <Image accessibilityLabel={`${pet.name} profil fotoğrafı`} source={{ uri: pet.photoUrl }} style={styles.photo} />
+            ) : (
+              <Text style={styles.emoji}>{pet.species === 'Kedi' ? '🐱' : pet.species === 'Köpek' ? '🐶' : '🐾'}</Text>
+            )}
           </View>
           <View style={styles.info}>
             <Text style={styles.name}>{pet.name}</Text>
@@ -71,6 +75,7 @@ const styles = StyleSheet.create({
   empty: { color: colors.muted, marginBottom: 18, textAlign: 'center' },
   card: { ...shadow, alignItems: 'center', backgroundColor: colors.surface, borderRadius: 20, flexDirection: 'row', marginBottom: 14, padding: 16 },
   avatar: { alignItems: 'center', borderRadius: 28, height: 56, justifyContent: 'center', width: 56 },
+  photo: { borderRadius: 28, height: 56, width: 56 },
   emoji: { fontSize: 28 },
   info: { flex: 1, marginLeft: 14 },
   name: { color: colors.text, fontSize: 19, fontWeight: '800' },

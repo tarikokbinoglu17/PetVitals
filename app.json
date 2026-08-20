@@ -13,6 +13,14 @@
     },
     "plugins": [
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "PetVitals, dostunuzun profil fotoğrafını seçebilmeniz için fotoğraflarınıza erişir.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-notifications",
         {
           "color": "#1C735B",

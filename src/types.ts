@@ -5,6 +5,15 @@ export type Pet = {
   breed: string;
   birthDate: string;
   weight: number;
+  photoPath?: string;
+  photoUrl?: string;
+};
+
+export type LocalImage = {
+  uri: string;
+  mimeType?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
 };
 
 export type PetDraft = {
@@ -13,6 +22,7 @@ export type PetDraft = {
   breed?: string;
   birthDate?: string;
   weight?: number;
+  photo?: LocalImage;
 };
 
 export type SavePetResult = {
