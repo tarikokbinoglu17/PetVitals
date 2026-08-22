@@ -38,6 +38,7 @@ const emptySnapshot: PlatformSnapshot = {
   weights: [],
   memberCount: 0,
   activePassportCount: 0,
+  passports: [],
   pro: { plan: 'free' },
 };
 
