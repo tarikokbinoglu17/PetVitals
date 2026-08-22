@@ -53,7 +53,9 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
         />
       );
     }
-    if (tab === 'platform') return <PlatformScreen pets={pets} records={records} />;
+    if (tab === 'platform') {
+      return <PlatformScreen demoMode={demoMode} pets={pets} records={records} userId={userId} />;
+    }
     return <HomeScreen pets={pets} records={records} />;
   })();
 
