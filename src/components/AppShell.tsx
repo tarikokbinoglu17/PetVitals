@@ -7,6 +7,7 @@ import { colors, shadow } from '../theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { PetsScreen } from '../screens/PetsScreen';
 import { HealthScreen } from '../screens/HealthScreen';
+import { NearMeScreen } from '../screens/NearMeScreen';
 import { PlatformScreen } from '../screens/PlatformScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 
@@ -14,6 +15,7 @@ const tabs: { key: TabName; label: string; icon: string }[] = [
   { key: 'home', label: 'Ana sayfa', icon: '⌂' },
   { key: 'pets', label: 'Dostlarım', icon: '🐾' },
   { key: 'health', label: 'Sağlık', icon: '♥' },
+  { key: 'nearby', label: 'Yakınımda', icon: '⌖' },
   { key: 'platform', label: 'PetVitals+', icon: '✦' },
   { key: 'profile', label: 'Profil', icon: '☺' },
 ];
@@ -24,6 +26,7 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
 
   const screen = (() => {
     if (tab === 'profile') return <ProfileScreen />;
+    if (tab === 'nearby') return <NearMeScreen />;
     if (loading) {
       return (
         <View style={styles.state}>
@@ -98,8 +101,8 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingTop: 9,
   },
-  tab: { alignItems: 'center', flex: 1, gap: 3 },
-  icon: { color: colors.muted, fontSize: 20 },
-  label: { color: colors.muted, fontSize: 9, fontWeight: '700' },
+  tab: { alignItems: 'center', flex: 1, gap: 3, minWidth: 0 },
+  icon: { color: colors.muted, fontSize: 18 },
+  label: { color: colors.muted, fontSize: 8, fontWeight: '700' },
   active: { color: colors.primary },
 });
