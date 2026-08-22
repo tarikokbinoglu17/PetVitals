@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { VaccineForm } from '../components/VaccineForm';
+import { askPetHealthBrain, evaluateSmartHealthAlerts, type SmartHealthAlert } from '../lib/healthBrain';
 import type { HealthRecord, Pet, SaveVaccineResult, VaccineDraft, VaccineNotificationStatus } from '../types';
 import { colors } from '../theme';
 
@@ -25,7 +26,50 @@ export function HealthScreen({
   onAddVaccine: (draft: VaccineDraft) => Promise<SaveVaccineResult>;
 }) {
   const [showVaccineForm, setShowVaccineForm] = useState(false);
+  const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id ?? '');
+  const [smartAlerts, setSmartAlerts] = useState<SmartHealthAlert[]>([]);
+  const [loadingAlerts, setLoadingAlerts] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [askingAi, setAskingAi] = useState(false);
+  const [aiAnswer, setAiAnswer] = useState('');
+  const [healthBrainError, setHealthBrainError] = useState('');
   const sortedRecords = [...records].sort((left, right) => left.date.localeCompare(right.date));
+
+  useEffect(() => {
+    if (!pets.some(pet => pet.id === selectedPetId)) {
+      setSelectedPetId(pets[0]?.id ?? '');
+    }
+  }, [pets, selectedPetId]);
+
+  const selectedPet = pets.find(pet => pet.id === selectedPetId);
+
+  async function handleEvaluateAlerts() {
+    if (!selectedPetId) return;
+    setLoadingAlerts(true);
+    setHealthBrainError('');
+    try {
+      setSmartAlerts(await evaluateSmartHealthAlerts(selectedPetId));
+    } catch (error) {
+      setHealthBrainError(error instanceof Error ? error.message : 'Akıllı sağlık uyarıları alınamadı.');
+    } finally {
+      setLoadingAlerts(false);
+    }
+  }
+
+  async function handleAskAi() {
+    if (!selectedPetId || !question.trim()) return;
+    setAskingAi(true);
+    setHealthBrainError('');
+    setAiAnswer('');
+    try {
+      const result = await askPetHealthBrain(selectedPetId, question);
+      setAiAnswer(result.answer);
+    } catch (error) {
+      setHealthBrainError(error instanceof Error ? error.message : 'AI Health Brain yanıt veremedi.');
+    } finally {
+      setAskingAi(false);
+    }
+  }
 
   return (
     <View style={styles.page}>
@@ -47,6 +91,64 @@ export function HealthScreen({
 
       {showVaccineForm ? (
         <VaccineForm onSave={onAddVaccine} pets={pets} saving={savingVaccine} />
+      ) : null}
+
+      {pets.length > 0 ? (
+        <View style={styles.brainCard}>
+          <Text style={styles.brainEyebrow}>PETVITALS AI</Text>
+          <Text style={styles.brainTitle}>Health Brain</Text>
+          <Text style={styles.brainCopy}>
+            Kayıtlı sağlık geçmişini kullanarak özet çıkarır ve yaklaşan risk işaretlerini görünür hale getirir. Tanı koymaz.
+          </Text>
+
+          <View style={styles.petPicker}>
+            {pets.map(pet => (
+              <Pressable
+                key={pet.id}
+                onPress={() => {
+                  setSelectedPetId(pet.id);
+                  setSmartAlerts([]);
+                  setAiAnswer('');
+                  setHealthBrainError('');
+                }}
+                style={[styles.petChip, selectedPetId === pet.id && styles.petChipSelected]}
+              >
+                <Text style={[styles.petChipText, selectedPetId === pet.id && styles.petChipTextSelected]}>{pet.name}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Pressable disabled={loadingAlerts || !selectedPetId} onPress={handleEvaluateAlerts} style={styles.brainButton}>
+            {loadingAlerts ? <ActivityIndicator color={colors.white} /> : <Text style={styles.brainButtonText}>Akıllı uyarıları kontrol et</Text>}
+          </Pressable>
+
+          {smartAlerts.length === 0 && !loadingAlerts ? (
+            <Text style={styles.noAlert}>Aktif bir akıllı uyarı görünmüyor.</Text>
+          ) : null}
+          {smartAlerts.map(alert => (
+            <View key={alert.id} style={styles.alertCard}>
+              <Text style={styles.alertSeverity}>{alert.severity.toUpperCase()}</Text>
+              <Text style={styles.alertTitle}>{alert.title}</Text>
+              <Text style={styles.alertMessage}>{alert.message}</Text>
+            </View>
+          ))}
+
+          <TextInput
+            multiline
+            onChangeText={setQuestion}
+            placeholder={selectedPet ? `${selectedPet.name} hakkında sağlık geçmişine soru sor` : 'Sağlık geçmişine soru sor'}
+            placeholderTextColor={colors.muted}
+            style={styles.questionInput}
+            value={question}
+          />
+          <Pressable disabled={askingAi || !selectedPetId || !question.trim()} onPress={handleAskAi} style={[styles.brainButton, styles.askButton]}>
+            {askingAi ? <ActivityIndicator color={colors.white} /> : <Text style={styles.brainButtonText}>AI Health Brain'e sor</Text>}
+          </Pressable>
+
+          {aiAnswer ? <Text style={styles.aiAnswer}>{aiAnswer}</Text> : null}
+          {healthBrainError ? <Text style={styles.brainError}>{healthBrainError}</Text> : null}
+          <Text style={styles.disclaimer}>Eğitsel destek sağlar; veteriner tanısı veya tedavisinin yerine geçmez.</Text>
+        </View>
       ) : null}
 
       {sortedRecords.length === 0 ? (
@@ -94,6 +196,27 @@ const styles = StyleSheet.create({
   addButtonActive: { backgroundColor: colors.surface },
   addButtonText: { color: colors.white, fontSize: 12, fontWeight: '800' },
   addButtonTextActive: { color: colors.primary },
+  brainCard: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 20, borderWidth: 1, marginBottom: 24, padding: 18 },
+  brainEyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 1.2 },
+  brainTitle: { color: colors.text, fontSize: 22, fontWeight: '900', marginTop: 4 },
+  brainCopy: { color: colors.muted, lineHeight: 20, marginTop: 7 },
+  petPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  petChip: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
+  petChipSelected: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
+  petChipText: { color: colors.muted, fontSize: 12, fontWeight: '800' },
+  petChipTextSelected: { color: colors.primaryDark },
+  brainButton: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 13, justifyContent: 'center', marginTop: 14, minHeight: 44, paddingHorizontal: 14, paddingVertical: 11 },
+  askButton: { marginTop: 9 },
+  brainButtonText: { color: colors.white, fontSize: 13, fontWeight: '900' },
+  noAlert: { color: colors.muted, fontSize: 12, marginTop: 12 },
+  alertCard: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 12, borderWidth: 1, marginTop: 10, padding: 12 },
+  alertSeverity: { color: colors.primary, fontSize: 10, fontWeight: '900' },
+  alertTitle: { color: colors.text, fontSize: 14, fontWeight: '900', marginTop: 3 },
+  alertMessage: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 4 },
+  questionInput: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 13, borderWidth: 1, color: colors.text, marginTop: 16, minHeight: 86, padding: 12, textAlignVertical: 'top' },
+  aiAnswer: { backgroundColor: colors.primarySoft, borderRadius: 12, color: colors.text, lineHeight: 20, marginTop: 12, padding: 12 },
+  brainError: { color: '#B42318', fontSize: 12, marginTop: 10 },
+  disclaimer: { color: colors.muted, fontSize: 10, lineHeight: 15, marginTop: 12 },
   empty: { color: colors.muted, textAlign: 'center' },
   row: { flexDirection: 'row' },
   lineWrap: { alignItems: 'center', width: 28 },
