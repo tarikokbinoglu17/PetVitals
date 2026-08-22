@@ -115,4 +115,4 @@ export type SaveVaccineResult = {
   message?: string;
 };
 
-export type TabName = 'home' | 'pets' | 'health' | 'nearby' | 'platform' | 'profile';
+export type TabName = 'home' | 'pets' | 'health' | 'life' | 'nearby' | 'platform' | 'profile';
