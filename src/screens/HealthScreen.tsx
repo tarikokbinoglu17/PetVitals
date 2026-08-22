@@ -78,53 +78,29 @@ export function HealthScreen({
           <Text style={styles.title}>Sağlık takvimi</Text>
           <Text style={styles.sub}>Kontrol, aşı ve ilaç planı.</Text>
         </View>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => setShowVaccineForm(value => !value)}
-          style={[styles.addButton, showVaccineForm && styles.addButtonActive]}
-        >
-          <Text style={[styles.addButtonText, showVaccineForm && styles.addButtonTextActive]}>
-            {showVaccineForm ? 'Kapat' : '＋ Aşı ekle'}
-          </Text>
+        <Pressable accessibilityRole="button" onPress={() => setShowVaccineForm(value => !value)} style={[styles.addButton, showVaccineForm && styles.addButtonActive]}>
+          <Text style={[styles.addButtonText, showVaccineForm && styles.addButtonTextActive]}>{showVaccineForm ? 'Kapat' : '＋ Aşı ekle'}</Text>
         </Pressable>
       </View>
 
-      {showVaccineForm ? (
-        <VaccineForm onSave={onAddVaccine} pets={pets} saving={savingVaccine} />
-      ) : null}
+      {showVaccineForm ? <VaccineForm onSave={onAddVaccine} pets={pets} saving={savingVaccine} /> : null}
 
       {pets.length > 0 ? (
         <View style={styles.brainCard}>
           <Text style={styles.brainEyebrow}>PETVITALS AI</Text>
           <Text style={styles.brainTitle}>Health Brain</Text>
-          <Text style={styles.brainCopy}>
-            Kayıtlı sağlık geçmişini kullanarak özet çıkarır ve yaklaşan risk işaretlerini görünür hale getirir. Tanı koymaz.
-          </Text>
-
+          <Text style={styles.brainCopy}>Kayıtlı sağlık geçmişini kullanarak özet çıkarır ve yaklaşan risk işaretlerini görünür hale getirir. Tanı koymaz.</Text>
           <View style={styles.petPicker}>
             {pets.map(pet => (
-              <Pressable
-                key={pet.id}
-                onPress={() => {
-                  setSelectedPetId(pet.id);
-                  setSmartAlerts([]);
-                  setAiAnswer('');
-                  setHealthBrainError('');
-                }}
-                style={[styles.petChip, selectedPetId === pet.id && styles.petChipSelected]}
-              >
+              <Pressable key={pet.id} onPress={() => { setSelectedPetId(pet.id); setSmartAlerts([]); setAiAnswer(''); setHealthBrainError(''); }} style={[styles.petChip, selectedPetId === pet.id && styles.petChipSelected]}>
                 <Text style={[styles.petChipText, selectedPetId === pet.id && styles.petChipTextSelected]}>{pet.name}</Text>
               </Pressable>
             ))}
           </View>
-
           <Pressable disabled={loadingAlerts || !selectedPetId} onPress={handleEvaluateAlerts} style={styles.brainButton}>
             {loadingAlerts ? <ActivityIndicator color={colors.white} /> : <Text style={styles.brainButtonText}>Akıllı uyarıları kontrol et</Text>}
           </Pressable>
-
-          {smartAlerts.length === 0 && !loadingAlerts ? (
-            <Text style={styles.noAlert}>Aktif bir akıllı uyarı görünmüyor.</Text>
-          ) : null}
+          {smartAlerts.length === 0 && !loadingAlerts ? <Text style={styles.noAlert}>Aktif bir akıllı uyarı görünmüyor.</Text> : null}
           {smartAlerts.map(alert => (
             <View key={alert.id} style={styles.alertCard}>
               <Text style={styles.alertSeverity}>{alert.severity.toUpperCase()}</Text>
@@ -132,28 +108,17 @@ export function HealthScreen({
               <Text style={styles.alertMessage}>{alert.message}</Text>
             </View>
           ))}
-
-          <TextInput
-            multiline
-            onChangeText={setQuestion}
-            placeholder={selectedPet ? `${selectedPet.name} hakkında sağlık geçmişine soru sor` : 'Sağlık geçmişine soru sor'}
-            placeholderTextColor={colors.muted}
-            style={styles.questionInput}
-            value={question}
-          />
+          <TextInput multiline onChangeText={setQuestion} placeholder={selectedPet ? `${selectedPet.name} hakkında sağlık geçmişine soru sor` : 'Sağlık geçmişine soru sor'} placeholderTextColor={colors.muted} style={styles.questionInput} value={question} />
           <Pressable disabled={askingAi || !selectedPetId || !question.trim()} onPress={handleAskAi} style={[styles.brainButton, styles.askButton]}>
             {askingAi ? <ActivityIndicator color={colors.white} /> : <Text style={styles.brainButtonText}>AI Health Brain'e sor</Text>}
           </Pressable>
-
           {aiAnswer ? <Text style={styles.aiAnswer}>{aiAnswer}</Text> : null}
           {healthBrainError ? <Text style={styles.brainError}>{healthBrainError}</Text> : null}
           <Text style={styles.disclaimer}>Eğitsel destek sağlar; veteriner tanısı veya tedavisinin yerine geçmez.</Text>
         </View>
       ) : null}
 
-      {sortedRecords.length === 0 ? (
-        <Text style={styles.empty}>Henüz bir sağlık kaydı eklenmemiş.</Text>
-      ) : null}
+      {sortedRecords.length === 0 ? <Text style={styles.empty}>Henüz bir sağlık kaydı eklenmemiş.</Text> : null}
       {sortedRecords.map((item, index) => {
         const notificationLabel = item.category === 'Aşı' ? getNotificationLabel(item.notificationStatus) : null;
         return (
@@ -165,16 +130,12 @@ export function HealthScreen({
             <View style={styles.card}>
               <View style={styles.top}>
                 <Text style={styles.category}>{item.category}</Text>
-                <Text style={styles.date}>
-                  {new Date(`${item.date}T00:00:00`).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
-                </Text>
+                <Text style={styles.date}>{new Date(`${item.date}T00:00:00`).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</Text>
               </View>
               <Text style={styles.record}>{item.title}</Text>
               {item.vaccineType ? <Text style={styles.vaccineType}>{item.vaccineType}</Text> : null}
               <Text style={styles.pet}>{pets.find(pet => pet.id === item.petId)?.name ?? 'Dostunuz'}</Text>
-              {item.administeredDate ? (
-                <Text style={styles.meta}>Uygulandı: {new Date(`${item.administeredDate}T00:00:00`).toLocaleDateString('tr-TR')}</Text>
-              ) : null}
+              {item.administeredDate ? <Text style={styles.meta}>Uygulandı: {new Date(`${item.administeredDate}T00:00:00`).toLocaleDateString('tr-TR')}</Text> : null}
               {item.veterinarian ? <Text style={styles.meta}>Veteriner: {item.veterinarian}</Text> : null}
               {notificationLabel ? <Text style={styles.notificationBadge}>{notificationLabel}</Text> : null}
               {item.notes ? <Text style={styles.notes}>{item.notes}</Text> : null}
