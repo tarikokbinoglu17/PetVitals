@@ -17,6 +17,19 @@
     "plugins": [
       "expo-apple-authentication",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "PetVitals, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+        }
+      ],
+      [
+        "expo-maps",
+        {
+          "requestLocationPermission": true,
+          "locationPermission": "PetVitals, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "PetVitals, dostunuzun profil fotoğrafını seçebilmeniz için fotoğraflarınıza erişir.",
