@@ -54,16 +54,16 @@ export type WeightEntry = {
   id: string;
   petId: string;
   weight: number;
-  date: string;
+  measuredAt: string;
   notes?: string;
 };
 
-export type ShareRole = 'caregiver' | 'veterinarian' | 'viewer';
+export type PetMemberRole = 'caregiver' | 'veterinarian' | 'viewer';
 
 export type PetShare = {
   id: string;
   petId: string;
-  role: ShareRole;
+  role: PetMemberRole;
   displayName?: string;
   expiresAt?: string;
   canEdit: boolean;
@@ -80,6 +80,13 @@ export type PassportShare = {
   includeAllergies: boolean;
   includeMedications: boolean;
   includeOwnerContact: boolean;
+};
+
+export type ProEntitlement = {
+  plan: 'free' | 'pro';
+  provider?: string;
+  productId?: string;
+  expiresAt?: string;
 };
 
 export type VaccineNotificationStatus =
