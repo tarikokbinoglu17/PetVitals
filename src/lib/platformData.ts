@@ -1,30 +1,52 @@
 import { supabase } from './supabase';
 import type { PetMemberRole, ProEntitlement, WeightEntry } from '../types';
 
+export type ActivePassport = {
+  id: string;
+  lostMode: boolean;
+  createdAt: string;
+  expiresAt?: string;
+};
+
 export type PlatformSnapshot = {
   weights: WeightEntry[];
   memberCount: number;
   activePassportCount: number;
+  passports: ActivePassport[];
   pro: ProEntitlement;
 };
 
 const freeEntitlement: ProEntitlement = { plan: 'free' };
 
+function client() {
+  if (!supabase) throw new Error('Supabase yapılandırılmamış.');
+  // Generated database types are refreshed separately; keep this module isolated meanwhile.
+  return supabase as any;
+}
+
 export async function loadPlatformSnapshot(userId: string, petId: string): Promise<PlatformSnapshot> {
-  if (!supabase) return { weights: [], memberCount: 0, activePassportCount: 0, pro: freeEntitlement };
+  if (!supabase) return { weights: [], memberCount: 0, activePassportCount: 0, passports: [], pro: freeEntitlement };
+  const db = client();
 
   const [weightsResult, membersResult, passportResult, entitlementResult] = await Promise.all([
-    supabase.from('weight_entries').select('id,pet_id,weight,measured_at,notes').eq('owner_id', userId).eq('pet_id', petId).order('measured_at', { ascending: true }),
-    supabase.from('pet_members').select('id', { count: 'exact', head: true }).eq('owner_id', userId).eq('pet_id', petId).is('revoked_at', null),
-    supabase.from('passport_shares').select('id', { count: 'exact', head: true }).eq('owner_id', userId).eq('pet_id', petId).is('revoked_at', null),
-    supabase.from('pro_entitlements').select('plan,provider,product_id,expires_at').eq('user_id', userId).maybeSingle(),
+    db.from('weight_entries').select('id,pet_id,weight,measured_at,notes').eq('owner_id', userId).eq('pet_id', petId).order('measured_at', { ascending: true }),
+    db.from('pet_members').select('id', { count: 'exact', head: true }).eq('owner_id', userId).eq('pet_id', petId).is('revoked_at', null),
+    db.from('passport_shares').select('id,lost_mode,created_at,expires_at').eq('owner_id', userId).eq('pet_id', petId).is('revoked_at', null).order('created_at', { ascending: false }),
+    db.from('pro_entitlements').select('plan,provider,product_id,expires_at').eq('user_id', userId).maybeSingle(),
   ]);
 
   const firstError = weightsResult.error ?? membersResult.error ?? passportResult.error ?? entitlementResult.error;
   if (firstError) throw firstError;
 
+  const passports: ActivePassport[] = (passportResult.data ?? []).map((row: any) => ({
+    id: row.id,
+    lostMode: Boolean(row.lost_mode),
+    createdAt: row.created_at,
+    expiresAt: row.expires_at ?? undefined,
+  }));
+
   return {
-    weights: (weightsResult.data ?? []).map(row => ({
+    weights: (weightsResult.data ?? []).map((row: any) => ({
       id: row.id,
       petId: row.pet_id,
       weight: Number(row.weight),
@@ -32,7 +54,8 @@ export async function loadPlatformSnapshot(userId: string, petId: string): Promi
       notes: row.notes ?? undefined,
     })),
     memberCount: membersResult.count ?? 0,
-    activePassportCount: passportResult.count ?? 0,
+    activePassportCount: passports.length,
+    passports,
     pro: entitlementResult.data ? {
       plan: entitlementResult.data.plan === 'pro' ? 'pro' : 'free',
       provider: entitlementResult.data.provider ?? undefined,
@@ -42,35 +65,52 @@ export async function loadPlatformSnapshot(userId: string, petId: string): Promi
   };
 }
 
-export async function addWeightEntry(userId: string, petId: string, weight: number) {
-  if (!supabase) throw new Error('Supabase yapılandırılmamış.');
-  const { error } = await supabase.from('weight_entries').insert({ owner_id: userId, pet_id: petId, weight });
+export async function addWeightEntry(userId: string, petId: string, weight: number, measuredAt?: string, notes?: string) {
+  if (!Number.isFinite(weight) || weight <= 0 || weight > 5000) throw new Error('Geçerli bir kilo girin.');
+  const { error } = await client().from('weight_entries').insert({
+    owner_id: userId,
+    pet_id: petId,
+    weight,
+    measured_at: measuredAt || new Date().toISOString().slice(0, 10),
+    notes: notes?.trim() || null,
+  });
   if (error) throw error;
 }
 
 export async function invitePetMember(userId: string, petId: string, email: string, role: PetMemberRole) {
-  if (!supabase) throw new Error('Supabase yapılandırılmamış.');
-  const { error } = await supabase.from('pet_members').insert({
+  const normalized = email.trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(normalized)) throw new Error('Geçerli bir e-posta adresi girin.');
+  const { error } = await client().from('pet_members').insert({
     owner_id: userId,
     pet_id: petId,
-    invite_email: email.trim().toLowerCase(),
+    invite_email: normalized,
     role,
     can_edit: role !== 'viewer',
   });
   if (error) throw error;
 }
 
-export async function createPassportShare(userId: string, petId: string, lostMode = false) {
-  if (!supabase) throw new Error('Supabase yapılandırılmamış.');
-  const rawToken = `${petId}.${Date.now()}.${Math.random().toString(36).slice(2)}`;
-  const tokenHash = rawToken.split('').reverse().join('');
-  const { error } = await supabase.from('passport_shares').insert({
-    owner_id: userId,
-    pet_id: petId,
-    token_hash: tokenHash,
-    lost_mode: lostMode,
-    include_owner_contact: lostMode,
+export async function createPassportShare(petId: string, lostMode = false) {
+  const { data, error } = await client().rpc('create_passport_share', {
+    p_pet_id: petId,
+    p_lost_mode: lostMode,
+    p_include_owner_contact: lostMode,
   });
   if (error) throw error;
-  return rawToken;
+  const result = data?.[0];
+  if (!result?.id || !result?.share_token) throw new Error('Pasaport bağlantısı oluşturulamadı.');
+  return { id: String(result.id), token: String(result.share_token) };
+}
+
+export async function revokePassportShare(userId: string, passportId: string) {
+  const { error } = await client().from('passport_shares').update({ revoked_at: new Date().toISOString() }).eq('owner_id', userId).eq('id', passportId);
+  if (error) throw error;
+}
+
+export async function setPassportLostMode(userId: string, passportId: string, enabled: boolean) {
+  const { error } = await client().from('passport_shares').update({
+    lost_mode: enabled,
+    include_owner_contact: enabled,
+  }).eq('owner_id', userId).eq('id', passportId).is('revoked_at', null);
+  if (error) throw error;
 }
