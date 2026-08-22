@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { buildVaccineReminderPlan, getVaccineReminderBody } from './vaccineReminders';
 
 const VACCINE_CHANNEL_ID = 'vaccine-reminders';
+const SMART_CHANNEL_ID = 'smart-reminders';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -16,102 +17,68 @@ Notifications.setNotificationHandler({
 function hasNotificationPermission(status: Notifications.NotificationPermissionsStatus) {
   if (status.granted) return true;
   if (Platform.OS !== 'ios') return false;
-
   const iosStatus = status.ios?.status;
-  return (
-    iosStatus === Notifications.IosAuthorizationStatus.AUTHORIZED ||
-    iosStatus === Notifications.IosAuthorizationStatus.PROVISIONAL ||
-    iosStatus === Notifications.IosAuthorizationStatus.EPHEMERAL
-  );
+  return iosStatus === Notifications.IosAuthorizationStatus.AUTHORIZED || iosStatus === Notifications.IosAuthorizationStatus.PROVISIONAL || iosStatus === Notifications.IosAuthorizationStatus.EPHEMERAL;
 }
 
-async function ensureNotificationPermission() {
+async function ensureNotificationPermission(channelId = VACCINE_CHANNEL_ID, channelName = 'PetVitals hatırlatmaları') {
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync(VACCINE_CHANNEL_ID, {
-      name: 'Aşı hatırlatmaları',
-      description: 'Yaklaşan aşılar için PetVitals hatırlatmaları',
+    await Notifications.setNotificationChannelAsync(channelId, {
+      name: channelName,
+      description: 'PetVitals tarafından planlanan hatırlatmalar',
       importance: Notifications.AndroidImportance.HIGH,
       sound: 'default',
       vibrationPattern: [0, 250, 250, 250],
     });
   }
-
   const current = await Notifications.getPermissionsAsync();
   if (hasNotificationPermission(current)) return true;
-
   const requested = await Notifications.requestPermissionsAsync();
   return hasNotificationPermission(requested);
 }
 
-export async function scheduleVaccineNotifications({
-  recordId,
-  petId,
-  petName,
-  vaccineName,
-  nextDueDate,
-  now,
-}: {
-  recordId: string;
-  petId: string;
-  petName: string;
-  vaccineName: string;
-  nextDueDate: string;
-  now?: Date;
-}) {
+export async function scheduleSmartReminderNotification(remindAt: string) {
+  const date = new Date(remindAt);
+  if (Number.isNaN(date.getTime()) || date.getTime() <= Date.now()) return null;
+  const granted = await ensureNotificationPermission(SMART_CHANNEL_ID, 'Akıllı hatırlatmalar');
+  if (!granted) return null;
+  return Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'PetVitals hatırlatması 🐾',
+      body: 'Dostunuz için planladığınız bir hatırlatma var.',
+      sound: 'default',
+      data: { screen: 'home', recordType: 'smart-reminder' },
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date,
+      channelId: Platform.OS === 'android' ? SMART_CHANNEL_ID : undefined,
+    },
+  });
+}
+
+export async function cancelSmartReminderNotification(notificationId?: string | null) {
+  if (!notificationId) return;
+  try { await Notifications.cancelScheduledNotificationAsync(notificationId); } catch { /* already fired/removed */ }
+}
+
+export async function scheduleVaccineNotifications({ recordId, petId, petName, vaccineName, nextDueDate, now }: { recordId:string; petId:string; petName:string; vaccineName:string; nextDueDate:string; now?:Date }) {
   const granted = await ensureNotificationPermission();
-  if (!granted) {
-    return {
-      granted: false,
-      notificationIds: [] as string[],
-      notifications: [] as { offsetDays: number; notificationId: string }[],
-    };
-  }
-
+  if (!granted) return { granted:false, notificationIds:[] as string[], notifications:[] as {offsetDays:number;notificationId:string}[] };
   const plan = buildVaccineReminderPlan(nextDueDate, now);
-  const notificationIds: string[] = [];
-  const notifications: { offsetDays: number; notificationId: string }[] = [];
-
+  const notificationIds:string[]=[]; const notifications:{offsetDays:number;notificationId:string}[]=[];
   try {
     for (const reminder of plan) {
       const notificationId = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: reminder.offsetDays === 0 ? 'Bugün aşı günü 💉' : 'Aşı zamanı yaklaşıyor 💉',
-          body: getVaccineReminderBody(petName, vaccineName, reminder.offsetDays),
-          sound: 'default',
-          data: {
-            screen: 'health',
-            recordType: 'vaccine',
-            recordId,
-            petId,
-            dueDate: nextDueDate,
-            offsetDays: reminder.offsetDays,
-          },
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: reminder.triggerDate,
-          channelId: Platform.OS === 'android' ? VACCINE_CHANNEL_ID : undefined,
-        },
+        content: { title: reminder.offsetDays===0?'Bugün aşı günü 💉':'Aşı zamanı yaklaşıyor 💉', body:getVaccineReminderBody(petName,vaccineName,reminder.offsetDays), sound:'default', data:{screen:'health',recordType:'vaccine',recordId,petId,dueDate:nextDueDate,offsetDays:reminder.offsetDays} },
+        trigger: { type:Notifications.SchedulableTriggerInputTypes.DATE, date:reminder.triggerDate, channelId:Platform.OS==='android'?VACCINE_CHANNEL_ID:undefined },
       });
-      notificationIds.push(notificationId);
-      notifications.push({ offsetDays: reminder.offsetDays, notificationId });
+      notificationIds.push(notificationId); notifications.push({offsetDays:reminder.offsetDays,notificationId});
     }
-  } catch (error) {
-    await cancelVaccineNotifications(notificationIds);
-    throw error;
-  }
-
-  return { granted: true, notificationIds, notifications };
+  } catch (error) { await cancelVaccineNotifications(notificationIds); throw error; }
+  return {granted:true,notificationIds,notifications};
 }
 
-export async function cancelVaccineNotifications(notificationIds: string[]) {
-  await Promise.all(
-    notificationIds.map(async notificationId => {
-      try {
-        await Notifications.cancelScheduledNotificationAsync(notificationId);
-      } catch {
-        // The notification may already have fired or been removed by the operating system.
-      }
-    }),
-  );
+export async function cancelVaccineNotifications(notificationIds:string[]) {
+  await Promise.all(notificationIds.map(async notificationId=>{try{await Notifications.cancelScheduledNotificationAsync(notificationId);}catch{/* fired/removed */}}));
 }
