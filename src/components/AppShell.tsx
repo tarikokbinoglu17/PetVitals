@@ -26,7 +26,6 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
 
   const screen = (() => {
     if (tab === 'profile') return <ProfileScreen />;
-    if (tab === 'nearby') return <NearMeScreen />;
     if (loading) {
       return (
         <View style={styles.state}>
@@ -43,40 +42,21 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
         </View>
       );
     }
-    if (tab === 'pets') {
-      return <PetsScreen onAddPet={addPet} pets={pets} savingPet={savingPet} />;
-    }
+    if (tab === 'nearby') return <NearMeScreen pets={pets} userId={demoMode ? undefined : userId} />;
+    if (tab === 'pets') return <PetsScreen onAddPet={addPet} pets={pets} savingPet={savingPet} />;
     if (tab === 'health') {
-      return (
-        <HealthScreen
-          onAddVaccine={addVaccine}
-          pets={pets}
-          records={records}
-          savingVaccine={savingVaccine}
-        />
-      );
+      return <HealthScreen onAddVaccine={addVaccine} pets={pets} records={records} savingVaccine={savingVaccine} />;
     }
-    if (tab === 'platform') {
-      return <PlatformScreen demoMode={demoMode} pets={pets} records={records} userId={userId} />;
-    }
+    if (tab === 'platform') return <PlatformScreen demoMode={demoMode} pets={pets} records={records} userId={userId} />;
     return <HomeScreen pets={pets} records={records} />;
   })();
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        {screen}
-      </ScrollView>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">{screen}</ScrollView>
       <View style={styles.tabs}>
         {tabs.map(item => (
-          <Pressable
-            accessibilityRole="tab"
-            accessibilityLabel={item.label}
-            accessibilityState={{ selected: tab === item.key }}
-            key={item.key}
-            onPress={() => setTab(item.key)}
-            style={styles.tab}
-          >
+          <Pressable accessibilityRole="tab" accessibilityLabel={item.label} accessibilityState={{ selected: tab === item.key }} key={item.key} onPress={() => setTab(item.key)} style={styles.tab}>
             <Text style={[styles.icon, tab === item.key && styles.active]}>{item.icon}</Text>
             <Text style={[styles.label, tab === item.key && styles.active]}>{item.label}</Text>
           </Pressable>
@@ -92,15 +72,7 @@ const styles = StyleSheet.create({
   state: { alignItems: 'center', flex: 1, justifyContent: 'center', minHeight: 420, padding: 32 },
   stateText: { color: colors.muted, lineHeight: 21, marginTop: 12, textAlign: 'center' },
   errorTitle: { color: colors.danger, fontSize: 18, fontWeight: '800' },
-  tabs: {
-    ...shadow,
-    backgroundColor: colors.surface,
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingTop: 9,
-  },
+  tabs: { ...shadow, backgroundColor: colors.surface, borderTopColor: colors.border, borderTopWidth: 1, flexDirection: 'row', paddingBottom: 10, paddingTop: 9 },
   tab: { alignItems: 'center', flex: 1, gap: 3, minWidth: 0 },
   icon: { color: colors.muted, fontSize: 18 },
   label: { color: colors.muted, fontSize: 8, fontWeight: '700' },
