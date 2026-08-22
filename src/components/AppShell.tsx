@@ -7,6 +7,7 @@ import { colors, shadow } from '../theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { PetsScreen } from '../screens/PetsScreen';
 import { HealthScreen } from '../screens/HealthScreen';
+import { LifeScreen } from '../screens/LifeScreen';
 import { NearMeScreen } from '../screens/NearMeScreen';
 import { PlatformScreen } from '../screens/PlatformScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -15,6 +16,7 @@ const tabs: { key: TabName; label: string; icon: string }[] = [
   { key: 'home', label: 'Ana sayfa', icon: '⌂' },
   { key: 'pets', label: 'Dostlarım', icon: '🐾' },
   { key: 'health', label: 'Sağlık', icon: '♥' },
+  { key: 'life', label: 'Life', icon: '◉' },
   { key: 'nearby', label: 'Yakınımda', icon: '⌖' },
   { key: 'platform', label: 'PetVitals+', icon: '✦' },
   { key: 'profile', label: 'Profil', icon: '☺' },
@@ -42,6 +44,7 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
         </View>
       );
     }
+    if (tab === 'life') return <LifeScreen demoMode={demoMode} pets={pets} userId={userId} />;
     if (tab === 'nearby') return <NearMeScreen pets={pets} userId={demoMode ? undefined : userId} />;
     if (tab === 'pets') return <PetsScreen onAddPet={addPet} pets={pets} savingPet={savingPet} />;
     if (tab === 'health') {
@@ -74,7 +77,7 @@ const styles = StyleSheet.create({
   errorTitle: { color: colors.danger, fontSize: 18, fontWeight: '800' },
   tabs: { ...shadow, backgroundColor: colors.surface, borderTopColor: colors.border, borderTopWidth: 1, flexDirection: 'row', paddingBottom: 10, paddingTop: 9 },
   tab: { alignItems: 'center', flex: 1, gap: 3, minWidth: 0 },
-  icon: { color: colors.muted, fontSize: 18 },
-  label: { color: colors.muted, fontSize: 8, fontWeight: '700' },
+  icon: { color: colors.muted, fontSize: 17 },
+  label: { color: colors.muted, fontSize: 7, fontWeight: '700' },
   active: { color: colors.primary },
 });
