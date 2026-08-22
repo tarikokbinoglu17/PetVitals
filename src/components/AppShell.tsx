@@ -7,12 +7,14 @@ import { colors, shadow } from '../theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { PetsScreen } from '../screens/PetsScreen';
 import { HealthScreen } from '../screens/HealthScreen';
+import { PlatformScreen } from '../screens/PlatformScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 
 const tabs: { key: TabName; label: string; icon: string }[] = [
   { key: 'home', label: 'Ana sayfa', icon: '⌂' },
   { key: 'pets', label: 'Dostlarım', icon: '🐾' },
   { key: 'health', label: 'Sağlık', icon: '♥' },
+  { key: 'platform', label: 'PetVitals+', icon: '✦' },
   { key: 'profile', label: 'Profil', icon: '☺' },
 ];
 
@@ -51,6 +53,7 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
         />
       );
     }
+    if (tab === 'platform') return <PlatformScreen pets={pets} records={records} />;
     return <HomeScreen pets={pets} records={records} />;
   })();
 
@@ -63,6 +66,7 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
         {tabs.map(item => (
           <Pressable
             accessibilityRole="tab"
+            accessibilityLabel={item.label}
             accessibilityState={{ selected: tab === item.key }}
             key={item.key}
             onPress={() => setTab(item.key)}
@@ -93,7 +97,7 @@ const styles = StyleSheet.create({
     paddingTop: 9,
   },
   tab: { alignItems: 'center', flex: 1, gap: 3 },
-  icon: { color: colors.muted, fontSize: 21 },
-  label: { color: colors.muted, fontSize: 10, fontWeight: '700' },
+  icon: { color: colors.muted, fontSize: 20 },
+  label: { color: colors.muted, fontSize: 9, fontWeight: '700' },
   active: { color: colors.primary },
 });
