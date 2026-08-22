@@ -1,7 +1,10 @@
 import * as Location from 'expo-location';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Linking, Platform, Pressable, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { createAppointmentRequest, loadFavoritePlaceIds, markAppointmentRequestSent, setPlaceFavorite } from '../lib/nearbyActions';
 import { findNearbyPetServices, type NearbyCategory, type NearbyPlace } from '../lib/nearbyServices';
+import { createPassportShare } from '../lib/platformData';
+import type { Pet } from '../types';
 import { colors, shadow } from '../theme';
 
 type Coordinates = { latitude: number; longitude: number };
@@ -26,19 +29,15 @@ function EmbeddedMap({ location, places, onSelect }: { location: Coordinates; pl
       showCallout: true,
     }));
     const cameraPosition = { coordinates: location, zoom: 13 };
-    if (Platform.OS === 'ios' && AppleMaps?.View) {
-      return <AppleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(event: any) => { const place = places.find(item => item.id === event?.id); if (place) onSelect(place); }} style={styles.map} />;
-    }
-    if (Platform.OS === 'android' && GoogleMaps?.View) {
-      return <GoogleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(event: any) => { const place = places.find(item => item.id === event?.id); if (place) onSelect(place); }} style={styles.map} />;
-    }
+    if (Platform.OS === 'ios' && AppleMaps?.View) return <AppleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(event: any) => { const place = places.find(item => item.id === event?.id); if (place) onSelect(place); }} style={styles.map} />;
+    if (Platform.OS === 'android' && GoogleMaps?.View) return <GoogleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(event: any) => { const place = places.find(item => item.id === event?.id); if (place) onSelect(place); }} style={styles.map} />;
   } catch {
-    // expo-maps is not available inside Expo Go; list/directions still work.
+    // Expo Go does not ship expo-maps. Search/list remains usable there.
   }
   return <View style={styles.mapFallback}><Text style={styles.mapFallbackTitle}>Harita development build ile açılır</Text><Text style={styles.mapFallbackText}>Yakındaki yerler ve yol tarifi listeden kullanılabilir.</Text></View>;
 }
 
-export function NearMeScreen() {
+export function NearMeScreen({ userId, pets }: { userId?: string; pets: Pet[] }) {
   const [category, setCategory] = useState<NearbyCategory>('all');
   const [emergencyOnly, setEmergencyOnly] = useState(false);
   const [location, setLocation] = useState<Coordinates | null>(null);
@@ -46,6 +45,22 @@ export function NearMeScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id);
+  const [appointmentOpen, setAppointmentOpen] = useState(false);
+  const [appointmentTime, setAppointmentTime] = useState('');
+  const [appointmentNote, setAppointmentNote] = useState('');
+  const [actionBusy, setActionBusy] = useState(false);
+  const initialSearchStarted = useRef(false);
+
+  useEffect(() => {
+    if (!selectedPetId && pets[0]?.id) setSelectedPetId(pets[0].id);
+  }, [pets, selectedPetId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    loadFavoritePlaceIds(userId).then(setFavoriteIds).catch(() => undefined);
+  }, [userId]);
 
   const requestLocation = useCallback(async () => {
     setError(null);
@@ -75,9 +90,7 @@ export function NearMeScreen() {
       });
       setPlaces(result);
       setSelectedId(result[0]?.id ?? null);
-      if (mode.emergencyOnly && result.length === 0) {
-        setError('25 km içinde şu an açık olduğu doğrulanan veteriner bulunamadı. Acil durumda daha geniş bölgede arama yapın veya bilinen kliniğinizi arayın.');
-      }
+      if (mode.emergencyOnly && result.length === 0) setError('25 km içinde şu an açık olduğu doğrulanan veteriner bulunamadı. Acil durumda daha geniş bölgede arayın veya bilinen kliniğinizi arayın.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Yakındaki yerler yüklenemedi.');
     } finally {
@@ -86,14 +99,14 @@ export function NearMeScreen() {
   }, [requestLocation]);
 
   useEffect(() => {
-    let active = true;
-    requestLocation().then(coords => {
-      if (active && coords) void runSearch(coords, { category: 'all', emergencyOnly: false });
-    });
-    return () => { active = false; };
+    if (initialSearchStarted.current) return;
+    initialSearchStarted.current = true;
+    requestLocation().then(coords => { if (coords) void runSearch(coords, { category: 'all', emergencyOnly: false }); });
   }, [requestLocation, runSearch]);
 
   const selected = useMemo(() => places.find(place => place.id === selectedId) ?? null, [places, selectedId]);
+  const selectedPet = pets.find(pet => pet.id === selectedPetId) ?? pets[0];
+  const selectedFavorite = selected ? favoriteIds.includes(selected.id) : false;
 
   const openDirections = async (place: NearbyPlace) => {
     const url = place.mapsUrl || (Platform.OS === 'ios' ? `http://maps.apple.com/?daddr=${place.latitude},${place.longitude}&dirflg=d` : `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`);
@@ -102,6 +115,60 @@ export function NearMeScreen() {
 
   const callPlace = async (place: NearbyPlace) => {
     if (place.phone) await Linking.openURL(`tel:${place.phone.replace(/[^+\d]/g, '')}`);
+  };
+
+  const toggleFavorite = async () => {
+    if (!selected || !userId) return;
+    const next = !selectedFavorite;
+    setActionBusy(true);
+    try {
+      await setPlaceFavorite(userId, selected, next);
+      setFavoriteIds(current => next ? Array.from(new Set([...current, selected.id])) : current.filter(id => id !== selected.id));
+    } catch {
+      setError('Favori işlemi kaydedilemedi.');
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const sharePassport = async () => {
+    if (!selectedPet) {
+      setError('Önce bir dost profili oluşturun.');
+      return;
+    }
+    setActionBusy(true);
+    try {
+      const share = await createPassportShare(selectedPet.id, false);
+      await Share.share({ message: `${selectedPet.name} için PetVitals Health Passport erişim kodu:\n${share.token}\n\nBu kodu yalnızca güvendiğiniz veterinerle paylaşın.` });
+    } catch {
+      setError('Health Passport paylaşımı oluşturulamadı.');
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const sendAppointmentRequest = async () => {
+    if (!selected || selected.kind !== 'veterinary' || !userId) return;
+    setActionBusy(true);
+    try {
+      const requestId = await createAppointmentRequest({ userId, petId: selectedPet?.id, place: selected, preferredTime: appointmentTime, note: appointmentNote });
+      const message = `Merhaba, PetVitals üzerinden ${selectedPet?.name ? selectedPet.name + ' için ' : ''}randevu talep ediyorum.${appointmentTime.trim() ? ` Tercih edilen zaman: ${appointmentTime.trim()}.` : ''}${appointmentNote.trim() ? ` Not: ${appointmentNote.trim()}` : ''}`;
+      if (selected.phone) {
+        const phone = selected.phone.replace(/[^+\d]/g, '');
+        const smsUrl = Platform.OS === 'ios' ? `sms:${phone}&body=${encodeURIComponent(message)}` : `sms:${phone}?body=${encodeURIComponent(message)}`;
+        await Linking.openURL(smsUrl);
+        await markAppointmentRequestSent(userId, requestId);
+      } else {
+        await Share.share({ message: `${selected.name}\n${message}` });
+      }
+      setAppointmentOpen(false);
+      setAppointmentTime('');
+      setAppointmentNote('');
+    } catch {
+      setError('Randevu talebi hazırlanamadı.');
+    } finally {
+      setActionBusy(false);
+    }
   };
 
   const applyCategory = (next: NearbyCategory) => {
@@ -122,57 +189,36 @@ export function NearMeScreen() {
       <Text style={styles.title}>Yakınınızdaki bakım noktaları</Text>
       <Text style={styles.sub}>Veterinerleri ve petshopları konumunuza göre bulun. Acil mod, şu anda açık görünen veterinerleri öne çıkarır.</Text>
 
-      <View style={styles.filters}>
-        {(['all', 'veterinary', 'petshop'] as NearbyCategory[]).map(item => {
-          const label = item === 'all' ? 'Tümü' : item === 'veterinary' ? 'Veteriner' : 'Petshop';
-          const active = category === item && !emergencyOnly;
-          return <Pressable key={item} onPress={() => applyCategory(item)} style={[styles.chip, active && styles.chipActive]}><Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text></Pressable>;
-        })}
-      </View>
+      <View style={styles.filters}>{(['all', 'veterinary', 'petshop'] as NearbyCategory[]).map(item => { const label = item === 'all' ? 'Tümü' : item === 'veterinary' ? 'Veteriner' : 'Petshop'; const active = category === item && !emergencyOnly; return <Pressable key={item} onPress={() => applyCategory(item)} style={[styles.chip, active && styles.chipActive]}><Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text></Pressable>; })}</View>
 
       <Pressable accessibilityRole="button" onPress={activateEmergency} style={[styles.emergencyButton, emergencyOnly && styles.emergencyButtonActive]}>
         <Text style={styles.emergencyTitle}>⚕ ACİL · ŞU AN AÇIK VETERİNER</Text>
         <Text style={styles.emergencyText}>25 km içinde açık görünen klinikleri ara</Text>
       </Pressable>
 
-      <View style={styles.actionRow}>
-        <Pressable onPress={() => void runSearch(location, { category, emergencyOnly })} style={styles.refreshButton}><Text style={styles.refreshText}>↻ Yenile</Text></Pressable>
-        <Text style={styles.locationNote}>{location ? 'Konumunuz kullanılıyor' : 'Konum bekleniyor'}</Text>
-      </View>
-
+      <View style={styles.actionRow}><Pressable onPress={() => void runSearch(location, { category, emergencyOnly })} style={styles.refreshButton}><Text style={styles.refreshText}>↻ Yenile</Text></Pressable><Text style={styles.locationNote}>{location ? 'Konumunuz kullanılıyor' : 'Konum bekleniyor'}</Text></View>
       {loading ? <ActivityIndicator color={colors.primary} size="large" style={styles.loader} /> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      {location ? <EmbeddedMap location={location} onSelect={place => setSelectedId(place.id)} places={places} /> : null}
+      {location ? <EmbeddedMap location={location} onSelect={place => { setSelectedId(place.id); setAppointmentOpen(false); }} places={places} /> : null}
 
       {selected ? (
         <View style={styles.selectedCard}>
-          <Text style={styles.selectedKind}>{selected.kind === 'veterinary' ? 'VETERİNER' : 'PETSHOP'}</Text>
-          <Text style={styles.selectedName}>{selected.name}</Text>
+          <View style={styles.cardHeader}><View style={{ flex: 1 }}><Text style={styles.selectedKind}>{selected.kind === 'veterinary' ? 'VETERİNER' : 'PETSHOP'}</Text><Text style={styles.selectedName}>{selected.name}</Text></View><Pressable disabled={!userId || actionBusy} onPress={() => void toggleFavorite()} style={styles.favoriteButton}><Text style={styles.favoriteText}>{selectedFavorite ? '★' : '☆'}</Text></Pressable></View>
           <Text style={styles.address}>{selected.address}</Text>
-          <View style={styles.metaRow}>
-            {selected.distanceMeters != null ? <Text style={styles.meta}>{distanceLabel(selected.distanceMeters)}</Text> : null}
-            {selected.rating != null ? <Text style={styles.meta}>★ {selected.rating.toFixed(1)}{selected.ratingCount ? ` (${selected.ratingCount})` : ''}</Text> : null}
-            <Text style={[styles.meta, selected.openNow === true ? styles.open : selected.openNow === false ? styles.closed : null]}>{selected.openNow === true ? 'Açık' : selected.openNow === false ? 'Kapalı' : 'Saat bilgisi yok'}</Text>
-          </View>
-          <View style={styles.cardActions}>
-            <Pressable onPress={() => void openDirections(selected)} style={styles.primaryAction}><Text style={styles.primaryActionText}>Yol tarifi</Text></Pressable>
-            <Pressable disabled={!selected.phone} onPress={() => void callPlace(selected)} style={[styles.secondaryAction, !selected.phone && styles.disabled]}><Text style={styles.secondaryActionText}>Ara</Text></Pressable>
-          </View>
+          <View style={styles.metaRow}>{selected.distanceMeters != null ? <Text style={styles.meta}>{distanceLabel(selected.distanceMeters)}</Text> : null}{selected.rating != null ? <Text style={styles.meta}>★ {selected.rating.toFixed(1)}{selected.ratingCount ? ` (${selected.ratingCount})` : ''}</Text> : null}<Text style={[styles.meta, selected.openNow === true ? styles.open : selected.openNow === false ? styles.closed : null]}>{selected.openNow === true ? 'Açık' : selected.openNow === false ? 'Kapalı' : 'Saat bilgisi yok'}</Text></View>
+          <View style={styles.cardActions}><Pressable onPress={() => void openDirections(selected)} style={styles.primaryAction}><Text style={styles.primaryActionText}>Yol tarifi</Text></Pressable><Pressable disabled={!selected.phone} onPress={() => void callPlace(selected)} style={[styles.secondaryAction, !selected.phone && styles.disabled]}><Text style={styles.secondaryActionText}>{emergencyOnly ? '⚡ Acil ara' : 'Ara'}</Text></Pressable></View>
+
+          {selected.kind === 'veterinary' ? <>
+            {pets.length > 0 ? <View style={styles.petRow}>{pets.map(pet => <Pressable key={pet.id} onPress={() => setSelectedPetId(pet.id)} style={[styles.petChip, selectedPet?.id === pet.id && styles.petChipActive]}><Text style={[styles.petChipText, selectedPet?.id === pet.id && styles.petChipTextActive]}>{pet.name}</Text></Pressable>)}</View> : null}
+            <View style={styles.cardActions}><Pressable disabled={actionBusy || !selectedPet} onPress={() => void sharePassport()} style={styles.secondaryAction}><Text style={styles.secondaryActionText}>Health Passport gönder</Text></Pressable><Pressable disabled={actionBusy || !userId} onPress={() => setAppointmentOpen(value => !value)} style={styles.secondaryAction}><Text style={styles.secondaryActionText}>Randevu iste</Text></Pressable></View>
+            {appointmentOpen ? <View style={styles.appointmentBox}><Text style={styles.appointmentTitle}>Randevu talebi</Text><TextInput value={appointmentTime} onChangeText={setAppointmentTime} placeholder="Tercih edilen zaman (örn. yarın 14:00)" placeholderTextColor={colors.muted} style={styles.input} /><TextInput multiline value={appointmentNote} onChangeText={setAppointmentNote} placeholder="Kısa not (isteğe bağlı)" placeholderTextColor={colors.muted} style={[styles.input, styles.noteInput]} /><Pressable disabled={actionBusy} onPress={() => void sendAppointmentRequest()} style={styles.primaryAction}>{actionBusy ? <ActivityIndicator color={colors.white} /> : <Text style={styles.primaryActionText}>Talebi hazırla ve gönder</Text>}</Pressable></View> : null}
+          </> : null}
         </View>
       ) : null}
 
+      {favoriteIds.length > 0 ? <Text style={styles.favoriteInfo}>★ {favoriteIds.length} favori bakım noktası kayıtlı</Text> : null}
       <Text style={styles.section}>Yakındaki yerler</Text>
-      {places.map(place => (
-        <Pressable key={place.id} onPress={() => setSelectedId(place.id)} style={[styles.placeCard, selectedId === place.id && styles.placeCardSelected]}>
-          <View style={styles.placeIcon}><Text>{place.kind === 'veterinary' ? '⚕' : '🛍'}</Text></View>
-          <View style={styles.placeCopy}>
-            <Text numberOfLines={1} style={styles.placeName}>{place.name}</Text>
-            <Text numberOfLines={1} style={styles.placeAddress}>{place.address}</Text>
-            <Text style={styles.placeMeta}>{distanceLabel(place.distanceMeters)}{place.rating != null ? ` · ★ ${place.rating.toFixed(1)}` : ''} · {place.openNow === true ? 'Açık' : place.openNow === false ? 'Kapalı' : 'Saat bilinmiyor'}</Text>
-          </View>
-          <Text style={styles.chevron}>›</Text>
-        </Pressable>
-      ))}
+      {places.map(place => <Pressable key={place.id} onPress={() => { setSelectedId(place.id); setAppointmentOpen(false); }} style={[styles.placeCard, selectedId === place.id && styles.placeCardSelected]}><View style={styles.placeIcon}><Text>{place.kind === 'veterinary' ? '⚕' : '🛍'}</Text></View><View style={styles.placeCopy}><Text numberOfLines={1} style={styles.placeName}>{favoriteIds.includes(place.id) ? '★ ' : ''}{place.name}</Text><Text numberOfLines={1} style={styles.placeAddress}>{place.address}</Text><Text style={styles.placeMeta}>{distanceLabel(place.distanceMeters)}{place.rating != null ? ` · ★ ${place.rating.toFixed(1)}` : ''} · {place.openNow === true ? 'Açık' : place.openNow === false ? 'Kapalı' : 'Saat bilinmiyor'}</Text></View><Text style={styles.chevron}>›</Text></Pressable>)}
 
       <View style={styles.safetyCard}><Text style={styles.safetyTitle}>Acil durumda saat bilgisini doğrulayın</Text><Text style={styles.safetyText}>Haritadaki “açık” bilgisi işletmenin yayınladığı çalışma saatlerine dayanır ve güncel olmayabilir. Yola çıkmadan önce kliniği arayın.</Text></View>
     </View>
@@ -185,8 +231,10 @@ const styles = StyleSheet.create({
   emergencyButton: { backgroundColor: '#FFF2F0', borderColor: '#F0C0BB', borderRadius: 18, borderWidth: 1, marginTop: 13, padding: 15 }, emergencyButtonActive: { backgroundColor: '#FCE5E2', borderColor: '#C7524C' }, emergencyTitle: { color: '#A63D38', fontSize: 14, fontWeight: '900' }, emergencyText: { color: '#895B57', fontSize: 12, marginTop: 4 },
   actionRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }, refreshButton: { backgroundColor: colors.primarySoft, borderRadius: 12, paddingHorizontal: 13, paddingVertical: 9 }, refreshText: { color: colors.primaryDark, fontWeight: '800' }, locationNote: { color: colors.muted, fontSize: 11 }, loader: { marginVertical: 18 }, error: { color: colors.danger, lineHeight: 19, marginVertical: 10 },
   map: { borderRadius: 20, height: 300, marginTop: 15, overflow: 'hidden', width: '100%' }, mapFallback: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 20, height: 210, justifyContent: 'center', marginTop: 15, padding: 24 }, mapFallbackTitle: { color: colors.primaryDark, fontSize: 16, fontWeight: '900', textAlign: 'center' }, mapFallbackText: { color: colors.muted, lineHeight: 19, marginTop: 7, textAlign: 'center' },
-  selectedCard: { ...shadow, backgroundColor: colors.surface, borderRadius: 20, marginTop: 14, padding: 17 }, selectedKind: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }, selectedName: { color: colors.text, fontSize: 19, fontWeight: '900', marginTop: 4 }, address: { color: colors.muted, lineHeight: 18, marginTop: 5 }, metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 10 }, meta: { color: colors.muted, fontSize: 12, fontWeight: '700' }, open: { color: colors.primary }, closed: { color: colors.danger },
-  cardActions: { flexDirection: 'row', gap: 9, marginTop: 14 }, primaryAction: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 13, flex: 1, paddingVertical: 12 }, primaryActionText: { color: colors.white, fontWeight: '900' }, secondaryAction: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 13, flex: 1, paddingVertical: 12 }, secondaryActionText: { color: colors.primaryDark, fontWeight: '900' }, disabled: { opacity: 0.45 },
-  section: { color: colors.text, fontSize: 19, fontWeight: '900', marginBottom: 11, marginTop: 24 }, placeCard: { alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 16, borderWidth: 1, flexDirection: 'row', marginBottom: 9, padding: 12 }, placeCardSelected: { borderColor: colors.primary }, placeIcon: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 12, height: 40, justifyContent: 'center', width: 40 }, placeCopy: { flex: 1, marginLeft: 11, minWidth: 0 }, placeName: { color: colors.text, fontWeight: '900' }, placeAddress: { color: colors.muted, fontSize: 11, marginTop: 3 }, placeMeta: { color: colors.primaryDark, fontSize: 11, fontWeight: '700', marginTop: 5 }, chevron: { color: colors.muted, fontSize: 26, marginLeft: 6 },
+  selectedCard: { ...shadow, backgroundColor: colors.surface, borderRadius: 20, marginTop: 14, padding: 17 }, cardHeader: { alignItems: 'center', flexDirection: 'row', gap: 12 }, favoriteButton: { alignItems: 'center', backgroundColor: '#FFF8E8', borderRadius: 22, height: 44, justifyContent: 'center', width: 44 }, favoriteText: { color: '#9A6B00', fontSize: 24 }, selectedKind: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }, selectedName: { color: colors.text, fontSize: 19, fontWeight: '900', marginTop: 4 }, address: { color: colors.muted, lineHeight: 18, marginTop: 5 }, metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 10 }, meta: { color: colors.muted, fontSize: 12, fontWeight: '700' }, open: { color: colors.primary }, closed: { color: colors.danger },
+  cardActions: { flexDirection: 'row', gap: 9, marginTop: 14 }, primaryAction: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 13, flex: 1, justifyContent: 'center', minHeight: 44, paddingHorizontal: 12, paddingVertical: 12 }, primaryActionText: { color: colors.white, fontWeight: '900', textAlign: 'center' }, secondaryAction: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 13, flex: 1, justifyContent: 'center', minHeight: 44, paddingHorizontal: 10, paddingVertical: 12 }, secondaryActionText: { color: colors.primaryDark, fontSize: 12, fontWeight: '900', textAlign: 'center' }, disabled: { opacity: 0.45 },
+  petRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 14 }, petChip: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 11, paddingVertical: 7 }, petChipActive: { backgroundColor: colors.primary }, petChipText: { color: colors.text, fontSize: 12, fontWeight: '800' }, petChipTextActive: { color: colors.white },
+  appointmentBox: { backgroundColor: colors.background, borderRadius: 15, marginTop: 12, padding: 12 }, appointmentTitle: { color: colors.text, fontWeight: '900', marginBottom: 8 }, input: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 12, borderWidth: 1, color: colors.text, fontSize: 16, marginBottom: 8, minHeight: 46, paddingHorizontal: 12 }, noteInput: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' },
+  favoriteInfo: { color: '#8A6500', fontSize: 12, fontWeight: '800', marginTop: 14 }, section: { color: colors.text, fontSize: 19, fontWeight: '900', marginBottom: 11, marginTop: 24 }, placeCard: { alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 16, borderWidth: 1, flexDirection: 'row', marginBottom: 9, padding: 12 }, placeCardSelected: { borderColor: colors.primary }, placeIcon: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 12, height: 40, justifyContent: 'center', width: 40 }, placeCopy: { flex: 1, marginLeft: 11, minWidth: 0 }, placeName: { color: colors.text, fontWeight: '900' }, placeAddress: { color: colors.muted, fontSize: 11, marginTop: 3 }, placeMeta: { color: colors.primaryDark, fontSize: 11, fontWeight: '700', marginTop: 5 }, chevron: { color: colors.muted, fontSize: 26, marginLeft: 6 },
   safetyCard: { backgroundColor: '#FFF8E8', borderRadius: 17, marginTop: 12, padding: 15 }, safetyTitle: { color: '#7A5A16', fontWeight: '900' }, safetyText: { color: colors.muted, lineHeight: 18, marginTop: 5 },
 });
