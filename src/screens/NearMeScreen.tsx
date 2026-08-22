@@ -33,7 +33,7 @@ function EmbeddedMap({ location, places, onSelect }: { location: Coordinates; pl
       return <GoogleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(event: any) => { const place = places.find(item => item.id === event?.id); if (place) onSelect(place); }} style={styles.map} />;
     }
   } catch {
-    // Expo Go does not ship expo-maps. Search/list remains usable there.
+    // expo-maps is not available inside Expo Go; list/directions still work.
   }
   return <View style={styles.mapFallback}><Text style={styles.mapFallbackTitle}>Harita development build ile açılır</Text><Text style={styles.mapFallbackText}>Yakındaki yerler ve yol tarifi listeden kullanılabilir.</Text></View>;
 }
@@ -61,7 +61,7 @@ export function NearMeScreen() {
   }, []);
 
   const runSearch = useCallback(async (coords: Coordinates | null | undefined, mode: SearchMode) => {
-    const target = coords ?? location ?? await requestLocation();
+    const target = coords ?? await requestLocation();
     if (!target) return;
     setLoading(true);
     setError(null);
@@ -79,15 +79,18 @@ export function NearMeScreen() {
         setError('25 km içinde şu an açık olduğu doğrulanan veteriner bulunamadı. Acil durumda daha geniş bölgede arama yapın veya bilinen kliniğinizi arayın.');
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Yakındaki yerler yüklenemedi.';
-      setError(message.includes('configured') ? 'Yakındaki yer servisi hazır; Google Places anahtarı eklendiğinde canlı sonuçlar açılacak.' : message);
+      setError(err instanceof Error ? err.message : 'Yakındaki yerler yüklenemedi.');
     } finally {
       setLoading(false);
     }
-  }, [location, requestLocation]);
+  }, [requestLocation]);
 
   useEffect(() => {
-    requestLocation().then(coords => { if (coords) void runSearch(coords, { category: 'all', emergencyOnly: false }); });
+    let active = true;
+    requestLocation().then(coords => {
+      if (active && coords) void runSearch(coords, { category: 'all', emergencyOnly: false });
+    });
+    return () => { active = false; };
   }, [requestLocation, runSearch]);
 
   const selected = useMemo(() => places.find(place => place.id === selectedId) ?? null, [places, selectedId]);
