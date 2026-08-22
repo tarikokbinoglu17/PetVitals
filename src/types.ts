@@ -30,11 +30,13 @@ export type SavePetResult = {
   message?: string;
 };
 
+export type HealthRecordCategory = 'Aşı' | 'Kontrol' | 'İlaç' | 'Tedavi' | 'Alerji' | 'Laboratuvar' | 'Operasyon';
+
 export type HealthRecord = {
   id: string;
   petId: string;
   title: string;
-  category: 'Aşı' | 'Kontrol' | 'İlaç';
+  category: HealthRecordCategory;
   date: string;
   notes?: string;
   vaccineType?: string;
@@ -46,6 +48,45 @@ export type HealthRecord = {
   notificationEnabled?: boolean;
   notificationStatus?: VaccineNotificationStatus;
   notificationIds?: string[];
+};
+
+export type WeightEntry = {
+  id: string;
+  petId: string;
+  weight: number;
+  measuredAt: string;
+  notes?: string;
+};
+
+export type PetMemberRole = 'caregiver' | 'veterinarian' | 'viewer';
+
+export type PetShare = {
+  id: string;
+  petId: string;
+  role: PetMemberRole;
+  displayName?: string;
+  expiresAt?: string;
+  canEdit: boolean;
+  revokedAt?: string;
+};
+
+export type PassportShare = {
+  id: string;
+  petId: string;
+  token: string;
+  expiresAt?: string;
+  lostMode: boolean;
+  includeVaccines: boolean;
+  includeAllergies: boolean;
+  includeMedications: boolean;
+  includeOwnerContact: boolean;
+};
+
+export type ProEntitlement = {
+  plan: 'free' | 'pro';
+  provider?: string;
+  productId?: string;
+  expiresAt?: string;
 };
 
 export type VaccineNotificationStatus =
@@ -74,4 +115,4 @@ export type SaveVaccineResult = {
   message?: string;
 };
 
-export type TabName = 'home' | 'pets' | 'health' | 'profile';
+export type TabName = 'home' | 'pets' | 'health' | 'nearby' | 'platform' | 'profile';
