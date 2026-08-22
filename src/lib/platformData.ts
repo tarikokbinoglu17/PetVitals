@@ -8,8 +8,22 @@ export type ActivePassport = {
   expiresAt?: string;
 };
 
+export type PetLifeEntryType = 'food' | 'water' | 'activity' | 'sleep' | 'grooming' | 'parasite' | 'mood' | 'custom';
+
+export type PetLifeEntry = {
+  id: string;
+  petId: string;
+  entryType: PetLifeEntryType;
+  valueNumeric?: number;
+  valueText?: string;
+  unit?: string;
+  occurredAt: string;
+  notes?: string;
+};
+
 export type PlatformSnapshot = {
   weights: WeightEntry[];
+  lifeEntries: PetLifeEntry[];
   memberCount: number;
   activePassportCount: number;
   passports: ActivePassport[];
@@ -20,22 +34,22 @@ const freeEntitlement: ProEntitlement = { plan: 'free' };
 
 function client() {
   if (!supabase) throw new Error('Supabase yapılandırılmamış.');
-  // Generated database types are refreshed separately; keep this module isolated meanwhile.
   return supabase as any;
 }
 
 export async function loadPlatformSnapshot(userId: string, petId: string): Promise<PlatformSnapshot> {
-  if (!supabase) return { weights: [], memberCount: 0, activePassportCount: 0, passports: [], pro: freeEntitlement };
+  if (!supabase) return { weights: [], lifeEntries: [], memberCount: 0, activePassportCount: 0, passports: [], pro: freeEntitlement };
   const db = client();
 
-  const [weightsResult, membersResult, passportResult, entitlementResult] = await Promise.all([
+  const [weightsResult, lifeResult, membersResult, passportResult, entitlementResult] = await Promise.all([
     db.from('weight_entries').select('id,pet_id,weight,measured_at,notes').eq('owner_id', userId).eq('pet_id', petId).order('measured_at', { ascending: true }),
+    db.from('pet_life_entries').select('id,pet_id,entry_type,value_numeric,value_text,unit,occurred_at,notes').eq('owner_id', userId).eq('pet_id', petId).order('occurred_at', { ascending: false }).limit(30),
     db.from('pet_members').select('id', { count: 'exact', head: true }).eq('owner_id', userId).eq('pet_id', petId).is('revoked_at', null),
     db.from('passport_shares').select('id,lost_mode,created_at,expires_at').eq('owner_id', userId).eq('pet_id', petId).is('revoked_at', null).order('created_at', { ascending: false }),
     db.from('pro_entitlements').select('plan,provider,product_id,expires_at').eq('user_id', userId).maybeSingle(),
   ]);
 
-  const firstError = weightsResult.error ?? membersResult.error ?? passportResult.error ?? entitlementResult.error;
+  const firstError = weightsResult.error ?? lifeResult.error ?? membersResult.error ?? passportResult.error ?? entitlementResult.error;
   if (firstError) throw firstError;
 
   const passports: ActivePassport[] = (passportResult.data ?? []).map((row: any) => ({
@@ -51,6 +65,16 @@ export async function loadPlatformSnapshot(userId: string, petId: string): Promi
       petId: row.pet_id,
       weight: Number(row.weight),
       measuredAt: row.measured_at,
+      notes: row.notes ?? undefined,
+    })),
+    lifeEntries: (lifeResult.data ?? []).map((row: any) => ({
+      id: row.id,
+      petId: row.pet_id,
+      entryType: row.entry_type,
+      valueNumeric: row.value_numeric == null ? undefined : Number(row.value_numeric),
+      valueText: row.value_text ?? undefined,
+      unit: row.unit ?? undefined,
+      occurredAt: row.occurred_at,
       notes: row.notes ?? undefined,
     })),
     memberCount: membersResult.count ?? 0,
@@ -73,6 +97,30 @@ export async function addWeightEntry(userId: string, petId: string, weight: numb
     weight,
     measured_at: measuredAt || new Date().toISOString().slice(0, 10),
     notes: notes?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export async function addLifeEntry(userId: string, petId: string, input: {
+  entryType: PetLifeEntryType;
+  valueNumeric?: number;
+  valueText?: string;
+  unit?: string;
+  notes?: string;
+}) {
+  const hasNumeric = Number.isFinite(input.valueNumeric);
+  const text = input.valueText?.trim();
+  const notes = input.notes?.trim();
+  if (!hasNumeric && !text && !notes) throw new Error('En az bir değer veya not girin.');
+
+  const { error } = await client().from('pet_life_entries').insert({
+    owner_id: userId,
+    pet_id: petId,
+    entry_type: input.entryType,
+    value_numeric: hasNumeric ? input.valueNumeric : null,
+    value_text: text || null,
+    unit: input.unit?.trim() || null,
+    notes: notes || null,
   });
   if (error) throw error;
 }
