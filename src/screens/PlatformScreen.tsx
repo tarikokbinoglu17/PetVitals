@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AIAssistantPanel } from '../components/AIAssistantPanel';
+import { DocumentScannerPanel } from '../components/DocumentScannerPanel';
 import { ProPaywall } from '../components/ProPaywall';
 import { calculateHealthScore } from '../lib/healthScore';
 import { loadPlatformSnapshot, type PlatformSnapshot } from '../lib/platformData';
@@ -39,6 +41,8 @@ const emptySnapshot: PlatformSnapshot = {
   pro: { plan: 'free' },
 };
 
+type ToolPanel = 'assistant' | 'scanner' | null;
+
 export function PlatformScreen({
   pets,
   records,
@@ -55,6 +59,7 @@ export function PlatformScreen({
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [toolPanel, setToolPanel] = useState<ToolPanel>(null);
   const selectedPet = pets.find(pet => pet.id === selectedPetId) ?? pets[0];
   const score = useMemo(
     () => selectedPet ? calculateHealthScore(selectedPet, records, snapshot.weights) : null,
@@ -63,6 +68,7 @@ export function PlatformScreen({
 
   useEffect(() => {
     let active = true;
+    setToolPanel(null);
     if (!selectedPet || !userId || demoMode) {
       setSnapshot(emptySnapshot);
       setLoadError(null);
@@ -94,6 +100,15 @@ export function PlatformScreen({
     : lastWeight ? `${lastWeight.weight.toFixed(1)} kg` : 'Henüz kilo geçmişi yok';
   const proActive = snapshot.pro.plan === 'pro';
 
+  const openProTool = (panel: Exclude<ToolPanel, null>) => {
+    if (!proActive) {
+      setShowPaywall(true);
+      return;
+    }
+    setShowPaywall(false);
+    setToolPanel(panel);
+  };
+
   return (
     <View style={styles.page}>
       <Text style={styles.eyebrow}>PETVITALS PLATFORM</Text>
@@ -123,10 +138,12 @@ export function PlatformScreen({
       {loadError ? <Text style={styles.error}>{loadError}</Text> : null}
 
       {showPaywall ? <ProPaywall active={proActive} onClose={() => setShowPaywall(false)} /> : null}
+      {selectedPet && toolPanel === 'assistant' ? <AIAssistantPanel pet={selectedPet} onClose={() => setToolPanel(null)} /> : null}
+      {selectedPet && toolPanel === 'scanner' ? <DocumentScannerPanel pet={selectedPet} onClose={() => setToolPanel(null)} /> : null}
 
       <Text style={styles.section}>Akıllı araçlar</Text>
-      <FeatureCard icon="✦" title="AI Health Assistant" text="Kayıtları özetler, veteriner ziyaretine hazırlanmanıza yardım eder. Tanı koymaz." badge="PRO" status={proActive ? 'Pro erişimi aktif' : 'Pro ile açılır'} onPress={() => !proActive && setShowPaywall(true)} />
-      <FeatureCard icon="▣" title="Belge Tarama" text="Aşı karnesi ve veteriner belgelerinden alanları çıkarıp onayınıza sunar." badge="AI" status={proActive ? 'Kullanıma hazır' : 'Pro ile açılır'} onPress={() => !proActive && setShowPaywall(true)} />
+      <FeatureCard icon="✦" title="AI Health Assistant" text="Kayıtları özetler, veteriner ziyaretine hazırlanmanıza yardım eder. Tanı koymaz." badge="PRO" status={proActive ? 'Pro erişimi aktif' : 'Pro ile açılır'} onPress={() => openProTool('assistant')} />
+      <FeatureCard icon="▣" title="Belge Tarama" text="Aşı karnesi ve veteriner belgelerinden alanları çıkarıp onayınıza sunar." badge="AI" status={proActive ? 'Kullanıma hazır' : 'Pro ile açılır'} onPress={() => openProTool('scanner')} />
       <FeatureCard icon="⌁" title="QR Health Passport" text="Aşı, alerji ve ilaçları süreli ve iptal edilebilir erişimle paylaşın." status={`${snapshot.activePassportCount} aktif paylaşım`} />
       <FeatureCard icon="👥" title="Aile & Bakıcı Paylaşımı" text="Aynı dostu aile veya bakıcılarla birlikte yönetin." status={`${snapshot.memberCount} aktif erişim`} />
       <FeatureCard icon="⚕" title="Veteriner Modu" text="Veterinere yalnızca seçtiğiniz bilgiler için süreli erişim verin." />
@@ -136,7 +153,7 @@ export function PlatformScreen({
 
       <View style={styles.privacyCard}>
         <Text style={styles.privacyTitle}>Privacy by design</Text>
-        <Text style={styles.privacyText}>Paylaşımlar iptal edilebilir ve süreli tasarlanır. AI özellikleri özel sağlık verisini cihaz içine gizli anahtar koyarak işlemez.</Text>
+        <Text style={styles.privacyText}>AI istekleri kimliği doğrulanmış sunucu fonksiyonundan yapılır. Gizli AI anahtarları mobil uygulamada tutulmaz ve belge sonuçları siz onaylamadan sağlık kaydına dönüşmez.</Text>
       </View>
     </View>
   );
