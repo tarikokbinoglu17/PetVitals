@@ -43,7 +43,9 @@ export function calculateHealthScore(
     reasons.push('No recent wellness check recorded');
   }
 
-  const petWeights = weights.filter(entry => entry.petId === pet.id).sort((a, b) => a.date.localeCompare(b.date));
+  const petWeights = weights
+    .filter(entry => entry.petId === pet.id)
+    .sort((a, b) => a.measuredAt.localeCompare(b.measuredAt));
   if (petWeights.length < 2) {
     score -= 5;
     reasons.push('Add regular weight checks');
