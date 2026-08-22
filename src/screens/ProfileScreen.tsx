@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
 import { deleteCurrentAccount, exportUserData } from '../lib/privacy';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { colors } from '../theme';
+
+const PRIVACY_URL = 'https://html-preview.github.io/?url=https://github.com/tarikokbinoglu17/PetVitals/blob/main/privacy.html';
+const DELETE_URL = 'https://html-preview.github.io/?url=https://github.com/tarikokbinoglu17/PetVitals/blob/main/account-deletion.html';
+const SUPPORT_URL = 'https://html-preview.github.io/?url=https://github.com/tarikokbinoglu17/PetVitals/blob/main/support.html';
 
 export function ProfileScreen() {
   const { user, demoMode, signOut } = useAuth();
@@ -74,9 +78,10 @@ export function ProfileScreen() {
 
       <View style={styles.menu}>
         <Text style={styles.menuText}>🔔  Bildirim tercihleri</Text>
-        <Text style={styles.menuText}>🔒  Gizlilik ve güvenlik</Text>
+        <Pressable onPress={() => void Linking.openURL(PRIVACY_URL)}><Text style={styles.menuText}>🔒  Gizlilik Politikası</Text></Pressable>
+        <Pressable onPress={() => void Linking.openURL(DELETE_URL)}><Text style={styles.menuText}>🗑️  Hesap ve Veri Silme</Text></Pressable>
         <Text style={styles.menuText}>🌍  Dil ve ölçü birimleri</Text>
-        <Text style={styles.menuText}>❓  Yardım ve destek</Text>
+        <Pressable onPress={() => void Linking.openURL(SUPPORT_URL)}><Text style={styles.menuText}>❓  Yardım ve destek</Text></Pressable>
       </View>
 
       <View style={styles.privacyBox}>
