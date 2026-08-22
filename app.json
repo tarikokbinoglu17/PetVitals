@@ -6,16 +6,26 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "petvitals",
-    "experiments": {
-      "baseUrl": "/PetVitals"
+    "runtimeVersion": {
+      "policy": "appVersion"
     },
     "ios": {
+      "bundleIdentifier": "com.tarikokbinoglu.petvitals",
+      "buildNumber": "1",
       "supportsTablet": true,
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.tarikokbinoglu.petvitals",
+      "versionCode": 1,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.SCHEDULE_EXACT_ALARM"
+      ]
     },
     "plugins": [
       "expo-apple-authentication",
