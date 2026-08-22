@@ -6,6 +6,9 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "petvitals",
+    "experiments": {
+      "baseUrl": "/PetVitals"
+    },
     "ios": {
       "supportsTablet": true,
       "usesAppleSignIn": true
