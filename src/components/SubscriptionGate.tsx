@@ -1,84 +1,24 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { billingPlans, getBillingSetupMessage, revenueCatConfigured } from '../lib/billing';
+import { revenueCatConfigured } from '../lib/billing';
 import { colors, shadow } from '../theme';
+import { usePreferences } from '../context/PreferencesContext';
+
+const copy = {
+  tr:{title:'7 günlük ücretsiz denemeniz sona erdi.',sub:"Dostunuzun sağlık geçmişine, hatırlatmalarına, AI araçlarına ve PetVitals'ın tüm özelliklerine devam etmek için Premium'u etkinleştirin.",benefits:['Tüm evcil hayvanlar ve sağlık kayıtları','Aşı ve ilaç hatırlatmaları','AI Health Assistant ve belge tarama','Health Passport, paylaşım ve sağlık trendleri','Yakındaki veterinerler ve PetVitals Life'],annual:'Yıllık Premium',monthly:'Aylık Premium',annualSub:'En avantajlı plan',monthlySub:'Esnek aylık abonelik',recommended:'ÖNERİLEN',continue:'Premium’a devam et',pending:'Ödeme kurulumu bekleniyor',restore:'Satın alımları geri yükle',setup:'Mağaza ürünleri bağlandığında gerçek satın alma açılır.',legal:'Abonelik otomatik yenilenir ve mağaza hesabınızdan yönetilir. Yerel fiyat ve yenileme koşulları satın alma ekranında gösterilir.'},
+  en:{title:'Your 7-day free trial has ended.',sub:'Activate Premium to keep access to health history, reminders, AI tools and all PetVitals features.',benefits:['All pets and health records','Vaccine and medication reminders','AI Health Assistant and document scanning','Health Passport, sharing and health trends','Nearby veterinarians and PetVitals Life'],annual:'Annual Premium',monthly:'Monthly Premium',annualSub:'Best value',monthlySub:'Flexible monthly subscription',recommended:'RECOMMENDED',continue:'Continue with Premium',pending:'Payment setup pending',restore:'Restore purchases',setup:'Real purchases will be enabled when store products are connected.',legal:'Subscription renews automatically and is managed through your store account. Local pricing and renewal terms are shown before purchase.'},
+  de:{title:'Ihre 7-tägige kostenlose Testphase ist beendet.',sub:'Aktivieren Sie Premium, um Gesundheitsdaten, Erinnerungen, AI-Tools und alle PetVitals-Funktionen weiter zu nutzen.',benefits:['Alle Tiere und Gesundheitsdaten','Impf- und Medikamentenerinnerungen','AI Health Assistant und Dokumentenscan','Health Passport, Freigabe und Gesundheitstrends','Tierärzte in der Nähe und PetVitals Life'],annual:'Premium jährlich',monthly:'Premium monatlich',annualSub:'Bestes Angebot',monthlySub:'Flexible monatliche Mitgliedschaft',recommended:'EMPFOHLEN',continue:'Mit Premium fortfahren',pending:'Zahlungseinrichtung ausstehend',restore:'Käufe wiederherstellen',setup:'Echte Käufe werden aktiviert, sobald die Store-Produkte verbunden sind.',legal:'Das Abonnement verlängert sich automatisch und wird über Ihr Store-Konto verwaltet. Lokale Preise und Verlängerungsbedingungen werden vor dem Kauf angezeigt.'},
+  es:{title:'Tu prueba gratuita de 7 días ha terminado.',sub:'Activa Premium para seguir accediendo al historial de salud, recordatorios, herramientas de IA y todas las funciones de PetVitals.',benefits:['Todas las mascotas y registros de salud','Recordatorios de vacunas y medicamentos','AI Health Assistant y escaneo de documentos','Health Passport, uso compartido y tendencias de salud','Veterinarios cercanos y PetVitals Life'],annual:'Premium anual',monthly:'Premium mensual',annualSub:'Mejor opción',monthlySub:'Suscripción mensual flexible',recommended:'RECOMENDADO',continue:'Continuar con Premium',pending:'Configuración de pago pendiente',restore:'Restaurar compras',setup:'Las compras reales se habilitarán cuando se conecten los productos de la tienda.',legal:'La suscripción se renueva automáticamente y se gestiona desde tu cuenta de la tienda. Los precios locales y las condiciones de renovación se muestran antes de comprar.'},
+} as const;
 
 export function SubscriptionGate() {
-  const [selectedPlan, setSelectedPlan] = useState<'annual' | 'monthly'>('annual');
-
-  return (
-    <View style={styles.page}>
-      <View style={styles.card}>
-        <Text style={styles.eyebrow}>PETVITALS PREMIUM</Text>
-        <Text style={styles.title}>7 günlük ücretsiz denemeniz sona erdi.</Text>
-        <Text style={styles.sub}>Dostunuzun sağlık geçmişine, hatırlatmalarına, AI araçlarına ve PetVitals'ın tüm özelliklerine devam etmek için Premium'u etkinleştirin.</Text>
-
-        <View style={styles.benefits}>
-          <Text style={styles.benefit}>✓ Tüm evcil hayvanlar ve sağlık kayıtları</Text>
-          <Text style={styles.benefit}>✓ Aşı ve ilaç hatırlatmaları</Text>
-          <Text style={styles.benefit}>✓ AI Health Assistant ve belge tarama</Text>
-          <Text style={styles.benefit}>✓ Health Passport, paylaşım ve sağlık trendleri</Text>
-          <Text style={styles.benefit}>✓ Yakındaki veterinerler ve PetVitals Life</Text>
-        </View>
-
-        {billingPlans.map(plan => {
-          const selected = selectedPlan === plan.id;
-          return (
-            <Pressable
-              accessibilityRole="radio"
-              accessibilityState={{ checked: selected }}
-              key={plan.id}
-              onPress={() => setSelectedPlan(plan.id)}
-              style={[styles.plan, selected && styles.planSelected]}
-            >
-              <View style={styles.radio}>{selected ? <View style={styles.radioInner} /> : null}</View>
-              <View style={{ flex: 1 }}>
-                <View style={styles.row}>
-                  <Text style={styles.planTitle}>{plan.id === 'annual' ? 'Yıllık Premium' : 'Aylık Premium'}</Text>
-                  {plan.badge ? <Text style={styles.badge}>{plan.badge}</Text> : null}
-                </View>
-                <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
-              </View>
-            </Pressable>
-          );
-        })}
-
-        <Pressable accessibilityRole="button" disabled={!revenueCatConfigured} style={[styles.cta, !revenueCatConfigured && styles.disabled]}>
-          <Text style={styles.ctaText}>{revenueCatConfigured ? 'Premium’a devam et' : 'Ödeme kurulumu bekleniyor'}</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" disabled={!revenueCatConfigured} style={styles.restore}>
-          <Text style={[styles.restoreText, !revenueCatConfigured && styles.restoreDisabled]}>Satın alımları geri yükle</Text>
-        </Pressable>
-
-        <Text style={styles.setup}>{getBillingSetupMessage()}</Text>
-        <Text style={styles.legal}>Abonelik otomatik yenilenir ve mağaza hesabınızdan yönetilir. Yerel fiyat ve yenileme koşulları satın alma ekranında gösterilir.</Text>
-      </View>
-    </View>
-  );
+  const { language } = usePreferences(); const c=copy[language];
+  const [selectedPlan,setSelectedPlan]=useState<'annual'|'monthly'>('annual');
+  return <View style={styles.page}><View style={styles.card}><Text style={styles.eyebrow}>PETVITALS PREMIUM</Text><Text style={styles.title}>{c.title}</Text><Text style={styles.sub}>{c.sub}</Text>
+    <View style={styles.benefits}>{c.benefits.map(item=><Text key={item} style={styles.benefit}>✓ {item}</Text>)}</View>
+    {(['annual','monthly'] as const).map(id=>{const selected=selectedPlan===id;return <Pressable accessibilityRole="radio" accessibilityState={{checked:selected}} key={id} onPress={()=>setSelectedPlan(id)} style={[styles.plan,selected&&styles.planSelected]}><View style={styles.radio}>{selected?<View style={styles.radioInner}/>:null}</View><View style={{flex:1}}><View style={styles.row}><Text style={styles.planTitle}>{id==='annual'?c.annual:c.monthly}</Text>{id==='annual'?<Text style={styles.badge}>{c.recommended}</Text>:null}</View><Text style={styles.planSubtitle}>{id==='annual'?c.annualSub:c.monthlySub}</Text></View></Pressable>;})}
+    <Pressable accessibilityRole="button" disabled={!revenueCatConfigured} style={[styles.cta,!revenueCatConfigured&&styles.disabled]}><Text style={styles.ctaText}>{revenueCatConfigured?c.continue:c.pending}</Text></Pressable><Pressable accessibilityRole="button" disabled={!revenueCatConfigured} style={styles.restore}><Text style={[styles.restoreText,!revenueCatConfigured&&styles.restoreDisabled]}>{c.restore}</Text></Pressable><Text style={styles.setup}>{c.setup}</Text><Text style={styles.legal}>{c.legal}</Text>
+  </View></View>;
 }
 
-const styles = StyleSheet.create({
-  page: { alignItems: 'center', backgroundColor: colors.background, flex: 1, justifyContent: 'center', padding: 22 },
-  card: { ...shadow, backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 26, borderWidth: 1, maxWidth: 560, padding: 22, width: '100%' },
-  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 1.2 },
-  title: { color: colors.text, fontSize: 28, fontWeight: '900', lineHeight: 34, marginTop: 7 },
-  sub: { color: colors.muted, lineHeight: 21, marginTop: 10 },
-  benefits: { backgroundColor: colors.background, borderRadius: 16, gap: 8, marginTop: 18, padding: 14 },
-  benefit: { color: colors.text, fontSize: 13, fontWeight: '700' },
-  plan: { alignItems: 'center', borderColor: colors.border, borderRadius: 16, borderWidth: 1, flexDirection: 'row', gap: 12, marginTop: 10, padding: 14 },
-  planSelected: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
-  radio: { alignItems: 'center', borderColor: colors.primary, borderRadius: 10, borderWidth: 2, height: 20, justifyContent: 'center', width: 20 },
-  radioInner: { backgroundColor: colors.primary, borderRadius: 5, height: 10, width: 10 },
-  row: { alignItems: 'center', flexDirection: 'row', gap: 8 },
-  planTitle: { color: colors.text, fontSize: 15, fontWeight: '900' },
-  planSubtitle: { color: colors.muted, fontSize: 12, marginTop: 3 },
-  badge: { backgroundColor: '#FFF4E8', borderRadius: 8, color: colors.accent, fontSize: 9, fontWeight: '900', paddingHorizontal: 7, paddingVertical: 3 },
-  cta: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 15, justifyContent: 'center', marginTop: 17, minHeight: 54 },
-  disabled: { opacity: 0.55 },
-  ctaText: { color: colors.white, fontSize: 16, fontWeight: '900' },
-  restore: { alignItems: 'center', paddingVertical: 14 },
-  restoreText: { color: colors.primaryDark, fontWeight: '800' },
-  restoreDisabled: { color: colors.muted },
-  setup: { color: colors.muted, fontSize: 11, lineHeight: 16, textAlign: 'center' },
-  legal: { color: colors.muted, fontSize: 10, lineHeight: 15, marginTop: 8, textAlign: 'center' },
-});
+const styles=StyleSheet.create({page:{alignItems:'center',backgroundColor:colors.background,flex:1,justifyContent:'center',padding:22},card:{...shadow,backgroundColor:colors.surface,borderColor:colors.border,borderRadius:26,borderWidth:1,maxWidth:560,padding:22,width:'100%'},eyebrow:{color:colors.primary,fontSize:11,fontWeight:'900',letterSpacing:1.2},title:{color:colors.text,fontSize:28,fontWeight:'900',lineHeight:34,marginTop:7},sub:{color:colors.muted,lineHeight:21,marginTop:10},benefits:{backgroundColor:colors.background,borderRadius:16,gap:8,marginTop:18,padding:14},benefit:{color:colors.text,fontSize:13,fontWeight:'700'},plan:{alignItems:'center',borderColor:colors.border,borderRadius:16,borderWidth:1,flexDirection:'row',gap:12,marginTop:10,padding:14},planSelected:{backgroundColor:colors.primarySoft,borderColor:colors.primary},radio:{alignItems:'center',borderColor:colors.primary,borderRadius:10,borderWidth:2,height:20,justifyContent:'center',width:20},radioInner:{backgroundColor:colors.primary,borderRadius:5,height:10,width:10},row:{alignItems:'center',flexDirection:'row',flexWrap:'wrap',gap:8},planTitle:{color:colors.text,fontSize:15,fontWeight:'900'},planSubtitle:{color:colors.muted,fontSize:12,marginTop:3},badge:{backgroundColor:'#FFF4E8',borderRadius:8,color:colors.accent,fontSize:9,fontWeight:'900',paddingHorizontal:7,paddingVertical:3},cta:{alignItems:'center',backgroundColor:colors.primary,borderRadius:15,justifyContent:'center',marginTop:17,minHeight:54},disabled:{opacity:.55},ctaText:{color:colors.white,fontSize:16,fontWeight:'900'},restore:{alignItems:'center',paddingVertical:14},restoreText:{color:colors.primaryDark,fontWeight:'800'},restoreDisabled:{color:colors.muted},setup:{color:colors.muted,fontSize:11,lineHeight:16,textAlign:'center'},legal:{color:colors.muted,fontSize:10,lineHeight:15,marginTop:8,textAlign:'center'}});
