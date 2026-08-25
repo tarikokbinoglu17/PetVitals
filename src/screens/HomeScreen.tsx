@@ -16,8 +16,11 @@ import {
 } from '../lib/prelaunch';
 import type { HealthRecord, Pet } from '../types';
 import { colors, shadow } from '../theme';
+import { usePreferences } from '../context/PreferencesContext';
+import { coreCopy } from '../lib/globalization';
 
 export function HomeScreen({ pets, records, userId, demoMode }: { pets: Pet[]; records: HealthRecord[]; userId?: string; demoMode: boolean }) {
+  const { language } = usePreferences();
   const now = new Date();
   const upcoming = getUpcomingRecords(records, now);
   const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id ?? '');
@@ -46,7 +49,7 @@ export function HomeScreen({ pets, records, userId, demoMode }: { pets: Pet[]; r
 
   return <View style={styles.page}>
     <Text style={styles.eyebrow}>{formatDashboardDate(now)}</Text>
-    <Text style={styles.title}>Today</Text>
+    <Text style={styles.title}>{coreCopy[language].today}</Text>
     <Text style={styles.sub}>Bugün önemli olan her şey tek yerde.</Text>
 
     {pets.length>1?<View style={styles.chips}>{pets.map(p=><Pressable key={p.id} onPress={()=>setSelectedPetId(p.id)} style={[styles.chip,selectedPet?.id===p.id&&styles.chipActive]}><Text style={[styles.chipText,selectedPet?.id===p.id&&styles.chipTextActive]}>{p.name}</Text></Pressable>)}</View>:null}
