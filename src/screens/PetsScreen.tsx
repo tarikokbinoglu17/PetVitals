@@ -8,10 +8,12 @@ export function PetsScreen({
   pets,
   savingPet,
   onAddPet,
+  onSelectPet,
 }: {
   pets: Pet[];
   savingPet: boolean;
   onAddPet: (draft: PetDraft) => Promise<SavePetResult>;
+  onSelectPet: (pet: Pet) => void;
 }) {
   const [showPetForm, setShowPetForm] = useState(false);
 
@@ -35,7 +37,14 @@ export function PetsScreen({
       {showPetForm ? <PetForm onSave={onAddPet} saving={savingPet} /> : null}
       {pets.length === 0 ? <Text style={styles.empty}>Henüz bir dost eklenmemiş.</Text> : null}
       {pets.map((pet, index) => (
-        <View key={pet.id} style={styles.card}>
+        <Pressable
+          accessibilityHint="Profil ve sağlık kayıtlarını gösterir"
+          accessibilityLabel={`${pet.name} detaylarını aç`}
+          accessibilityRole="button"
+          key={pet.id}
+          onPress={() => onSelectPet(pet)}
+          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+        >
           <View style={[styles.avatar, { backgroundColor: index ? '#FDE8DF' : colors.primarySoft }]}>
             {pet.photoUrl ? (
               <Image accessibilityLabel={`${pet.name} profil fotoğrafı`} source={{ uri: pet.photoUrl }} style={styles.photo} />
@@ -50,8 +59,8 @@ export function PetsScreen({
             </Text>
             {pet.birthDate ? <Text style={styles.birth}>Doğum: {new Date(`${pet.birthDate}T00:00:00`).toLocaleDateString('tr-TR')}</Text> : null}
           </View>
-          <Text style={styles.arrow}>›</Text>
-        </View>
+          <Text accessible={false} style={styles.arrow}>›</Text>
+        </Pressable>
       ))}
       {!showPetForm ? (
         <Pressable accessibilityRole="button" onPress={() => setShowPetForm(true)} style={styles.add}>
@@ -74,6 +83,7 @@ const styles = StyleSheet.create({
   headerButtonTextActive: { color: colors.primary },
   empty: { color: colors.muted, marginBottom: 18, textAlign: 'center' },
   card: { ...shadow, alignItems: 'center', backgroundColor: colors.surface, borderRadius: 20, flexDirection: 'row', marginBottom: 14, padding: 16 },
+  cardPressed: { opacity: 0.7, transform: [{ scale: 0.99 }] },
   avatar: { alignItems: 'center', borderRadius: 28, height: 56, justifyContent: 'center', width: 56 },
   photo: { borderRadius: 28, height: 56, width: 56 },
   emoji: { fontSize: 28 },
