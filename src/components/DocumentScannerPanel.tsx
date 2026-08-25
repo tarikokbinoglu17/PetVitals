@@ -1,70 +1,10 @@
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { scanPetDocument } from '../lib/ai';
-import type { Pet } from '../types';
-import { colors } from '../theme';
-
-export function DocumentScannerPanel({ pet, onClose }: { pet: Pet; onClose: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
-
-  const pickAndScan = async () => {
-    setError(null);
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      setError('Belge seçmek için fotoğraf erişimi gerekli.');
-      return;
-    }
-    const picked = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      base64: true,
-      quality: 0.75,
-    });
-    if (picked.canceled) return;
-    const asset = picked.assets[0];
-    if (!asset.base64) {
-      setError('Belge okunamadı. Lütfen yeniden seçin.');
-      return;
-    }
-    setLoading(true);
-    try {
-      const mime = asset.mimeType || 'image/jpeg';
-      const response = await scanPetDocument(pet.id, `data:${mime};base64,${asset.base64}`);
-      setResult(response.extraction.extracted_data ?? {});
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Belge analizi başarısız oldu.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <View style={styles.panel}>
-      <View style={styles.header}><Text style={styles.title}>▣ {pet.name} Belge Tarama</Text><Pressable onPress={onClose}><Text style={styles.close}>Kapat</Text></Pressable></View>
-      <Text style={styles.note}>Aşı karnesi veya veteriner raporunun fotoğrafını seçin. Çıkan bilgiler siz onaylamadan sağlık kaydına eklenmez.</Text>
-      <Pressable disabled={loading} onPress={pickAndScan} style={styles.button}>{loading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Belge fotoğrafı seç</Text>}</Pressable>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {result ? <View style={styles.result}><Text style={styles.resultTitle}>İnceleme gerekli</Text>{Object.entries(result).filter(([, value]) => value !== null && value !== '' && value !== undefined).map(([key, value]) => <View key={key} style={styles.row}><Text style={styles.key}>{key}</Text><Text style={styles.value}>{Array.isArray(value) ? value.join(', ') : String(value)}</Text></View>)}<Text style={styles.warning}>Bu bilgiler henüz PetVitals sağlık kaydına işlenmedi.</Text></View> : null}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  panel: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 20, borderWidth: 1, marginBottom: 16, padding: 17 },
-  header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
-  title: { color: colors.text, flex: 1, fontSize: 17, fontWeight: '900' },
-  close: { color: colors.primary, fontSize: 12, fontWeight: '800' },
-  note: { color: colors.muted, lineHeight: 19, marginTop: 8 },
-  button: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 14, justifyContent: 'center', marginTop: 14, minHeight: 48 },
-  buttonText: { color: colors.white, fontWeight: '900' },
-  error: { color: colors.danger, marginTop: 10 },
-  result: { backgroundColor: colors.background, borderRadius: 14, marginTop: 12, padding: 13 },
-  resultTitle: { color: colors.primaryDark, fontWeight: '900', marginBottom: 8 },
-  row: { borderBottomColor: colors.border, borderBottomWidth: 1, paddingVertical: 7 },
-  key: { color: colors.muted, fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
-  value: { color: colors.text, marginTop: 3 },
-  warning: { color: colors.accent, fontSize: 11, fontWeight: '800', marginTop: 10 },
-});
+import React,{useState} from 'react';
+import {ActivityIndicator,Pressable,StyleSheet,Text,View} from 'react-native';
+import {scanPetDocument} from '../lib/ai';
+import type {Pet} from '../types';
+import {colors} from '../theme';
+import {usePreferences} from '../context/PreferencesContext';
+const copy={tr:{title:'Belge Tarama',close:'Kapat',note:'Aşı karnesi veya veteriner raporunun fotoğrafını seçin. Çıkan bilgiler siz onaylamadan sağlık kaydına eklenmez.',select:'Belge fotoğrafı seç',permission:'Belge seçmek için fotoğraf erişimi gerekli.',read:'Belge okunamadı. Lütfen yeniden seçin.',failed:'Belge analizi başarısız oldu.',review:'İnceleme gerekli',warning:'Bu bilgiler henüz PetVitals sağlık kaydına işlenmedi.'},en:{title:'Document Scanner',close:'Close',note:'Choose a photo of a vaccine card or veterinary report. Extracted information is not added to health records until you approve it.',select:'Choose document photo',permission:'Photo access is required to choose a document.',read:'Could not read the document. Please choose it again.',failed:'Document analysis failed.',review:'Review required',warning:'This information has not been added to PetVitals health records yet.'},de:{title:'Dokumentenscan',close:'Schließen',note:'Wählen Sie ein Foto des Impfpasses oder Tierarztberichts. Extrahierte Daten werden erst nach Ihrer Bestätigung gespeichert.',select:'Dokumentfoto auswählen',permission:'Fotozugriff ist zum Auswählen eines Dokuments erforderlich.',read:'Dokument konnte nicht gelesen werden. Bitte erneut auswählen.',failed:'Dokumentanalyse fehlgeschlagen.',review:'Prüfung erforderlich',warning:'Diese Informationen wurden noch nicht in PetVitals gespeichert.'},es:{title:'Escáner de documentos',close:'Cerrar',note:'Elige una foto de la cartilla de vacunas o informe veterinario. La información extraída no se añade a los registros hasta que la apruebes.',select:'Elegir foto del documento',permission:'Se necesita acceso a fotos para elegir un documento.',read:'No se pudo leer el documento. Vuelve a seleccionarlo.',failed:'Falló el análisis del documento.',review:'Revisión necesaria',warning:'Esta información aún no se ha añadido a los registros de salud de PetVitals.'}} as const;
+export function DocumentScannerPanel({pet,onClose}:{pet:Pet;onClose:()=>void}){const{language}=usePreferences();const c=copy[language];const[loading,setLoading]=useState(false);const[error,setError]=useState<string|null>(null);const[result,setResult]=useState<Record<string,unknown>|null>(null);const pickAndScan=async()=>{setError(null);const permission=await ImagePicker.requestMediaLibraryPermissionsAsync();if(!permission.granted){setError(c.permission);return;}const picked=await ImagePicker.launchImageLibraryAsync({mediaTypes:['images'],allowsEditing:false,base64:true,quality:.75});if(picked.canceled)return;const asset=picked.assets[0];if(!asset.base64){setError(c.read);return;}setLoading(true);try{const mime=asset.mimeType||'image/jpeg';const response=await scanPetDocument(pet.id,`data:${mime};base64,${asset.base64}`);setResult(response.extraction.extracted_data??{});}catch(err){setError(err instanceof Error?err.message:c.failed);}finally{setLoading(false)}};return <View style={styles.panel}><View style={styles.header}><Text style={styles.title}>▣ {pet.name} {c.title}</Text><Pressable onPress={onClose}><Text style={styles.close}>{c.close}</Text></Pressable></View><Text style={styles.note}>{c.note}</Text><Pressable disabled={loading} onPress={pickAndScan} style={styles.button}>{loading?<ActivityIndicator color={colors.white}/>:<Text style={styles.buttonText}>{c.select}</Text>}</Pressable>{error?<Text style={styles.error}>{error}</Text>:null}{result?<View style={styles.result}><Text style={styles.resultTitle}>{c.review}</Text>{Object.entries(result).filter(([,v])=>v!==null&&v!==''&&v!==undefined).map(([key,value])=><View key={key} style={styles.row}><Text style={styles.key}>{key}</Text><Text style={styles.value}>{Array.isArray(value)?value.join(', '):String(value)}</Text></View>)}<Text style={styles.warning}>{c.warning}</Text></View>:null}</View>}
+const styles=StyleSheet.create({panel:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:20,borderWidth:1,marginBottom:16,padding:17},header:{alignItems:'center',flexDirection:'row',justifyContent:'space-between'},title:{color:colors.text,flex:1,fontSize:17,fontWeight:'900'},close:{color:colors.primary,fontSize:12,fontWeight:'800'},note:{color:colors.muted,lineHeight:19,marginTop:8},button:{alignItems:'center',backgroundColor:colors.primary,borderRadius:14,justifyContent:'center',marginTop:14,minHeight:48},buttonText:{color:colors.white,fontWeight:'900'},error:{color:colors.danger,marginTop:10},result:{backgroundColor:colors.background,borderRadius:14,marginTop:12,padding:13},resultTitle:{color:colors.primaryDark,fontWeight:'900',marginBottom:8},row:{borderBottomColor:colors.border,borderBottomWidth:1,paddingVertical:7},key:{color:colors.muted,fontSize:10,fontWeight:'800',textTransform:'uppercase'},value:{color:colors.text,marginTop:3},warning:{color:colors.accent,fontSize:11,fontWeight:'800',marginTop:10}});
