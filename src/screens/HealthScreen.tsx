@@ -14,14 +14,15 @@ const copy = {
   es: { title:'Calendario de salud', sub:'Revisiones, vacunas y medicación.', add:'＋ Añadir vacuna', brain:'Resume el historial guardado y muestra posibles señales de riesgo. No realiza diagnósticos.', check:'Revisar alertas inteligentes', noAlert:'No hay alertas inteligentes activas.', ask:'Preguntar a AI Health Brain', q:'Pregunta sobre el historial de salud', disclaimer:'Solo apoyo educativo; no sustituye el diagnóstico ni tratamiento veterinario.', empty:'Aún no hay registros de salud.', applied:'Administrada', vet:'Veterinario', pet:'Tu mascota' },
 } as const;
 
+type NotificationCopy = Record<VaccineNotificationStatus, string>;
 function getNotificationLabel(status: VaccineNotificationStatus | undefined, language: keyof typeof copy) {
-  const labels = {
-    tr:{scheduled:'🔔 Hatırlatmalar açık',denied:'Bildirim izni kapalı',failed:'Bildirim kurulamadı',no_future_dates:'Gelecek bildirim yok',disabled:'Bildirim kapalı'},
-    en:{scheduled:'🔔 Reminders on',denied:'Notifications denied',failed:'Could not schedule notifications',no_future_dates:'No future notification',disabled:'Notifications off'},
-    de:{scheduled:'🔔 Erinnerungen aktiv',denied:'Benachrichtigungen nicht erlaubt',failed:'Benachrichtigung fehlgeschlagen',no_future_dates:'Keine zukünftige Benachrichtigung',disabled:'Benachrichtigungen aus'},
-    es:{scheduled:'🔔 Recordatorios activos',denied:'Notificaciones no permitidas',failed:'No se pudo programar',no_future_dates:'Sin notificación futura',disabled:'Notificaciones desactivadas'},
-  } as const;
-  return status ? labels[language][status] ?? null : null;
+  const labels: Record<keyof typeof copy, NotificationCopy> = {
+    tr:{pending:'Bildirim hazırlanıyor',scheduled:'🔔 Hatırlatmalar açık',denied:'Bildirim izni kapalı',failed:'Bildirim kurulamadı',no_future_dates:'Gelecek bildirim yok',disabled:'Bildirim kapalı'},
+    en:{pending:'Preparing notification',scheduled:'🔔 Reminders on',denied:'Notifications denied',failed:'Could not schedule notifications',no_future_dates:'No future notification',disabled:'Notifications off'},
+    de:{pending:'Benachrichtigung wird vorbereitet',scheduled:'🔔 Erinnerungen aktiv',denied:'Benachrichtigungen nicht erlaubt',failed:'Benachrichtigung fehlgeschlagen',no_future_dates:'Keine zukünftige Benachrichtigung',disabled:'Benachrichtigungen aus'},
+    es:{pending:'Preparando notificación',scheduled:'🔔 Recordatorios activos',denied:'Notificaciones no permitidas',failed:'No se pudo programar',no_future_dates:'Sin notificación futura',disabled:'Notificaciones desactivadas'},
+  };
+  return status ? labels[language][status] : null;
 }
 
 export function HealthScreen({ pets, records, savingVaccine, onAddVaccine }: { pets: Pet[]; records: HealthRecord[]; savingVaccine: boolean; onAddVaccine: (draft: VaccineDraft) => Promise<SaveVaccineResult> }) {
