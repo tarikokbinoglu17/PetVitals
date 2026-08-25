@@ -57,6 +57,9 @@
           "defaultChannel": "vaccine-reminders"
         }
       ]
-    ]
+    ],
+    "experiments": {
+      "baseUrl": "/PetVitals"
+    }
   }
 }
