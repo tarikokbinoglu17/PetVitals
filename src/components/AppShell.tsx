@@ -13,6 +13,8 @@ import { NearMeScreen } from '../screens/NearMeScreen';
 import { PlatformScreen } from '../screens/PlatformScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { usePreferences } from '../context/PreferencesContext';
+import { useSubscription } from '../context/SubscriptionContext';
+import { SubscriptionGate } from './SubscriptionGate';
 
 const tabCopy = {
   tr: ['Bugün', 'Dostlarım', 'Sağlık', 'Yaşam', 'Yakınımda', 'PetVitals+', 'Profil'],
@@ -29,12 +31,21 @@ const tabKeys: { key: TabName; icon: string }[] = [
 
 export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: string }) {
   const { language } = usePreferences();
+  const { accessState, trialDaysRemaining } = useSubscription();
   const tabs = tabKeys.map((item, index) => ({ ...item, label: tabCopy[language][index] }));
   const [tab, setTab] = useState<TabName>('home');
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const { pets, records, loading, error, addPet, addVaccine, savingPet, savingVaccine } = usePetData({ demoMode, userId });
   const selectedPet = selectedPetId ? pets.find(pet => pet.id === selectedPetId) : undefined;
+
+  if (accessState === 'loading') {
+    return <SafeAreaView style={styles.safe}><View style={styles.state}><ActivityIndicator color={colors.primary} size="large" /><Text style={styles.stateText}>Üyelik durumunuz kontrol ediliyor…</Text></View></SafeAreaView>;
+  }
+
+  if (accessState === 'expired') {
+    return <SafeAreaView edges={['top', 'bottom']} style={styles.safe}><SubscriptionGate /></SafeAreaView>;
+  }
 
   function scrollToTop() {
     scrollRef.current?.scrollTo({ animated: false, y: 0 });
@@ -81,6 +92,11 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+      {accessState === 'trial' ? (
+        <View style={styles.trialBanner}>
+          <Text style={styles.trialText}>Premium deneme · {trialDaysRemaining} gün kaldı</Text>
+        </View>
+      ) : null}
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
@@ -119,6 +135,8 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
 
 const styles = StyleSheet.create({
   safe: { backgroundColor: colors.background, flex: 1 },
+  trialBanner: { alignItems: 'center', backgroundColor: colors.primarySoft, borderBottomColor: colors.border, borderBottomWidth: 1, paddingHorizontal: 12, paddingVertical: 7 },
+  trialText: { color: colors.primaryDark, fontSize: 11, fontWeight: '900' },
   scroll: { flexGrow: 1, paddingBottom: 25 },
   state: { alignItems: 'center', flex: 1, justifyContent: 'center', minHeight: 420, padding: 32 },
   stateText: { color: colors.muted, lineHeight: 21, marginTop: 12, textAlign: 'center' },

@@ -8,12 +8,19 @@ import { AppShell } from './src/components/AppShell';
 import { AppErrorBoundary } from './src/components/AppErrorBoundary';
 import { colors } from './src/theme';
 import { PreferencesProvider } from './src/context/PreferencesContext';
+import { SubscriptionProvider } from './src/context/SubscriptionContext';
 
 function Root() {
   const { user, demoMode, loading } = useAuth();
   if (loading) return <View style={styles.loading}><ActivityIndicator color={colors.primary} size="large" /></View>;
   if (!user && !demoMode) return <AuthScreen />;
-  return <AppShell demoMode={demoMode} userId={user?.id} />;
+
+  const userKey = user?.id || 'demo';
+  return (
+    <SubscriptionProvider userKey={userKey}>
+      <AppShell demoMode={demoMode} userId={user?.id} />
+    </SubscriptionProvider>
+  );
 }
 
 export default function App() {

@@ -30,7 +30,7 @@ export type PlatformSnapshot = {
   pro: ProEntitlement;
 };
 
-const freeEntitlement: ProEntitlement = { plan: 'free' };
+const fullAccessEntitlement: ProEntitlement = { plan: 'pro' };
 
 function client() {
   if (!supabase) throw new Error('Supabase yapılandırılmamış.');
@@ -38,7 +38,7 @@ function client() {
 }
 
 export async function loadPlatformSnapshot(userId: string, petId: string): Promise<PlatformSnapshot> {
-  if (!supabase) return { weights: [], lifeEntries: [], memberCount: 0, activePassportCount: 0, passports: [], pro: freeEntitlement };
+  if (!supabase) return { weights: [], lifeEntries: [], memberCount: 0, activePassportCount: 0, passports: [], pro: fullAccessEntitlement };
   const db = client();
 
   const [weightsResult, lifeResult, membersResult, passportResult, entitlementResult] = await Promise.all([
@@ -80,12 +80,14 @@ export async function loadPlatformSnapshot(userId: string, petId: string): Promi
     memberCount: membersResult.count ?? 0,
     activePassportCount: passports.length,
     passports,
-    pro: entitlementResult.data ? {
-      plan: entitlementResult.data.plan === 'pro' ? 'pro' : 'free',
-      provider: entitlementResult.data.provider ?? undefined,
-      productId: entitlementResult.data.product_id ?? undefined,
-      expiresAt: entitlementResult.data.expires_at ?? undefined,
-    } : freeEntitlement,
+    // App-wide access is controlled by the 7-day trial / Premium gate.
+    // Anyone who passes that gate receives every PetVitals feature.
+    pro: {
+      plan: 'pro',
+      provider: entitlementResult.data?.provider ?? undefined,
+      productId: entitlementResult.data?.product_id ?? undefined,
+      expiresAt: entitlementResult.data?.expires_at ?? undefined,
+    },
   };
 }
 
