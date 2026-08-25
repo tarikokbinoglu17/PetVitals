@@ -4,193 +4,42 @@ import { VaccineForm } from '../components/VaccineForm';
 import { askPetHealthBrain, evaluateSmartHealthAlerts, type SmartHealthAlert } from '../lib/healthBrain';
 import type { HealthRecord, Pet, SaveVaccineResult, VaccineDraft, VaccineNotificationStatus } from '../types';
 import { colors } from '../theme';
+import { usePreferences } from '../context/PreferencesContext';
+import { t } from '../lib/i18n';
 
-function getNotificationLabel(status?: VaccineNotificationStatus) {
-  if (status === 'scheduled') return '🔔 Hatırlatmalar açık';
-  if (status === 'denied') return 'Bildirim izni kapalı';
-  if (status === 'failed') return 'Bildirim kurulamadı';
-  if (status === 'no_future_dates') return 'Gelecek bildirim yok';
-  if (status === 'disabled') return 'Bildirim kapalı';
-  return null;
+const copy = {
+  tr: { title:'Sağlık takvimi', sub:'Kontrol, aşı ve ilaç planı.', add:'＋ Aşı ekle', brain:'Kayıtlı sağlık geçmişini kullanarak özet çıkarır ve yaklaşan risk işaretlerini görünür hale getirir. Tanı koymaz.', check:'Akıllı uyarıları kontrol et', noAlert:'Aktif bir akıllı uyarı görünmüyor.', ask:'AI Health Brain’e sor', q:'Sağlık geçmişine soru sor', disclaimer:'Eğitsel destek sağlar; veteriner tanısı veya tedavisinin yerine geçmez.', empty:'Henüz bir sağlık kaydı eklenmemiş.', applied:'Uygulandı', vet:'Veteriner', pet:'Dostunuz' },
+  en: { title:'Health calendar', sub:'Checkups, vaccines and medication plan.', add:'＋ Add vaccine', brain:'Uses saved health history to summarize patterns and surface upcoming risk signals. It does not diagnose.', check:'Check smart alerts', noAlert:'No active smart alerts right now.', ask:'Ask AI Health Brain', q:'Ask about health history', disclaimer:'Educational support only; it does not replace veterinary diagnosis or treatment.', empty:'No health records yet.', applied:'Administered', vet:'Veterinarian', pet:'Your pet' },
+  de: { title:'Gesundheitskalender', sub:'Kontrollen, Impfungen und Medikamente.', add:'＋ Impfung hinzufügen', brain:'Fasst gespeicherte Gesundheitsdaten zusammen und macht mögliche Risikosignale sichtbar. Keine Diagnose.', check:'Intelligente Hinweise prüfen', noAlert:'Derzeit keine aktiven Hinweise.', ask:'AI Health Brain fragen', q:'Frage zur Gesundheitsgeschichte', disclaimer:'Nur zur Unterstützung; ersetzt keine tierärztliche Diagnose oder Behandlung.', empty:'Noch keine Gesundheitsdaten.', applied:'Verabreicht', vet:'Tierarzt', pet:'Ihr Tier' },
+  es: { title:'Calendario de salud', sub:'Revisiones, vacunas y medicación.', add:'＋ Añadir vacuna', brain:'Resume el historial guardado y muestra posibles señales de riesgo. No realiza diagnósticos.', check:'Revisar alertas inteligentes', noAlert:'No hay alertas inteligentes activas.', ask:'Preguntar a AI Health Brain', q:'Pregunta sobre el historial de salud', disclaimer:'Solo apoyo educativo; no sustituye el diagnóstico ni tratamiento veterinario.', empty:'Aún no hay registros de salud.', applied:'Administrada', vet:'Veterinario', pet:'Tu mascota' },
+} as const;
+
+function getNotificationLabel(status: VaccineNotificationStatus | undefined, language: keyof typeof copy) {
+  const labels = {
+    tr:{scheduled:'🔔 Hatırlatmalar açık',denied:'Bildirim izni kapalı',failed:'Bildirim kurulamadı',no_future_dates:'Gelecek bildirim yok',disabled:'Bildirim kapalı'},
+    en:{scheduled:'🔔 Reminders on',denied:'Notifications denied',failed:'Could not schedule notifications',no_future_dates:'No future notification',disabled:'Notifications off'},
+    de:{scheduled:'🔔 Erinnerungen aktiv',denied:'Benachrichtigungen nicht erlaubt',failed:'Benachrichtigung fehlgeschlagen',no_future_dates:'Keine zukünftige Benachrichtigung',disabled:'Benachrichtigungen aus'},
+    es:{scheduled:'🔔 Recordatorios activos',denied:'Notificaciones no permitidas',failed:'No se pudo programar',no_future_dates:'Sin notificación futura',disabled:'Notificaciones desactivadas'},
+  } as const;
+  return status ? labels[language][status] ?? null : null;
 }
 
-export function HealthScreen({
-  pets,
-  records,
-  savingVaccine,
-  onAddVaccine,
-}: {
-  pets: Pet[];
-  records: HealthRecord[];
-  savingVaccine: boolean;
-  onAddVaccine: (draft: VaccineDraft) => Promise<SaveVaccineResult>;
-}) {
-  const [showVaccineForm, setShowVaccineForm] = useState(false);
-  const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id ?? '');
-  const [smartAlerts, setSmartAlerts] = useState<SmartHealthAlert[]>([]);
-  const [loadingAlerts, setLoadingAlerts] = useState(false);
-  const [question, setQuestion] = useState('');
-  const [askingAi, setAskingAi] = useState(false);
-  const [aiAnswer, setAiAnswer] = useState('');
-  const [healthBrainError, setHealthBrainError] = useState('');
-  const sortedRecords = [...records].sort((left, right) => left.date.localeCompare(right.date));
+export function HealthScreen({ pets, records, savingVaccine, onAddVaccine }: { pets: Pet[]; records: HealthRecord[]; savingVaccine: boolean; onAddVaccine: (draft: VaccineDraft) => Promise<SaveVaccineResult> }) {
+  const { language } = usePreferences(); const c = copy[language];
+  const [showVaccineForm,setShowVaccineForm]=useState(false); const [selectedPetId,setSelectedPetId]=useState(pets[0]?.id??''); const [smartAlerts,setSmartAlerts]=useState<SmartHealthAlert[]>([]); const [loadingAlerts,setLoadingAlerts]=useState(false); const [question,setQuestion]=useState(''); const [askingAi,setAskingAi]=useState(false); const [aiAnswer,setAiAnswer]=useState(''); const [healthBrainError,setHealthBrainError]=useState('');
+  const sortedRecords=[...records].sort((a,b)=>a.date.localeCompare(b.date));
+  useEffect(()=>{if(!pets.some(p=>p.id===selectedPetId))setSelectedPetId(pets[0]?.id??'');},[pets,selectedPetId]);
+  const selectedPet=pets.find(p=>p.id===selectedPetId);
+  async function handleEvaluateAlerts(){if(!selectedPetId)return;setLoadingAlerts(true);setHealthBrainError('');try{setSmartAlerts(await evaluateSmartHealthAlerts(selectedPetId));}catch(e){setHealthBrainError(e instanceof Error?e.message:c.noAlert);}finally{setLoadingAlerts(false);}}
+  async function handleAskAi(){if(!selectedPetId||!question.trim())return;setAskingAi(true);setHealthBrainError('');setAiAnswer('');try{const result=await askPetHealthBrain(selectedPetId,question);setAiAnswer(result.answer);}catch(e){setHealthBrainError(e instanceof Error?e.message:'AI Health Brain');}finally{setAskingAi(false);}}
 
-  useEffect(() => {
-    if (!pets.some(pet => pet.id === selectedPetId)) {
-      setSelectedPetId(pets[0]?.id ?? '');
-    }
-  }, [pets, selectedPetId]);
-
-  const selectedPet = pets.find(pet => pet.id === selectedPetId);
-
-  async function handleEvaluateAlerts() {
-    if (!selectedPetId) return;
-    setLoadingAlerts(true);
-    setHealthBrainError('');
-    try {
-      setSmartAlerts(await evaluateSmartHealthAlerts(selectedPetId));
-    } catch (error) {
-      setHealthBrainError(error instanceof Error ? error.message : 'Akıllı sağlık uyarıları alınamadı.');
-    } finally {
-      setLoadingAlerts(false);
-    }
-  }
-
-  async function handleAskAi() {
-    if (!selectedPetId || !question.trim()) return;
-    setAskingAi(true);
-    setHealthBrainError('');
-    setAiAnswer('');
-    try {
-      const result = await askPetHealthBrain(selectedPetId, question);
-      setAiAnswer(result.answer);
-    } catch (error) {
-      setHealthBrainError(error instanceof Error ? error.message : 'AI Health Brain yanıt veremedi.');
-    } finally {
-      setAskingAi(false);
-    }
-  }
-
-  return (
-    <View style={styles.page}>
-      <View style={styles.header}>
-        <View style={styles.headerCopy}>
-          <Text style={styles.title}>Sağlık takvimi</Text>
-          <Text style={styles.sub}>Kontrol, aşı ve ilaç planı.</Text>
-        </View>
-        <Pressable accessibilityRole="button" onPress={() => setShowVaccineForm(value => !value)} style={[styles.addButton, showVaccineForm && styles.addButtonActive]}>
-          <Text style={[styles.addButtonText, showVaccineForm && styles.addButtonTextActive]}>{showVaccineForm ? 'Kapat' : '＋ Aşı ekle'}</Text>
-        </Pressable>
-      </View>
-
-      {showVaccineForm ? <VaccineForm onSave={onAddVaccine} pets={pets} saving={savingVaccine} /> : null}
-
-      {pets.length > 0 ? (
-        <View style={styles.brainCard}>
-          <Text style={styles.brainEyebrow}>PETVITALS AI</Text>
-          <Text style={styles.brainTitle}>Health Brain</Text>
-          <Text style={styles.brainCopy}>Kayıtlı sağlık geçmişini kullanarak özet çıkarır ve yaklaşan risk işaretlerini görünür hale getirir. Tanı koymaz.</Text>
-          <View style={styles.petPicker}>
-            {pets.map(pet => (
-              <Pressable key={pet.id} onPress={() => { setSelectedPetId(pet.id); setSmartAlerts([]); setAiAnswer(''); setHealthBrainError(''); }} style={[styles.petChip, selectedPetId === pet.id && styles.petChipSelected]}>
-                <Text style={[styles.petChipText, selectedPetId === pet.id && styles.petChipTextSelected]}>{pet.name}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Pressable disabled={loadingAlerts || !selectedPetId} onPress={handleEvaluateAlerts} style={styles.brainButton}>
-            {loadingAlerts ? <ActivityIndicator color={colors.white} /> : <Text style={styles.brainButtonText}>Akıllı uyarıları kontrol et</Text>}
-          </Pressable>
-          {smartAlerts.length === 0 && !loadingAlerts ? <Text style={styles.noAlert}>Aktif bir akıllı uyarı görünmüyor.</Text> : null}
-          {smartAlerts.map(alert => (
-            <View key={alert.id} style={styles.alertCard}>
-              <Text style={styles.alertSeverity}>{alert.severity.toUpperCase()}</Text>
-              <Text style={styles.alertTitle}>{alert.title}</Text>
-              <Text style={styles.alertMessage}>{alert.message}</Text>
-            </View>
-          ))}
-          <TextInput multiline onChangeText={setQuestion} placeholder={selectedPet ? `${selectedPet.name} hakkında sağlık geçmişine soru sor` : 'Sağlık geçmişine soru sor'} placeholderTextColor={colors.muted} style={styles.questionInput} value={question} />
-          <Pressable disabled={askingAi || !selectedPetId || !question.trim()} onPress={handleAskAi} style={[styles.brainButton, styles.askButton]}>
-            {askingAi ? <ActivityIndicator color={colors.white} /> : <Text style={styles.brainButtonText}>AI Health Brain'e sor</Text>}
-          </Pressable>
-          {aiAnswer ? <Text style={styles.aiAnswer}>{aiAnswer}</Text> : null}
-          {healthBrainError ? <Text style={styles.brainError}>{healthBrainError}</Text> : null}
-          <Text style={styles.disclaimer}>Eğitsel destek sağlar; veteriner tanısı veya tedavisinin yerine geçmez.</Text>
-        </View>
-      ) : null}
-
-      {sortedRecords.length === 0 ? <Text style={styles.empty}>Henüz bir sağlık kaydı eklenmemiş.</Text> : null}
-      {sortedRecords.map((item, index) => {
-        const notificationLabel = item.category === 'Aşı' ? getNotificationLabel(item.notificationStatus) : null;
-        return (
-          <View key={item.id} style={styles.row}>
-            <View style={styles.lineWrap}>
-              <View style={[styles.dot, { backgroundColor: item.category === 'İlaç' ? colors.accent : colors.primary }]} />
-              {index < sortedRecords.length - 1 ? <View style={styles.line} /> : null}
-            </View>
-            <View style={styles.card}>
-              <View style={styles.top}>
-                <Text style={styles.category}>{item.category}</Text>
-                <Text style={styles.date}>{new Date(`${item.date}T00:00:00`).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</Text>
-              </View>
-              <Text style={styles.record}>{item.title}</Text>
-              {item.vaccineType ? <Text style={styles.vaccineType}>{item.vaccineType}</Text> : null}
-              <Text style={styles.pet}>{pets.find(pet => pet.id === item.petId)?.name ?? 'Dostunuz'}</Text>
-              {item.administeredDate ? <Text style={styles.meta}>Uygulandı: {new Date(`${item.administeredDate}T00:00:00`).toLocaleDateString('tr-TR')}</Text> : null}
-              {item.veterinarian ? <Text style={styles.meta}>Veteriner: {item.veterinarian}</Text> : null}
-              {notificationLabel ? <Text style={styles.notificationBadge}>{notificationLabel}</Text> : null}
-              {item.notes ? <Text style={styles.notes}>{item.notes}</Text> : null}
-            </View>
-          </View>
-        );
-      })}
-    </View>
-  );
+  return <View style={styles.page}>
+    <View style={styles.header}><View style={styles.headerCopy}><Text style={styles.title}>{c.title}</Text><Text style={styles.sub}>{c.sub}</Text></View><Pressable accessibilityRole="button" onPress={()=>setShowVaccineForm(v=>!v)} style={[styles.addButton,showVaccineForm&&styles.addButtonActive]}><Text style={[styles.addButtonText,showVaccineForm&&styles.addButtonTextActive]}>{showVaccineForm?t(language,'Kapat'):c.add}</Text></Pressable></View>
+    {showVaccineForm?<VaccineForm onSave={onAddVaccine} pets={pets} saving={savingVaccine}/>:null}
+    {pets.length>0?<View style={styles.brainCard}><Text style={styles.brainEyebrow}>PETVITALS AI</Text><Text style={styles.brainTitle}>Health Brain</Text><Text style={styles.brainCopy}>{c.brain}</Text><View style={styles.petPicker}>{pets.map(p=><Pressable key={p.id} onPress={()=>{setSelectedPetId(p.id);setSmartAlerts([]);setAiAnswer('');setHealthBrainError('');}} style={[styles.petChip,selectedPetId===p.id&&styles.petChipSelected]}><Text style={[styles.petChipText,selectedPetId===p.id&&styles.petChipTextSelected]}>{p.name}</Text></Pressable>)}</View><Pressable disabled={loadingAlerts||!selectedPetId} onPress={handleEvaluateAlerts} style={styles.brainButton}>{loadingAlerts?<ActivityIndicator color={colors.white}/>:<Text style={styles.brainButtonText}>{c.check}</Text>}</Pressable>{smartAlerts.length===0&&!loadingAlerts?<Text style={styles.noAlert}>{c.noAlert}</Text>:null}{smartAlerts.map(a=><View key={a.id} style={styles.alertCard}><Text style={styles.alertSeverity}>{a.severity.toUpperCase()}</Text><Text style={styles.alertTitle}>{a.title}</Text><Text style={styles.alertMessage}>{a.message}</Text></View>)}<TextInput multiline onChangeText={setQuestion} placeholder={selectedPet?`${selectedPet.name}: ${c.q}`:c.q} placeholderTextColor={colors.muted} style={styles.questionInput} value={question}/><Pressable disabled={askingAi||!selectedPetId||!question.trim()} onPress={handleAskAi} style={[styles.brainButton,styles.askButton]}>{askingAi?<ActivityIndicator color={colors.white}/>:<Text style={styles.brainButtonText}>{c.ask}</Text>}</Pressable>{aiAnswer?<Text style={styles.aiAnswer}>{aiAnswer}</Text>:null}{healthBrainError?<Text style={styles.brainError}>{healthBrainError}</Text>:null}<Text style={styles.disclaimer}>{c.disclaimer}</Text></View>:null}
+    {sortedRecords.length===0?<Text style={styles.empty}>{c.empty}</Text>:null}
+    {sortedRecords.map((item,index)=>{const notificationLabel=item.category==='Aşı'?getNotificationLabel(item.notificationStatus,language):null;return <View key={item.id} style={styles.row}><View style={styles.lineWrap}><View style={[styles.dot,{backgroundColor:item.category==='İlaç'?colors.accent:colors.primary}]}/>{index<sortedRecords.length-1?<View style={styles.line}/>:null}</View><View style={styles.card}><View style={styles.top}><Text style={styles.category}>{t(language,item.category)}</Text><Text style={styles.date}>{new Date(`${item.date}T00:00:00`).toLocaleDateString(language,{day:'numeric',month:'short'})}</Text></View><Text style={styles.record}>{item.title}</Text>{item.vaccineType?<Text style={styles.vaccineType}>{item.vaccineType}</Text>:null}<Text style={styles.pet}>{pets.find(p=>p.id===item.petId)?.name??c.pet}</Text>{item.administeredDate?<Text style={styles.meta}>{c.applied}: {new Date(`${item.administeredDate}T00:00:00`).toLocaleDateString(language)}</Text>:null}{item.veterinarian?<Text style={styles.meta}>{c.vet}: {item.veterinarian}</Text>:null}{notificationLabel?<Text style={styles.notificationBadge}>{notificationLabel}</Text>:null}{item.notes?<Text style={styles.notes}>{item.notes}</Text>:null}</View></View>;})}
+  </View>;
 }
 
-const styles = StyleSheet.create({
-  page: { padding: 22 },
-  header: { alignItems: 'flex-start', flexDirection: 'row', gap: 12, justifyContent: 'space-between' },
-  headerCopy: { flex: 1 },
-  title: { color: colors.text, fontSize: 30, fontWeight: '900' },
-  sub: { color: colors.muted, marginBottom: 25, marginTop: 5 },
-  addButton: { backgroundColor: colors.primary, borderColor: colors.primary, borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
-  addButtonActive: { backgroundColor: colors.surface },
-  addButtonText: { color: colors.white, fontSize: 12, fontWeight: '800' },
-  addButtonTextActive: { color: colors.primary },
-  brainCard: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 20, borderWidth: 1, marginBottom: 24, padding: 18 },
-  brainEyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 1.2 },
-  brainTitle: { color: colors.text, fontSize: 22, fontWeight: '900', marginTop: 4 },
-  brainCopy: { color: colors.muted, lineHeight: 20, marginTop: 7 },
-  petPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  petChip: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
-  petChipSelected: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
-  petChipText: { color: colors.muted, fontSize: 12, fontWeight: '800' },
-  petChipTextSelected: { color: colors.primaryDark },
-  brainButton: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 13, justifyContent: 'center', marginTop: 14, minHeight: 44, paddingHorizontal: 14, paddingVertical: 11 },
-  askButton: { marginTop: 9 },
-  brainButtonText: { color: colors.white, fontSize: 13, fontWeight: '900' },
-  noAlert: { color: colors.muted, fontSize: 12, marginTop: 12 },
-  alertCard: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 12, borderWidth: 1, marginTop: 10, padding: 12 },
-  alertSeverity: { color: colors.primary, fontSize: 10, fontWeight: '900' },
-  alertTitle: { color: colors.text, fontSize: 14, fontWeight: '900', marginTop: 3 },
-  alertMessage: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 4 },
-  questionInput: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 13, borderWidth: 1, color: colors.text, marginTop: 16, minHeight: 86, padding: 12, textAlignVertical: 'top' },
-  aiAnswer: { backgroundColor: colors.primarySoft, borderRadius: 12, color: colors.text, lineHeight: 20, marginTop: 12, padding: 12 },
-  brainError: { color: '#B42318', fontSize: 12, marginTop: 10 },
-  disclaimer: { color: colors.muted, fontSize: 10, lineHeight: 15, marginTop: 12 },
-  empty: { color: colors.muted, textAlign: 'center' },
-  row: { flexDirection: 'row' },
-  lineWrap: { alignItems: 'center', width: 28 },
-  dot: { borderRadius: 7, height: 14, marginTop: 20, width: 14 },
-  line: { backgroundColor: colors.border, flex: 1, width: 2 },
-  card: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 18, borderWidth: 1, flex: 1, marginBottom: 14, padding: 17 },
-  top: { flexDirection: 'row', justifyContent: 'space-between' },
-  category: { color: colors.primary, fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
-  date: { color: colors.muted, fontSize: 12, fontWeight: '700' },
-  record: { color: colors.text, fontSize: 17, fontWeight: '800', marginTop: 8 },
-  vaccineType: { color: colors.primary, fontSize: 12, fontWeight: '700', marginTop: 4 },
-  pet: { color: colors.muted, marginTop: 5 },
-  meta: { color: colors.muted, fontSize: 12, marginTop: 5 },
-  notificationBadge: { alignSelf: 'flex-start', backgroundColor: colors.primarySoft, borderRadius: 10, color: colors.primaryDark, fontSize: 11, fontWeight: '800', marginTop: 10, paddingHorizontal: 9, paddingVertical: 6 },
-  notes: { backgroundColor: colors.background, borderRadius: 9, color: colors.muted, marginTop: 10, padding: 9 },
-});
+const styles=StyleSheet.create({page:{padding:22},header:{alignItems:'flex-start',flexDirection:'row',gap:12,justifyContent:'space-between'},headerCopy:{flex:1},title:{color:colors.text,fontSize:30,fontWeight:'900'},sub:{color:colors.muted,marginBottom:25,marginTop:5},addButton:{backgroundColor:colors.primary,borderColor:colors.primary,borderRadius:14,borderWidth:1,paddingHorizontal:12,paddingVertical:10},addButtonActive:{backgroundColor:colors.surface},addButtonText:{color:colors.white,fontSize:12,fontWeight:'800'},addButtonTextActive:{color:colors.primary},brainCard:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:20,borderWidth:1,marginBottom:24,padding:18},brainEyebrow:{color:colors.primary,fontSize:11,fontWeight:'900',letterSpacing:1.2},brainTitle:{color:colors.text,fontSize:22,fontWeight:'900',marginTop:4},brainCopy:{color:colors.muted,lineHeight:20,marginTop:7},petPicker:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:14},petChip:{backgroundColor:colors.background,borderColor:colors.border,borderRadius:999,borderWidth:1,paddingHorizontal:12,paddingVertical:8},petChipSelected:{backgroundColor:colors.primarySoft,borderColor:colors.primary},petChipText:{color:colors.muted,fontSize:12,fontWeight:'800'},petChipTextSelected:{color:colors.primaryDark},brainButton:{alignItems:'center',backgroundColor:colors.primary,borderRadius:13,justifyContent:'center',marginTop:14,minHeight:44,paddingHorizontal:14,paddingVertical:11},askButton:{marginTop:9},brainButtonText:{color:colors.white,fontSize:13,fontWeight:'900'},noAlert:{color:colors.muted,fontSize:12,marginTop:12},alertCard:{backgroundColor:colors.background,borderColor:colors.border,borderRadius:12,borderWidth:1,marginTop:10,padding:12},alertSeverity:{color:colors.primary,fontSize:10,fontWeight:'900'},alertTitle:{color:colors.text,fontSize:14,fontWeight:'900',marginTop:3},alertMessage:{color:colors.muted,fontSize:12,lineHeight:18,marginTop:4},questionInput:{backgroundColor:colors.background,borderColor:colors.border,borderRadius:13,borderWidth:1,color:colors.text,marginTop:16,minHeight:86,padding:12,textAlignVertical:'top'},aiAnswer:{backgroundColor:colors.primarySoft,borderRadius:12,color:colors.text,lineHeight:20,marginTop:12,padding:12},brainError:{color:'#B42318',fontSize:12,marginTop:10},disclaimer:{color:colors.muted,fontSize:10,lineHeight:15,marginTop:12},empty:{color:colors.muted,textAlign:'center'},row:{flexDirection:'row'},lineWrap:{alignItems:'center',width:28},dot:{borderRadius:7,height:14,marginTop:20,width:14},line:{backgroundColor:colors.border,flex:1,width:2},card:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:18,borderWidth:1,flex:1,marginBottom:14,padding:17},top:{flexDirection:'row',justifyContent:'space-between'},category:{color:colors.primary,fontSize:12,fontWeight:'800',textTransform:'uppercase'},date:{color:colors.muted,fontSize:12,fontWeight:'700'},record:{color:colors.text,fontSize:17,fontWeight:'800',marginTop:8},vaccineType:{color:colors.primary,fontSize:12,fontWeight:'700',marginTop:4},pet:{color:colors.muted,marginTop:5},meta:{color:colors.muted,fontSize:12,marginTop:5},notificationBadge:{alignSelf:'flex-start',backgroundColor:colors.primarySoft,borderRadius:10,color:colors.primaryDark,fontSize:11,fontWeight:'800',marginTop:10,paddingHorizontal:9,paddingVertical:6},notes:{backgroundColor:colors.background,borderRadius:9,color:colors.muted,marginTop:10,padding:9}});
