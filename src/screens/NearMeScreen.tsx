@@ -1,240 +1,35 @@
 import * as Location from 'expo-location';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, Pressable, Share, StyleSheet, Text, TextInput, View } from 'react-native';
-import { createAppointmentRequest, loadFavoritePlaceIds, markAppointmentRequestSent, setPlaceFavorite } from '../lib/nearbyActions';
-import { findNearbyPetServices, type NearbyCategory, type NearbyPlace } from '../lib/nearbyServices';
-import { createPassportShare } from '../lib/platformData';
-import type { Pet } from '../types';
-import { colors, shadow } from '../theme';
+import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {ActivityIndicator,Linking,Platform,Pressable,Share,StyleSheet,Text,TextInput,View} from 'react-native';
+import {createAppointmentRequest,loadFavoritePlaceIds,markAppointmentRequestSent,setPlaceFavorite} from '../lib/nearbyActions';
+import {findNearbyPetServices,type NearbyCategory,type NearbyPlace} from '../lib/nearbyServices';
+import {createPassportShare} from '../lib/platformData';
+import type {Pet} from '../types';
+import {colors,shadow} from '../theme';
+import {usePreferences} from '../context/PreferencesContext';
 
-type Coordinates = { latitude: number; longitude: number };
-type SearchMode = { category: NearbyCategory; emergencyOnly: boolean };
-
-function distanceLabel(meters: number | null) {
-  if (meters == null) return '';
-  return meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1)} km`;
-}
-
-function EmbeddedMap({ location, places, onSelect }: { location: Coordinates; places: NearbyPlace[]; onSelect: (place: NearbyPlace) => void }) {
-  if (Platform.OS === 'web') return <View style={styles.mapFallback}><Text style={styles.mapFallbackText}>Harita mobil uygulamada görüntülenir.</Text></View>;
-  try {
-    const { AppleMaps, GoogleMaps } = require('expo-maps') as any;
-    const markers = places.map(place => ({
-      id: place.id,
-      coordinates: { latitude: place.latitude, longitude: place.longitude },
-      title: place.name,
-      snippet: place.address,
-      monogram: place.kind === 'veterinary' ? 'V' : 'P',
-      tintColor: place.kind === 'veterinary' ? '#C7524C' : colors.primary,
-      showCallout: true,
-    }));
-    const cameraPosition = { coordinates: location, zoom: 13 };
-    if (Platform.OS === 'ios' && AppleMaps?.View) return <AppleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(event: any) => { const place = places.find(item => item.id === event?.id); if (place) onSelect(place); }} style={styles.map} />;
-    if (Platform.OS === 'android' && GoogleMaps?.View) return <GoogleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(event: any) => { const place = places.find(item => item.id === event?.id); if (place) onSelect(place); }} style={styles.map} />;
-  } catch {
-    // Expo Go does not ship expo-maps. Search/list remains usable there.
-  }
-  return <View style={styles.mapFallback}><Text style={styles.mapFallbackTitle}>Harita development build ile açılır</Text><Text style={styles.mapFallbackText}>Yakındaki yerler ve yol tarifi listeden kullanılabilir.</Text></View>;
-}
-
-export function NearMeScreen({ userId, pets }: { userId?: string; pets: Pet[] }) {
-  const [category, setCategory] = useState<NearbyCategory>('all');
-  const [emergencyOnly, setEmergencyOnly] = useState(false);
-  const [location, setLocation] = useState<Coordinates | null>(null);
-  const [places, setPlaces] = useState<NearbyPlace[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id);
-  const [appointmentOpen, setAppointmentOpen] = useState(false);
-  const [appointmentTime, setAppointmentTime] = useState('');
-  const [appointmentNote, setAppointmentNote] = useState('');
-  const [actionBusy, setActionBusy] = useState(false);
-  const initialSearchStarted = useRef(false);
-
-  useEffect(() => {
-    if (!selectedPetId && pets[0]?.id) setSelectedPetId(pets[0].id);
-  }, [pets, selectedPetId]);
-
-  useEffect(() => {
-    if (!userId) return;
-    loadFavoritePlaceIds(userId).then(setFavoriteIds).catch(() => undefined);
-  }, [userId]);
-
-  const requestLocation = useCallback(async () => {
-    setError(null);
-    const permission = await Location.requestForegroundPermissionsAsync();
-    if (!permission.granted) {
-      setError('Yakındaki veterinerleri göstermek için konum izni gerekiyor.');
-      return null;
-    }
-    const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    const next = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-    setLocation(next);
-    return next;
-  }, []);
-
-  const runSearch = useCallback(async (coords: Coordinates | null | undefined, mode: SearchMode) => {
-    const target = coords ?? await requestLocation();
-    if (!target) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await findNearbyPetServices({
-        ...target,
-        radiusMeters: mode.emergencyOnly ? 25000 : 10000,
-        category: mode.emergencyOnly ? 'veterinary' : mode.category,
-        openNowOnly: mode.emergencyOnly,
-        languageCode: 'tr',
-      });
-      setPlaces(result);
-      setSelectedId(result[0]?.id ?? null);
-      if (mode.emergencyOnly && result.length === 0) setError('25 km içinde şu an açık olduğu doğrulanan veteriner bulunamadı. Acil durumda daha geniş bölgede arayın veya bilinen kliniğinizi arayın.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Yakındaki yerler yüklenemedi.');
-    } finally {
-      setLoading(false);
-    }
-  }, [requestLocation]);
-
-  useEffect(() => {
-    if (initialSearchStarted.current) return;
-    initialSearchStarted.current = true;
-    requestLocation().then(coords => { if (coords) void runSearch(coords, { category: 'all', emergencyOnly: false }); });
-  }, [requestLocation, runSearch]);
-
-  const selected = useMemo(() => places.find(place => place.id === selectedId) ?? null, [places, selectedId]);
-  const selectedPet = pets.find(pet => pet.id === selectedPetId) ?? pets[0];
-  const selectedFavorite = selected ? favoriteIds.includes(selected.id) : false;
-
-  const openDirections = async (place: NearbyPlace) => {
-    const url = place.mapsUrl || (Platform.OS === 'ios' ? `http://maps.apple.com/?daddr=${place.latitude},${place.longitude}&dirflg=d` : `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`);
-    await Linking.openURL(url);
-  };
-
-  const callPlace = async (place: NearbyPlace) => {
-    if (place.phone) await Linking.openURL(`tel:${place.phone.replace(/[^+\d]/g, '')}`);
-  };
-
-  const toggleFavorite = async () => {
-    if (!selected || !userId) return;
-    const next = !selectedFavorite;
-    setActionBusy(true);
-    try {
-      await setPlaceFavorite(userId, selected, next);
-      setFavoriteIds(current => next ? Array.from(new Set([...current, selected.id])) : current.filter(id => id !== selected.id));
-    } catch {
-      setError('Favori işlemi kaydedilemedi.');
-    } finally {
-      setActionBusy(false);
-    }
-  };
-
-  const sharePassport = async () => {
-    if (!selectedPet) {
-      setError('Önce bir dost profili oluşturun.');
-      return;
-    }
-    setActionBusy(true);
-    try {
-      const share = await createPassportShare(selectedPet.id, false);
-      await Share.share({ message: `${selectedPet.name} için PetVitals Health Passport erişim kodu:\n${share.token}\n\nBu kodu yalnızca güvendiğiniz veterinerle paylaşın.` });
-    } catch {
-      setError('Health Passport paylaşımı oluşturulamadı.');
-    } finally {
-      setActionBusy(false);
-    }
-  };
-
-  const sendAppointmentRequest = async () => {
-    if (!selected || selected.kind !== 'veterinary' || !userId) return;
-    setActionBusy(true);
-    try {
-      const requestId = await createAppointmentRequest({ userId, petId: selectedPet?.id, place: selected, preferredTime: appointmentTime, note: appointmentNote });
-      const message = `Merhaba, PetVitals üzerinden ${selectedPet?.name ? selectedPet.name + ' için ' : ''}randevu talep ediyorum.${appointmentTime.trim() ? ` Tercih edilen zaman: ${appointmentTime.trim()}.` : ''}${appointmentNote.trim() ? ` Not: ${appointmentNote.trim()}` : ''}`;
-      if (selected.phone) {
-        const phone = selected.phone.replace(/[^+\d]/g, '');
-        const smsUrl = Platform.OS === 'ios' ? `sms:${phone}&body=${encodeURIComponent(message)}` : `sms:${phone}?body=${encodeURIComponent(message)}`;
-        await Linking.openURL(smsUrl);
-        await markAppointmentRequestSent(userId, requestId);
-      } else {
-        await Share.share({ message: `${selected.name}\n${message}` });
-      }
-      setAppointmentOpen(false);
-      setAppointmentTime('');
-      setAppointmentNote('');
-    } catch {
-      setError('Randevu talebi hazırlanamadı.');
-    } finally {
-      setActionBusy(false);
-    }
-  };
-
-  const applyCategory = (next: NearbyCategory) => {
-    setEmergencyOnly(false);
-    setCategory(next);
-    void runSearch(location, { category: next, emergencyOnly: false });
-  };
-
-  const activateEmergency = () => {
-    setEmergencyOnly(true);
-    setCategory('veterinary');
-    void runSearch(location, { category: 'veterinary', emergencyOnly: true });
-  };
-
-  return (
-    <View style={styles.page}>
-      <Text style={styles.eyebrow}>PETVITALS NEARBY</Text>
-      <Text style={styles.title}>Yakınınızdaki bakım noktaları</Text>
-      <Text style={styles.sub}>Veterinerleri ve petshopları konumunuza göre bulun. Acil mod, şu anda açık görünen veterinerleri öne çıkarır.</Text>
-
-      <View style={styles.filters}>{(['all', 'veterinary', 'petshop'] as NearbyCategory[]).map(item => { const label = item === 'all' ? 'Tümü' : item === 'veterinary' ? 'Veteriner' : 'Petshop'; const active = category === item && !emergencyOnly; return <Pressable key={item} onPress={() => applyCategory(item)} style={[styles.chip, active && styles.chipActive]}><Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text></Pressable>; })}</View>
-
-      <Pressable accessibilityRole="button" onPress={activateEmergency} style={[styles.emergencyButton, emergencyOnly && styles.emergencyButtonActive]}>
-        <Text style={styles.emergencyTitle}>⚕ ACİL · ŞU AN AÇIK VETERİNER</Text>
-        <Text style={styles.emergencyText}>25 km içinde açık görünen klinikleri ara</Text>
-      </Pressable>
-
-      <View style={styles.actionRow}><Pressable onPress={() => void runSearch(location, { category, emergencyOnly })} style={styles.refreshButton}><Text style={styles.refreshText}>↻ Yenile</Text></Pressable><Text style={styles.locationNote}>{location ? 'Konumunuz kullanılıyor' : 'Konum bekleniyor'}</Text></View>
-      {loading ? <ActivityIndicator color={colors.primary} size="large" style={styles.loader} /> : null}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {location ? <EmbeddedMap location={location} onSelect={place => { setSelectedId(place.id); setAppointmentOpen(false); }} places={places} /> : null}
-
-      {selected ? (
-        <View style={styles.selectedCard}>
-          <View style={styles.cardHeader}><View style={{ flex: 1 }}><Text style={styles.selectedKind}>{selected.kind === 'veterinary' ? 'VETERİNER' : 'PETSHOP'}</Text><Text style={styles.selectedName}>{selected.name}</Text></View><Pressable disabled={!userId || actionBusy} onPress={() => void toggleFavorite()} style={styles.favoriteButton}><Text style={styles.favoriteText}>{selectedFavorite ? '★' : '☆'}</Text></Pressable></View>
-          <Text style={styles.address}>{selected.address}</Text>
-          <View style={styles.metaRow}>{selected.distanceMeters != null ? <Text style={styles.meta}>{distanceLabel(selected.distanceMeters)}</Text> : null}{selected.rating != null ? <Text style={styles.meta}>★ {selected.rating.toFixed(1)}{selected.ratingCount ? ` (${selected.ratingCount})` : ''}</Text> : null}<Text style={[styles.meta, selected.openNow === true ? styles.open : selected.openNow === false ? styles.closed : null]}>{selected.openNow === true ? 'Açık' : selected.openNow === false ? 'Kapalı' : 'Saat bilgisi yok'}</Text></View>
-          <View style={styles.cardActions}><Pressable onPress={() => void openDirections(selected)} style={styles.primaryAction}><Text style={styles.primaryActionText}>Yol tarifi</Text></Pressable><Pressable disabled={!selected.phone} onPress={() => void callPlace(selected)} style={[styles.secondaryAction, !selected.phone && styles.disabled]}><Text style={styles.secondaryActionText}>{emergencyOnly ? '⚡ Acil ara' : 'Ara'}</Text></Pressable></View>
-
-          {selected.kind === 'veterinary' ? <>
-            {pets.length > 0 ? <View style={styles.petRow}>{pets.map(pet => <Pressable key={pet.id} onPress={() => setSelectedPetId(pet.id)} style={[styles.petChip, selectedPet?.id === pet.id && styles.petChipActive]}><Text style={[styles.petChipText, selectedPet?.id === pet.id && styles.petChipTextActive]}>{pet.name}</Text></Pressable>)}</View> : null}
-            <View style={styles.cardActions}><Pressable disabled={actionBusy || !selectedPet} onPress={() => void sharePassport()} style={styles.secondaryAction}><Text style={styles.secondaryActionText}>Health Passport gönder</Text></Pressable><Pressable disabled={actionBusy || !userId} onPress={() => setAppointmentOpen(value => !value)} style={styles.secondaryAction}><Text style={styles.secondaryActionText}>Randevu iste</Text></Pressable></View>
-            {appointmentOpen ? <View style={styles.appointmentBox}><Text style={styles.appointmentTitle}>Randevu talebi</Text><TextInput value={appointmentTime} onChangeText={setAppointmentTime} placeholder="Tercih edilen zaman (örn. yarın 14:00)" placeholderTextColor={colors.muted} style={styles.input} /><TextInput multiline value={appointmentNote} onChangeText={setAppointmentNote} placeholder="Kısa not (isteğe bağlı)" placeholderTextColor={colors.muted} style={[styles.input, styles.noteInput]} /><Pressable disabled={actionBusy} onPress={() => void sendAppointmentRequest()} style={styles.primaryAction}>{actionBusy ? <ActivityIndicator color={colors.white} /> : <Text style={styles.primaryActionText}>Talebi hazırla ve gönder</Text>}</Pressable></View> : null}
-          </> : null}
-        </View>
-      ) : null}
-
-      {favoriteIds.length > 0 ? <Text style={styles.favoriteInfo}>★ {favoriteIds.length} favori bakım noktası kayıtlı</Text> : null}
-      <Text style={styles.section}>Yakındaki yerler</Text>
-      {places.map(place => <Pressable key={place.id} onPress={() => { setSelectedId(place.id); setAppointmentOpen(false); }} style={[styles.placeCard, selectedId === place.id && styles.placeCardSelected]}><View style={styles.placeIcon}><Text>{place.kind === 'veterinary' ? '⚕' : '🛍'}</Text></View><View style={styles.placeCopy}><Text numberOfLines={1} style={styles.placeName}>{favoriteIds.includes(place.id) ? '★ ' : ''}{place.name}</Text><Text numberOfLines={1} style={styles.placeAddress}>{place.address}</Text><Text style={styles.placeMeta}>{distanceLabel(place.distanceMeters)}{place.rating != null ? ` · ★ ${place.rating.toFixed(1)}` : ''} · {place.openNow === true ? 'Açık' : place.openNow === false ? 'Kapalı' : 'Saat bilinmiyor'}</Text></View><Text style={styles.chevron}>›</Text></Pressable>)}
-
-      <View style={styles.safetyCard}><Text style={styles.safetyTitle}>Acil durumda saat bilgisini doğrulayın</Text><Text style={styles.safetyText}>Haritadaki “açık” bilgisi işletmenin yayınladığı çalışma saatlerine dayanır ve güncel olmayabilir. Yola çıkmadan önce kliniği arayın.</Text></View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  page: { padding: 22 }, eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 1.2 }, title: { color: colors.text, fontSize: 28, fontWeight: '900', lineHeight: 34, marginTop: 7 }, sub: { color: colors.muted, lineHeight: 21, marginTop: 8 },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 18 }, chip: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 9 }, chipActive: { backgroundColor: colors.primary, borderColor: colors.primary }, chipText: { color: colors.text, fontWeight: '800' }, chipTextActive: { color: colors.white },
-  emergencyButton: { backgroundColor: '#FFF2F0', borderColor: '#F0C0BB', borderRadius: 18, borderWidth: 1, marginTop: 13, padding: 15 }, emergencyButtonActive: { backgroundColor: '#FCE5E2', borderColor: '#C7524C' }, emergencyTitle: { color: '#A63D38', fontSize: 14, fontWeight: '900' }, emergencyText: { color: '#895B57', fontSize: 12, marginTop: 4 },
-  actionRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }, refreshButton: { backgroundColor: colors.primarySoft, borderRadius: 12, paddingHorizontal: 13, paddingVertical: 9 }, refreshText: { color: colors.primaryDark, fontWeight: '800' }, locationNote: { color: colors.muted, fontSize: 11 }, loader: { marginVertical: 18 }, error: { color: colors.danger, lineHeight: 19, marginVertical: 10 },
-  map: { borderRadius: 20, height: 300, marginTop: 15, overflow: 'hidden', width: '100%' }, mapFallback: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 20, height: 210, justifyContent: 'center', marginTop: 15, padding: 24 }, mapFallbackTitle: { color: colors.primaryDark, fontSize: 16, fontWeight: '900', textAlign: 'center' }, mapFallbackText: { color: colors.muted, lineHeight: 19, marginTop: 7, textAlign: 'center' },
-  selectedCard: { ...shadow, backgroundColor: colors.surface, borderRadius: 20, marginTop: 14, padding: 17 }, cardHeader: { alignItems: 'center', flexDirection: 'row', gap: 12 }, favoriteButton: { alignItems: 'center', backgroundColor: '#FFF8E8', borderRadius: 22, height: 44, justifyContent: 'center', width: 44 }, favoriteText: { color: '#9A6B00', fontSize: 24 }, selectedKind: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }, selectedName: { color: colors.text, fontSize: 19, fontWeight: '900', marginTop: 4 }, address: { color: colors.muted, lineHeight: 18, marginTop: 5 }, metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 10 }, meta: { color: colors.muted, fontSize: 12, fontWeight: '700' }, open: { color: colors.primary }, closed: { color: colors.danger },
-  cardActions: { flexDirection: 'row', gap: 9, marginTop: 14 }, primaryAction: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 13, flex: 1, justifyContent: 'center', minHeight: 44, paddingHorizontal: 12, paddingVertical: 12 }, primaryActionText: { color: colors.white, fontWeight: '900', textAlign: 'center' }, secondaryAction: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 13, flex: 1, justifyContent: 'center', minHeight: 44, paddingHorizontal: 10, paddingVertical: 12 }, secondaryActionText: { color: colors.primaryDark, fontSize: 12, fontWeight: '900', textAlign: 'center' }, disabled: { opacity: 0.45 },
-  petRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 14 }, petChip: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 11, paddingVertical: 7 }, petChipActive: { backgroundColor: colors.primary }, petChipText: { color: colors.text, fontSize: 12, fontWeight: '800' }, petChipTextActive: { color: colors.white },
-  appointmentBox: { backgroundColor: colors.background, borderRadius: 15, marginTop: 12, padding: 12 }, appointmentTitle: { color: colors.text, fontWeight: '900', marginBottom: 8 }, input: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 12, borderWidth: 1, color: colors.text, fontSize: 16, marginBottom: 8, minHeight: 46, paddingHorizontal: 12 }, noteInput: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' },
-  favoriteInfo: { color: '#8A6500', fontSize: 12, fontWeight: '800', marginTop: 14 }, section: { color: colors.text, fontSize: 19, fontWeight: '900', marginBottom: 11, marginTop: 24 }, placeCard: { alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 16, borderWidth: 1, flexDirection: 'row', marginBottom: 9, padding: 12 }, placeCardSelected: { borderColor: colors.primary }, placeIcon: { alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: 12, height: 40, justifyContent: 'center', width: 40 }, placeCopy: { flex: 1, marginLeft: 11, minWidth: 0 }, placeName: { color: colors.text, fontWeight: '900' }, placeAddress: { color: colors.muted, fontSize: 11, marginTop: 3 }, placeMeta: { color: colors.primaryDark, fontSize: 11, fontWeight: '700', marginTop: 5 }, chevron: { color: colors.muted, fontSize: 26, marginLeft: 6 },
-  safetyCard: { backgroundColor: '#FFF8E8', borderRadius: 17, marginTop: 12, padding: 15 }, safetyTitle: { color: '#7A5A16', fontWeight: '900' }, safetyText: { color: colors.muted, lineHeight: 18, marginTop: 5 },
-});
+type Coordinates={latitude:number;longitude:number};type SearchMode={category:NearbyCategory;emergencyOnly:boolean};
+const copy={
+tr:{webMap:'Harita mobil uygulamada görüntülenir.',devMap:'Harita development build ile açılır',devMapText:'Yakındaki yerler ve yol tarifi listeden kullanılabilir.',permission:'Yakındaki veterinerleri göstermek için konum izni gerekiyor.',noneEmergency:'25 km içinde şu an açık olduğu doğrulanan veteriner bulunamadı. Acil durumda daha geniş bölgede arayın veya bilinen kliniğinizi arayın.',load:'Yakındaki yerler yüklenemedi.',favoriteFail:'Favori işlemi kaydedilemedi.',needPet:'Önce bir dost profili oluşturun.',passportFail:'Health Passport paylaşımı oluşturulamadı.',appointmentFail:'Randevu talebi hazırlanamadı.',title:'Yakınınızdaki bakım noktaları',sub:'Veterinerleri ve petshopları konumunuza göre bulun. Acil mod, şu anda açık görünen veterinerleri öne çıkarır.',all:'Tümü',vet:'Veteriner',petshop:'Petshop',emergency:'⚕ ACİL · ŞU AN AÇIK VETERİNER',emergencyText:'25 km içinde açık görünen klinikleri ara',refresh:'↻ Yenile',using:'Konumunuz kullanılıyor',waiting:'Konum bekleniyor',open:'Açık',closed:'Kapalı',unknown:'Saat bilgisi yok',directions:'Yol tarifi',call:'Ara',emergencyCall:'⚡ Acil ara',sendPassport:'Health Passport gönder',appointment:'Randevu iste',appointmentTitle:'Randevu talebi',time:'Tercih edilen zaman (örn. yarın 14:00)',note:'Kısa not (isteğe bağlı)',send:'Talebi hazırla ve gönder',favorites:'favori bakım noktası kayıtlı',nearby:'Yakındaki yerler',safety:'Acil durumda saat bilgisini doğrulayın',safetyText:'Haritadaki “açık” bilgisi işletmenin yayınladığı çalışma saatlerine dayanır ve güncel olmayabilir. Yola çıkmadan önce kliniği arayın.',message:'Merhaba, PetVitals üzerinden randevu talep ediyorum.'},
+en:{webMap:'The map is shown in the mobile app.',devMap:'Map opens in a development build',devMapText:'Nearby places and directions remain available from the list.',permission:'Location permission is required to show nearby veterinarians.',noneEmergency:'No veterinarian verified as open now was found within 25 km. In an emergency, search a wider area or call a known clinic.',load:'Could not load nearby places.',favoriteFail:'Could not save favorite.',needPet:'Create a pet profile first.',passportFail:'Could not create Health Passport share.',appointmentFail:'Could not prepare appointment request.',title:'Care points near you',sub:'Find veterinarians and pet shops based on your location. Emergency mode prioritizes clinics that appear open now.',all:'All',vet:'Veterinarian',petshop:'Pet shop',emergency:'⚕ EMERGENCY · VET OPEN NOW',emergencyText:'Search clinics that appear open within 25 km',refresh:'↻ Refresh',using:'Using your location',waiting:'Waiting for location',open:'Open',closed:'Closed',unknown:'Hours unavailable',directions:'Directions',call:'Call',emergencyCall:'⚡ Emergency call',sendPassport:'Send Health Passport',appointment:'Request appointment',appointmentTitle:'Appointment request',time:'Preferred time (e.g. tomorrow 14:00)',note:'Short note (optional)',send:'Prepare and send request',favorites:'favorite care points saved',nearby:'Nearby places',safety:'Verify opening hours in an emergency',safetyText:'“Open” status is based on business-published hours and may be outdated. Call the clinic before leaving.',message:'Hello, I would like to request an appointment through PetVitals.'},
+de:{webMap:'Die Karte wird in der mobilen App angezeigt.',devMap:'Karte öffnet sich im Development Build',devMapText:'Orte in der Nähe und Wegbeschreibungen sind weiterhin über die Liste verfügbar.',permission:'Für Tierärzte in der Nähe ist Standortzugriff erforderlich.',noneEmergency:'Innerhalb von 25 km wurde kein aktuell geöffnet bestätigter Tierarzt gefunden. Suchen Sie im Notfall weiter oder rufen Sie eine bekannte Klinik an.',load:'Orte in der Nähe konnten nicht geladen werden.',favoriteFail:'Favorit konnte nicht gespeichert werden.',needPet:'Erstellen Sie zuerst ein Tierprofil.',passportFail:'Health Passport konnte nicht geteilt werden.',appointmentFail:'Terminanfrage konnte nicht vorbereitet werden.',title:'Versorgung in Ihrer Nähe',sub:'Finden Sie Tierärzte und Tierhandlungen nach Standort. Der Notfallmodus priorisiert aktuell geöffnete Kliniken.',all:'Alle',vet:'Tierarzt',petshop:'Tierhandlung',emergency:'⚕ NOTFALL · JETZT GEÖFFNETER TIERARZT',emergencyText:'Geöffnete Kliniken im Umkreis von 25 km suchen',refresh:'↻ Aktualisieren',using:'Standort wird verwendet',waiting:'Warte auf Standort',open:'Geöffnet',closed:'Geschlossen',unknown:'Öffnungszeiten unbekannt',directions:'Route',call:'Anrufen',emergencyCall:'⚡ Notruf',sendPassport:'Health Passport senden',appointment:'Termin anfragen',appointmentTitle:'Terminanfrage',time:'Wunschzeit (z. B. morgen 14:00)',note:'Kurze Notiz (optional)',send:'Anfrage vorbereiten und senden',favorites:'favorisierte Versorgungsorte gespeichert',nearby:'Orte in der Nähe',safety:'Öffnungszeiten im Notfall prüfen',safetyText:'Der Status „geöffnet“ basiert auf veröffentlichten Öffnungszeiten und kann veraltet sein. Rufen Sie vor der Abfahrt an.',message:'Hallo, ich möchte über PetVitals einen Termin anfragen.'},
+es:{webMap:'El mapa se muestra en la aplicación móvil.',devMap:'El mapa se abre en una build de desarrollo',devMapText:'Los lugares cercanos y las indicaciones siguen disponibles en la lista.',permission:'Se necesita permiso de ubicación para mostrar veterinarios cercanos.',noneEmergency:'No se encontró ningún veterinario verificado como abierto ahora en 25 km. En una emergencia, amplía la búsqueda o llama a una clínica conocida.',load:'No se pudieron cargar los lugares cercanos.',favoriteFail:'No se pudo guardar el favorito.',needPet:'Crea primero un perfil de mascota.',passportFail:'No se pudo crear el acceso Health Passport.',appointmentFail:'No se pudo preparar la solicitud de cita.',title:'Puntos de cuidado cerca de ti',sub:'Encuentra veterinarios y tiendas de mascotas según tu ubicación. El modo emergencia prioriza clínicas que aparecen abiertas ahora.',all:'Todos',vet:'Veterinario',petshop:'Tienda',emergency:'⚕ EMERGENCIA · VETERINARIO ABIERTO AHORA',emergencyText:'Buscar clínicas abiertas en 25 km',refresh:'↻ Actualizar',using:'Usando tu ubicación',waiting:'Esperando ubicación',open:'Abierto',closed:'Cerrado',unknown:'Horario no disponible',directions:'Cómo llegar',call:'Llamar',emergencyCall:'⚡ Llamada urgente',sendPassport:'Enviar Health Passport',appointment:'Pedir cita',appointmentTitle:'Solicitud de cita',time:'Hora preferida (p. ej. mañana 14:00)',note:'Nota breve (opcional)',send:'Preparar y enviar solicitud',favorites:'puntos de cuidado favoritos guardados',nearby:'Lugares cercanos',safety:'Verifica el horario en una emergencia',safetyText:'El estado “abierto” se basa en horarios publicados por el negocio y puede estar desactualizado. Llama antes de salir.',message:'Hola, me gustaría solicitar una cita a través de PetVitals.'}
+} as const;
+function distanceLabel(meters:number|null){if(meters==null)return'';return meters<1000?`${meters} m`:`${(meters/1000).toFixed(1)} km`;}
+function EmbeddedMap({location,places,onSelect,language}:{location:Coordinates;places:NearbyPlace[];onSelect:(place:NearbyPlace)=>void;language:keyof typeof copy}){const c=copy[language];if(Platform.OS==='web')return <View style={styles.mapFallback}><Text style={styles.mapFallbackText}>{c.webMap}</Text></View>;try{const{AppleMaps,GoogleMaps}=require('expo-maps') as any;const markers=places.map(place=>({id:place.id,coordinates:{latitude:place.latitude,longitude:place.longitude},title:place.name,snippet:place.address,monogram:place.kind==='veterinary'?'V':'P',tintColor:place.kind==='veterinary'?'#C7524C':colors.primary,showCallout:true}));const cameraPosition={coordinates:location,zoom:13};if(Platform.OS==='ios'&&AppleMaps?.View)return <AppleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(e:any)=>{const p=places.find(x=>x.id===e?.id);if(p)onSelect(p);}} style={styles.map}/>;if(Platform.OS==='android'&&GoogleMaps?.View)return <GoogleMaps.View cameraPosition={cameraPosition} markers={markers} onMarkerClick={(e:any)=>{const p=places.find(x=>x.id===e?.id);if(p)onSelect(p);}} style={styles.map}/>;}catch{}return <View style={styles.mapFallback}><Text style={styles.mapFallbackTitle}>{c.devMap}</Text><Text style={styles.mapFallbackText}>{c.devMapText}</Text></View>}
+export function NearMeScreen({userId,pets}:{userId?:string;pets:Pet[]}){const{language}=usePreferences();const c=copy[language];const[category,setCategory]=useState<NearbyCategory>('all');const[emergencyOnly,setEmergencyOnly]=useState(false);const[location,setLocation]=useState<Coordinates|null>(null);const[places,setPlaces]=useState<NearbyPlace[]>([]);const[loading,setLoading]=useState(false);const[error,setError]=useState<string|null>(null);const[selectedId,setSelectedId]=useState<string|null>(null);const[favoriteIds,setFavoriteIds]=useState<string[]>([]);const[selectedPetId,setSelectedPetId]=useState(pets[0]?.id);const[appointmentOpen,setAppointmentOpen]=useState(false);const[appointmentTime,setAppointmentTime]=useState('');const[appointmentNote,setAppointmentNote]=useState('');const[actionBusy,setActionBusy]=useState(false);const initialSearchStarted=useRef(false);
+useEffect(()=>{if(!selectedPetId&&pets[0]?.id)setSelectedPetId(pets[0].id);},[pets,selectedPetId]);useEffect(()=>{if(userId)loadFavoritePlaceIds(userId).then(setFavoriteIds).catch(()=>undefined);},[userId]);
+const requestLocation=useCallback(async()=>{setError(null);const permission=await Location.requestForegroundPermissionsAsync();if(!permission.granted){setError(c.permission);return null;}const position=await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.Balanced});const next={latitude:position.coords.latitude,longitude:position.coords.longitude};setLocation(next);return next;},[language]);
+const runSearch=useCallback(async(coords:Coordinates|null|undefined,mode:SearchMode)=>{const target=coords??await requestLocation();if(!target)return;setLoading(true);setError(null);try{const result=await findNearbyPetServices({...target,radiusMeters:mode.emergencyOnly?25000:10000,category:mode.emergencyOnly?'veterinary':mode.category,openNowOnly:mode.emergencyOnly,languageCode:language});setPlaces(result);setSelectedId(result[0]?.id??null);if(mode.emergencyOnly&&result.length===0)setError(c.noneEmergency);}catch(err){setError(err instanceof Error?err.message:c.load);}finally{setLoading(false);}},[requestLocation,language]);
+useEffect(()=>{if(initialSearchStarted.current)return;initialSearchStarted.current=true;requestLocation().then(coords=>{if(coords)void runSearch(coords,{category:'all',emergencyOnly:false});});},[requestLocation,runSearch]);
+const selected=useMemo(()=>places.find(p=>p.id===selectedId)??null,[places,selectedId]);const selectedPet=pets.find(p=>p.id===selectedPetId)??pets[0];const selectedFavorite=selected?favoriteIds.includes(selected.id):false;
+const openDirections=async(place:NearbyPlace)=>{const url=place.mapsUrl||(Platform.OS==='ios'?`http://maps.apple.com/?daddr=${place.latitude},${place.longitude}&dirflg=d`:`https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`);await Linking.openURL(url)};const callPlace=async(place:NearbyPlace)=>{if(place.phone)await Linking.openURL(`tel:${place.phone.replace(/[^+\d]/g,'')}`)};
+const toggleFavorite=async()=>{if(!selected||!userId)return;const next=!selectedFavorite;setActionBusy(true);try{await setPlaceFavorite(userId,selected,next);setFavoriteIds(cur=>next?Array.from(new Set([...cur,selected.id])):cur.filter(id=>id!==selected.id));}catch{setError(c.favoriteFail);}finally{setActionBusy(false)}};
+const sharePassport=async()=>{if(!selectedPet){setError(c.needPet);return;}setActionBusy(true);try{const share=await createPassportShare(selectedPet.id,false);await Share.share({message:`PetVitals Health Passport — ${selectedPet.name}\n${share.token}`});}catch{setError(c.passportFail);}finally{setActionBusy(false)}};
+const sendAppointmentRequest=async()=>{if(!selected||selected.kind!=='veterinary'||!userId)return;setActionBusy(true);try{const requestId=await createAppointmentRequest({userId,petId:selectedPet?.id,place:selected,preferredTime:appointmentTime,note:appointmentNote});const message=`${c.message}${selectedPet?.name?` ${selectedPet.name}.`:''}${appointmentTime.trim()?` ${appointmentTime.trim()}.`:''}${appointmentNote.trim()?` ${appointmentNote.trim()}`:''}`;if(selected.phone){const phone=selected.phone.replace(/[^+\d]/g,'');await Linking.openURL(Platform.OS==='ios'?`sms:${phone}&body=${encodeURIComponent(message)}`:`sms:${phone}?body=${encodeURIComponent(message)}`);await markAppointmentRequestSent(userId,requestId);}else await Share.share({message:`${selected.name}\n${message}`});setAppointmentOpen(false);setAppointmentTime('');setAppointmentNote('');}catch{setError(c.appointmentFail);}finally{setActionBusy(false)}};
+const applyCategory=(next:NearbyCategory)=>{setEmergencyOnly(false);setCategory(next);void runSearch(location,{category:next,emergencyOnly:false})};const activateEmergency=()=>{setEmergencyOnly(true);setCategory('veterinary');void runSearch(location,{category:'veterinary',emergencyOnly:true})};
+const status=(p:NearbyPlace)=>p.openNow===true?c.open:p.openNow===false?c.closed:c.unknown;
+return <View style={styles.page}><Text style={styles.eyebrow}>PETVITALS NEARBY</Text><Text style={styles.title}>{c.title}</Text><Text style={styles.sub}>{c.sub}</Text><View style={styles.filters}>{(['all','veterinary','petshop'] as NearbyCategory[]).map(item=>{const label=item==='all'?c.all:item==='veterinary'?c.vet:c.petshop;const active=category===item&&!emergencyOnly;return <Pressable key={item} onPress={()=>applyCategory(item)} style={[styles.chip,active&&styles.chipActive]}><Text style={[styles.chipText,active&&styles.chipTextActive]}>{label}</Text></Pressable>})}</View><Pressable onPress={activateEmergency} style={[styles.emergencyButton,emergencyOnly&&styles.emergencyButtonActive]}><Text style={styles.emergencyTitle}>{c.emergency}</Text><Text style={styles.emergencyText}>{c.emergencyText}</Text></Pressable><View style={styles.actionRow}><Pressable onPress={()=>void runSearch(location,{category,emergencyOnly})} style={styles.refreshButton}><Text style={styles.refreshText}>{c.refresh}</Text></Pressable><Text style={styles.locationNote}>{location?c.using:c.waiting}</Text></View>{loading?<ActivityIndicator color={colors.primary} size="large" style={styles.loader}/>:null}{error?<Text style={styles.error}>{error}</Text>:null}{location?<EmbeddedMap language={language} location={location} onSelect={p=>{setSelectedId(p.id);setAppointmentOpen(false)}} places={places}/>:null}
+{selected?<View style={styles.selectedCard}><View style={styles.cardHeader}><View style={{flex:1}}><Text style={styles.selectedKind}>{selected.kind==='veterinary'?c.vet.toUpperCase():c.petshop.toUpperCase()}</Text><Text style={styles.selectedName}>{selected.name}</Text></View><Pressable disabled={!userId||actionBusy} onPress={()=>void toggleFavorite()} style={styles.favoriteButton}><Text style={styles.favoriteText}>{selectedFavorite?'★':'☆'}</Text></Pressable></View><Text style={styles.address}>{selected.address}</Text><View style={styles.metaRow}>{selected.distanceMeters!=null?<Text style={styles.meta}>{distanceLabel(selected.distanceMeters)}</Text>:null}{selected.rating!=null?<Text style={styles.meta}>★ {selected.rating.toFixed(1)}</Text>:null}<Text style={[styles.meta,selected.openNow===true?styles.open:selected.openNow===false?styles.closed:null]}>{status(selected)}</Text></View><View style={styles.cardActions}><Pressable onPress={()=>void openDirections(selected)} style={styles.primaryAction}><Text style={styles.primaryActionText}>{c.directions}</Text></Pressable><Pressable disabled={!selected.phone} onPress={()=>void callPlace(selected)} style={[styles.secondaryAction,!selected.phone&&styles.disabled]}><Text style={styles.secondaryActionText}>{emergencyOnly?c.emergencyCall:c.call}</Text></Pressable></View>{selected.kind==='veterinary'?<>{pets.length?<View style={styles.petRow}>{pets.map(p=><Pressable key={p.id} onPress={()=>setSelectedPetId(p.id)} style={[styles.petChip,selectedPet?.id===p.id&&styles.petChipActive]}><Text style={[styles.petChipText,selectedPet?.id===p.id&&styles.petChipTextActive]}>{p.name}</Text></Pressable>)}</View>:null}<View style={styles.cardActions}><Pressable disabled={actionBusy||!selectedPet} onPress={()=>void sharePassport()} style={styles.secondaryAction}><Text style={styles.secondaryActionText}>{c.sendPassport}</Text></Pressable><Pressable disabled={actionBusy||!userId} onPress={()=>setAppointmentOpen(v=>!v)} style={styles.secondaryAction}><Text style={styles.secondaryActionText}>{c.appointment}</Text></Pressable></View>{appointmentOpen?<View style={styles.appointmentBox}><Text style={styles.appointmentTitle}>{c.appointmentTitle}</Text><TextInput value={appointmentTime} onChangeText={setAppointmentTime} placeholder={c.time} placeholderTextColor={colors.muted} style={styles.input}/><TextInput multiline value={appointmentNote} onChangeText={setAppointmentNote} placeholder={c.note} placeholderTextColor={colors.muted} style={[styles.input,styles.noteInput]}/><Pressable disabled={actionBusy} onPress={()=>void sendAppointmentRequest()} style={styles.primaryAction}>{actionBusy?<ActivityIndicator color={colors.white}/>:<Text style={styles.primaryActionText}>{c.send}</Text>}</Pressable></View>:null}</>:null}</View>:null}
+{favoriteIds.length?<Text style={styles.favoriteInfo}>★ {favoriteIds.length} {c.favorites}</Text>:null}<Text style={styles.section}>{c.nearby}</Text>{places.map(place=><Pressable key={place.id} onPress={()=>{setSelectedId(place.id);setAppointmentOpen(false)}} style={[styles.placeCard,selectedId===place.id&&styles.placeCardSelected]}><View style={styles.placeIcon}><Text>{place.kind==='veterinary'?'⚕':'🛍'}</Text></View><View style={styles.placeCopy}><Text numberOfLines={1} style={styles.placeName}>{favoriteIds.includes(place.id)?'★ ':''}{place.name}</Text><Text numberOfLines={1} style={styles.placeAddress}>{place.address}</Text><Text style={styles.placeMeta}>{distanceLabel(place.distanceMeters)}{place.rating!=null?` · ★ ${place.rating.toFixed(1)}`:''} · {status(place)}</Text></View><Text style={styles.chevron}>›</Text></Pressable>)}<View style={styles.safetyCard}><Text style={styles.safetyTitle}>{c.safety}</Text><Text style={styles.safetyText}>{c.safetyText}</Text></View></View>}
+const styles=StyleSheet.create({page:{padding:22},eyebrow:{color:colors.primary,fontSize:11,fontWeight:'900',letterSpacing:1.2},title:{color:colors.text,fontSize:28,fontWeight:'900',lineHeight:34,marginTop:7},sub:{color:colors.muted,lineHeight:21,marginTop:8},filters:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:18},chip:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:999,borderWidth:1,paddingHorizontal:14,paddingVertical:9},chipActive:{backgroundColor:colors.primary,borderColor:colors.primary},chipText:{color:colors.text,fontWeight:'800'},chipTextActive:{color:colors.white},emergencyButton:{backgroundColor:'#FFF2F0',borderColor:'#F0C0BB',borderRadius:18,borderWidth:1,marginTop:13,padding:15},emergencyButtonActive:{backgroundColor:'#FCE5E2',borderColor:'#C7524C'},emergencyTitle:{color:'#A63D38',fontSize:14,fontWeight:'900'},emergencyText:{color:'#895B57',fontSize:12,marginTop:4},actionRow:{alignItems:'center',flexDirection:'row',justifyContent:'space-between',marginTop:12},refreshButton:{backgroundColor:colors.primarySoft,borderRadius:12,paddingHorizontal:13,paddingVertical:9},refreshText:{color:colors.primaryDark,fontWeight:'800'},locationNote:{color:colors.muted,fontSize:11},loader:{marginVertical:18},error:{color:colors.danger,lineHeight:19,marginVertical:10},map:{borderRadius:20,height:300,marginTop:15,overflow:'hidden',width:'100%'},mapFallback:{alignItems:'center',backgroundColor:colors.primarySoft,borderRadius:20,height:210,justifyContent:'center',marginTop:15,padding:24},mapFallbackTitle:{color:colors.primaryDark,fontSize:16,fontWeight:'900',textAlign:'center'},mapFallbackText:{color:colors.muted,lineHeight:19,marginTop:7,textAlign:'center'},selectedCard:{...shadow,backgroundColor:colors.surface,borderRadius:20,marginTop:14,padding:17},cardHeader:{alignItems:'center',flexDirection:'row',gap:12},favoriteButton:{alignItems:'center',backgroundColor:'#FFF8E8',borderRadius:22,height:44,justifyContent:'center',width:44},favoriteText:{color:'#9A6B00',fontSize:24},selectedKind:{color:colors.primary,fontSize:10,fontWeight:'900',letterSpacing:1},selectedName:{color:colors.text,fontSize:19,fontWeight:'900',marginTop:4},address:{color:colors.muted,lineHeight:18,marginTop:5},metaRow:{flexDirection:'row',flexWrap:'wrap',gap:9,marginTop:10},meta:{color:colors.muted,fontSize:12,fontWeight:'700'},open:{color:colors.primary},closed:{color:colors.danger},cardActions:{flexDirection:'row',gap:9,marginTop:14},primaryAction:{alignItems:'center',backgroundColor:colors.primary,borderRadius:13,flex:1,justifyContent:'center',minHeight:44,paddingHorizontal:12,paddingVertical:12},primaryActionText:{color:colors.white,fontWeight:'900',textAlign:'center'},secondaryAction:{alignItems:'center',backgroundColor:colors.primarySoft,borderRadius:13,flex:1,justifyContent:'center',minHeight:44,paddingHorizontal:10,paddingVertical:12},secondaryActionText:{color:colors.primaryDark,fontSize:12,fontWeight:'900',textAlign:'center'},disabled:{opacity:.45},petRow:{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:14},petChip:{backgroundColor:colors.background,borderColor:colors.border,borderRadius:999,borderWidth:1,paddingHorizontal:11,paddingVertical:7},petChipActive:{backgroundColor:colors.primary},petChipText:{color:colors.text,fontSize:12,fontWeight:'800'},petChipTextActive:{color:colors.white},appointmentBox:{backgroundColor:colors.background,borderRadius:15,marginTop:12,padding:12},appointmentTitle:{color:colors.text,fontWeight:'900',marginBottom:8},input:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:12,borderWidth:1,color:colors.text,fontSize:16,marginBottom:8,minHeight:46,paddingHorizontal:12},noteInput:{minHeight:80,paddingTop:12,textAlignVertical:'top'},favoriteInfo:{color:'#8A6500',fontSize:12,fontWeight:'800',marginTop:14},section:{color:colors.text,fontSize:19,fontWeight:'900',marginBottom:11,marginTop:24},placeCard:{alignItems:'center',backgroundColor:colors.surface,borderColor:colors.border,borderRadius:16,borderWidth:1,flexDirection:'row',marginBottom:9,padding:12},placeCardSelected:{borderColor:colors.primary},placeIcon:{alignItems:'center',backgroundColor:colors.primarySoft,borderRadius:12,height:40,justifyContent:'center',width:40},placeCopy:{flex:1,marginLeft:11,minWidth:0},placeName:{color:colors.text,fontWeight:'900'},placeAddress:{color:colors.muted,fontSize:11,marginTop:3},placeMeta:{color:colors.primaryDark,fontSize:11,fontWeight:'700',marginTop:5},chevron:{color:colors.muted,fontSize:26,marginLeft:6},safetyCard:{backgroundColor:'#FFF8E8',borderRadius:17,marginTop:12,padding:15},safetyTitle:{color:'#7A5A16',fontWeight:'900'},safetyText:{color:colors.muted,lineHeight:18,marginTop:5}});
