@@ -5,154 +5,35 @@ import { buildTodayLifeMetrics } from '../lib/lifeDashboard';
 import { addLifeEntry, loadPlatformSnapshot, type PetLifeEntryType, type PlatformSnapshot } from '../lib/platformData';
 import type { Pet } from '../types';
 import { colors, shadow } from '../theme';
+import { usePreferences } from '../context/PreferencesContext';
 
 const emptySnapshot: PlatformSnapshot = { weights: [], lifeEntries: [], memberCount: 0, activePassportCount: 0, passports: [], pro: { plan: 'free' } };
-const quickTypes: { key: PetLifeEntryType; label: string; placeholder: string; unit: string }[] = [
-  { key: 'food', label: 'Mama', placeholder: 'Örn. 120', unit: 'g' },
-  { key: 'water', label: 'Su', placeholder: 'Örn. 250', unit: 'ml' },
-  { key: 'activity', label: 'Aktivite', placeholder: 'Örn. 45', unit: 'dk' },
-  { key: 'sleep', label: 'Uyku', placeholder: 'Örn. 8', unit: 'saat' },
-  { key: 'grooming', label: 'Bakım', placeholder: 'Not', unit: '' },
-  { key: 'parasite', label: 'Parazit', placeholder: 'Uygulama adı/not', unit: '' },
-  { key: 'mood', label: 'Ruh hali', placeholder: 'Mutlu, sakin...', unit: '' },
-];
+const copy = {
+  tr: { title:'Bugün nasıl gidiyor?', sub:'Beslenme, su, aktivite, uyku ve bakım rutinlerini tek yerde takip edin.', summary:'Bugünün özeti', quick:'Hızlı kayıt', unit:'Birim', note:'Not (opsiyonel)', save:'Bugüne ekle', saving:'Kaydediliyor…', alerts:'Akıllı sağlık uyarıları', noAlert:'✓ Aktif uyarı yok', noAlertText:'PetVitals kayıtları açılışta ve yeni Life kaydı sonrasında otomatik kontrol eder.', disclaimer:'Smart Alerts kayıtlarınızdaki değişimleri ve kayıt boşluklarını görünür hale getirir; veteriner tanısı değildir.', account:'Gerçek hesap gerekli', accountText:'Life kayıtları gerçek hesabınızda saklanır.', failed:'Kaydedilemedi', none:'Henüz kayıt yok', record:'kayıt', types:{food:'Mama',water:'Su',activity:'Aktivite',sleep:'Uyku',grooming:'Bakım',parasite:'Parazit',mood:'Ruh hali'}, placeholders:{food:'Örn. 120',water:'Örn. 250',activity:'Örn. 45',sleep:'Örn. 8',grooming:'Not',parasite:'Uygulama adı/not',mood:'Mutlu, sakin...'}, units:{activity:'dk',sleep:'saat'} },
+  en: { title:'How is today going?', sub:'Track nutrition, water, activity, sleep and care routines in one place.', summary:"Today's summary", quick:'Quick log', unit:'Unit', note:'Note (optional)', save:'Add to today', saving:'Saving…', alerts:'Smart health alerts', noAlert:'✓ No active alert', noAlertText:'PetVitals automatically checks your records on launch and after each new Life entry.', disclaimer:'Smart Alerts highlight changes and gaps in your records; they are not a veterinary diagnosis.', account:'Real account required', accountText:'Life entries are stored in your real account.', failed:'Could not save', none:'No entries yet', record:'entries', types:{food:'Food',water:'Water',activity:'Activity',sleep:'Sleep',grooming:'Grooming',parasite:'Parasite care',mood:'Mood'}, placeholders:{food:'e.g. 120',water:'e.g. 250',activity:'e.g. 45',sleep:'e.g. 8',grooming:'Note',parasite:'Product/name note',mood:'Happy, calm...'}, units:{activity:'min',sleep:'hours'} },
+  de: { title:'Wie läuft der Tag?', sub:'Futter, Wasser, Aktivität, Schlaf und Pflege an einem Ort verfolgen.', summary:'Heutige Übersicht', quick:'Schnelleintrag', unit:'Einheit', note:'Notiz (optional)', save:'Für heute hinzufügen', saving:'Speichern…', alerts:'Intelligente Gesundheitswarnungen', noAlert:'✓ Keine aktive Warnung', noAlertText:'PetVitals prüft Ihre Daten beim Start und nach jedem neuen Life-Eintrag automatisch.', disclaimer:'Smart Alerts zeigen Änderungen und Lücken in Ihren Daten; sie sind keine tierärztliche Diagnose.', account:'Echtes Konto erforderlich', accountText:'Life-Einträge werden in Ihrem echten Konto gespeichert.', failed:'Speichern fehlgeschlagen', none:'Noch keine Einträge', record:'Einträge', types:{food:'Futter',water:'Wasser',activity:'Aktivität',sleep:'Schlaf',grooming:'Pflege',parasite:'Parasiten',mood:'Stimmung'}, placeholders:{food:'z. B. 120',water:'z. B. 250',activity:'z. B. 45',sleep:'z. B. 8',grooming:'Notiz',parasite:'Produkt/Notiz',mood:'Fröhlich, ruhig...'}, units:{activity:'Min.',sleep:'Std.'} },
+  es: { title:'¿Cómo va el día?', sub:'Registra alimentación, agua, actividad, sueño y cuidados en un solo lugar.', summary:'Resumen de hoy', quick:'Registro rápido', unit:'Unidad', note:'Nota (opcional)', save:'Añadir a hoy', saving:'Guardando…', alerts:'Alertas inteligentes de salud', noAlert:'✓ Sin alertas activas', noAlertText:'PetVitals revisa automáticamente los registros al abrir y tras cada nueva entrada Life.', disclaimer:'Smart Alerts muestran cambios y vacíos en tus registros; no son un diagnóstico veterinario.', account:'Se requiere una cuenta real', accountText:'Las entradas Life se guardan en tu cuenta real.', failed:'No se pudo guardar', none:'Aún no hay registros', record:'registros', types:{food:'Comida',water:'Agua',activity:'Actividad',sleep:'Sueño',grooming:'Cuidados',parasite:'Parásitos',mood:'Estado de ánimo'}, placeholders:{food:'p. ej. 120',water:'p. ej. 250',activity:'p. ej. 45',sleep:'p. ej. 8',grooming:'Nota',parasite:'Producto/nota',mood:'Feliz, tranquilo...'}, units:{activity:'min',sleep:'h'} },
+} as const;
 
 export function LifeScreen({ pets, userId, demoMode }: { pets: Pet[]; userId?: string; demoMode: boolean }) {
-  const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id ?? '');
-  const [snapshot, setSnapshot] = useState<PlatformSnapshot>(emptySnapshot);
-  const [alerts, setAlerts] = useState<SmartHealthAlert[]>([]);
-  const [selectedType, setSelectedType] = useState<PetLifeEntryType>('activity');
-  const [value, setValue] = useState('');
-  const [unit, setUnit] = useState('dk');
-  const [note, setNote] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const selectedPet = pets.find(pet => pet.id === selectedPetId) ?? pets[0];
-  const metrics = useMemo(() => buildTodayLifeMetrics(snapshot.lifeEntries), [snapshot.lifeEntries]);
-
-  useEffect(() => {
-    if (!pets.some(pet => pet.id === selectedPetId)) setSelectedPetId(pets[0]?.id ?? '');
-  }, [pets, selectedPetId]);
-
-  async function refresh() {
-    if (!selectedPet || !userId || demoMode) {
-      setSnapshot(emptySnapshot);
-      setAlerts([]);
-      return;
-    }
-    setLoading(true);
-    try {
-      const [nextSnapshot, nextAlerts] = await Promise.all([
-        loadPlatformSnapshot(userId, selectedPet.id),
-        evaluateSmartHealthAlerts(selectedPet.id),
-      ]);
-      setSnapshot(nextSnapshot);
-      setAlerts(nextAlerts);
-    } catch {
-      // Dashboard remains usable even if alert evaluation is temporarily unavailable.
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { void refresh(); }, [selectedPet?.id, userId, demoMode]);
-
-  function chooseType(type: PetLifeEntryType) {
-    setSelectedType(type);
-    const preset = quickTypes.find(item => item.key === type);
-    setUnit(preset?.unit ?? '');
-    setValue('');
-    setNote('');
-  }
-
-  async function save() {
-    if (!selectedPet || !userId || demoMode) {
-      Alert.alert('Gerçek hesap gerekli', 'Life kayıtları gerçek hesabınızda saklanır.');
-      return;
-    }
-    const numeric = value.trim() ? Number(value.replace(',', '.')) : undefined;
-    setSaving(true);
-    try {
-      await addLifeEntry(userId, selectedPet.id, {
-        entryType: selectedType,
-        valueNumeric: Number.isFinite(numeric) ? numeric : undefined,
-        valueText: Number.isFinite(numeric) ? undefined : value.trim() || undefined,
-        unit,
-        notes: note,
-      });
-      setValue('');
-      setNote('');
-      await refresh();
-    } catch (error) {
-      Alert.alert('Kaydedilemedi', error instanceof Error ? error.message : 'Life kaydı eklenemedi.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <View style={styles.page}>
-      <Text style={styles.eyebrow}>PETVITALS LIFE</Text>
-      <Text style={styles.title}>Bugün nasıl gidiyor?</Text>
-      <Text style={styles.sub}>Beslenme, su, aktivite, uyku ve bakım rutinlerini tek yerde takip edin.</Text>
-
-      {pets.length > 1 ? <View style={styles.petPicker}>{pets.map(pet => <Pressable key={pet.id} onPress={() => setSelectedPetId(pet.id)} style={[styles.petChip, selectedPet?.id === pet.id && styles.petChipActive]}><Text style={[styles.petChipText, selectedPet?.id === pet.id && styles.petChipTextActive]}>{pet.name}</Text></Pressable>)}</View> : null}
-
-      {loading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 18 }} /> : null}
-
-      <Text style={styles.section}>Bugünün özeti</Text>
-      <View style={styles.grid}>{metrics.filter(metric => metric.type !== 'custom').map(metric => <View key={metric.type} style={styles.metricCard}><Text style={styles.metricIcon}>{metric.icon}</Text><Text style={styles.metricLabel}>{metric.label}</Text><Text style={styles.metricValue}>{metric.total != null ? `${Number(metric.total.toFixed(1))}${metric.unit ? ` ${metric.unit}` : ''}` : metric.latestText || '—'}</Text><Text style={styles.metricCount}>{metric.count ? `${metric.count} kayıt` : 'Henüz kayıt yok'}</Text></View>)}</View>
-
-      <Text style={styles.section}>Hızlı kayıt</Text>
-      <View style={styles.chips}>{quickTypes.map(item => <Pressable key={item.key} onPress={() => chooseType(item.key)} style={[styles.chip, selectedType === item.key && styles.chipActive]}><Text style={[styles.chipText, selectedType === item.key && styles.chipTextActive]}>{item.label}</Text></Pressable>)}</View>
-      <View style={styles.formCard}>
-        <TextInput keyboardType={['food','water','activity','sleep'].includes(selectedType) ? 'decimal-pad' : 'default'} placeholder={quickTypes.find(item => item.key === selectedType)?.placeholder} placeholderTextColor={colors.muted} value={value} onChangeText={setValue} style={styles.input} />
-        <TextInput placeholder="Birim" placeholderTextColor={colors.muted} value={unit} onChangeText={setUnit} style={styles.input} />
-        <TextInput multiline placeholder="Not (opsiyonel)" placeholderTextColor={colors.muted} value={note} onChangeText={setNote} style={[styles.input, styles.multiline]} />
-        <Pressable disabled={saving} onPress={save} style={styles.saveButton}><Text style={styles.saveButtonText}>{saving ? 'Kaydediliyor…' : 'Bugüne ekle'}</Text></Pressable>
-      </View>
-
-      <Text style={styles.section}>Akıllı sağlık uyarıları</Text>
-      {alerts.length === 0 ? <View style={styles.okCard}><Text style={styles.okTitle}>✓ Aktif uyarı yok</Text><Text style={styles.okText}>PetVitals kayıtları açılışta ve yeni Life kaydı sonrasında otomatik kontrol eder.</Text></View> : alerts.map(alert => <View key={alert.id} style={styles.alertCard}><Text style={styles.alertSeverity}>{alert.severity.toUpperCase()}</Text><Text style={styles.alertTitle}>{alert.title}</Text><Text style={styles.alertText}>{alert.message}</Text></View>)}
-
-      <Text style={styles.disclaimer}>Smart Alerts kayıtlarınızdaki değişimleri ve kayıt boşluklarını görünür hale getirir; veteriner tanısı değildir.</Text>
-    </View>
-  );
+  const { language } = usePreferences(); const c=copy[language];
+  const quickTypes: { key: PetLifeEntryType; label: string; placeholder: string; unit: string }[] = [
+    {key:'food',label:c.types.food,placeholder:c.placeholders.food,unit:'g'},{key:'water',label:c.types.water,placeholder:c.placeholders.water,unit:'ml'},{key:'activity',label:c.types.activity,placeholder:c.placeholders.activity,unit:c.units.activity},{key:'sleep',label:c.types.sleep,placeholder:c.placeholders.sleep,unit:c.units.sleep},{key:'grooming',label:c.types.grooming,placeholder:c.placeholders.grooming,unit:''},{key:'parasite',label:c.types.parasite,placeholder:c.placeholders.parasite,unit:''},{key:'mood',label:c.types.mood,placeholder:c.placeholders.mood,unit:''},
+  ];
+  const [selectedPetId,setSelectedPetId]=useState(pets[0]?.id??''); const [snapshot,setSnapshot]=useState<PlatformSnapshot>(emptySnapshot); const [alerts,setAlerts]=useState<SmartHealthAlert[]>([]); const [selectedType,setSelectedType]=useState<PetLifeEntryType>('activity'); const [value,setValue]=useState(''); const [unit,setUnit]=useState<string>(c.units.activity); const [note,setNote]=useState(''); const [loading,setLoading]=useState(false); const [saving,setSaving]=useState(false);
+  const selectedPet=pets.find(p=>p.id===selectedPetId)??pets[0]; const metrics=useMemo(()=>buildTodayLifeMetrics(snapshot.lifeEntries),[snapshot.lifeEntries]);
+  useEffect(()=>{if(!pets.some(p=>p.id===selectedPetId))setSelectedPetId(pets[0]?.id??'');},[pets,selectedPetId]);
+  useEffect(()=>{const preset=quickTypes.find(i=>i.key===selectedType);setUnit(preset?.unit??'');},[language]);
+  async function refresh(){if(!selectedPet||!userId||demoMode){setSnapshot(emptySnapshot);setAlerts([]);return;}setLoading(true);try{const [nextSnapshot,nextAlerts]=await Promise.all([loadPlatformSnapshot(userId,selectedPet.id),evaluateSmartHealthAlerts(selectedPet.id)]);setSnapshot(nextSnapshot);setAlerts(nextAlerts);}catch{}finally{setLoading(false);}}
+  useEffect(()=>{void refresh();},[selectedPet?.id,userId,demoMode]);
+  function chooseType(type:PetLifeEntryType){setSelectedType(type);const preset=quickTypes.find(i=>i.key===type);setUnit(preset?.unit??'');setValue('');setNote('');}
+  async function save(){if(!selectedPet||!userId||demoMode){Alert.alert(c.account,c.accountText);return;}const numeric=value.trim()?Number(value.replace(',','.')):undefined;setSaving(true);try{await addLifeEntry(userId,selectedPet.id,{entryType:selectedType,valueNumeric:Number.isFinite(numeric)?numeric:undefined,valueText:Number.isFinite(numeric)?undefined:value.trim()||undefined,unit,notes:note});setValue('');setNote('');await refresh();}catch(e){Alert.alert(c.failed,e instanceof Error?e.message:c.failed);}finally{setSaving(false);}}
+  return <View style={styles.page}><Text style={styles.eyebrow}>PETVITALS LIFE</Text><Text style={styles.title}>{c.title}</Text><Text style={styles.sub}>{c.sub}</Text>
+    {pets.length>1?<View style={styles.petPicker}>{pets.map(p=><Pressable key={p.id} onPress={()=>setSelectedPetId(p.id)} style={[styles.petChip,selectedPet?.id===p.id&&styles.petChipActive]}><Text style={[styles.petChipText,selectedPet?.id===p.id&&styles.petChipTextActive]}>{p.name}</Text></Pressable>)}</View>:null}
+    {loading?<ActivityIndicator color={colors.primary} style={{marginTop:18}}/>:null}<Text style={styles.section}>{c.summary}</Text><View style={styles.grid}>{metrics.filter(m=>m.type!=='custom').map(m=><View key={m.type} style={styles.metricCard}><Text style={styles.metricIcon}>{m.icon}</Text><Text style={styles.metricLabel}>{c.types[m.type as keyof typeof c.types]??m.label}</Text><Text style={styles.metricValue}>{m.total!=null?`${Number(m.total.toFixed(1))}${m.unit?` ${m.unit}`:''}`:m.latestText||'—'}</Text><Text style={styles.metricCount}>{m.count?`${m.count} ${c.record}`:c.none}</Text></View>)}</View>
+    <Text style={styles.section}>{c.quick}</Text><View style={styles.chips}>{quickTypes.map(i=><Pressable key={i.key} onPress={()=>chooseType(i.key)} style={[styles.chip,selectedType===i.key&&styles.chipActive]}><Text style={[styles.chipText,selectedType===i.key&&styles.chipTextActive]}>{i.label}</Text></Pressable>)}</View><View style={styles.formCard}><TextInput keyboardType={['food','water','activity','sleep'].includes(selectedType)?'decimal-pad':'default'} placeholder={quickTypes.find(i=>i.key===selectedType)?.placeholder} placeholderTextColor={colors.muted} value={value} onChangeText={setValue} style={styles.input}/><TextInput placeholder={c.unit} placeholderTextColor={colors.muted} value={unit} onChangeText={setUnit} style={styles.input}/><TextInput multiline placeholder={c.note} placeholderTextColor={colors.muted} value={note} onChangeText={setNote} style={[styles.input,styles.multiline]}/><Pressable disabled={saving} onPress={save} style={styles.saveButton}><Text style={styles.saveButtonText}>{saving?c.saving:c.save}</Text></Pressable></View>
+    <Text style={styles.section}>{c.alerts}</Text>{alerts.length===0?<View style={styles.okCard}><Text style={styles.okTitle}>{c.noAlert}</Text><Text style={styles.okText}>{c.noAlertText}</Text></View>:alerts.map(a=><View key={a.id} style={styles.alertCard}><Text style={styles.alertSeverity}>{a.severity.toUpperCase()}</Text><Text style={styles.alertTitle}>{a.title}</Text><Text style={styles.alertText}>{a.message}</Text></View>)}<Text style={styles.disclaimer}>{c.disclaimer}</Text>
+  </View>;
 }
 
-const styles = StyleSheet.create({
-  page: { padding: 22 },
-  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 1.2 },
-  title: { color: colors.text, fontSize: 30, fontWeight: '900', marginTop: 6 },
-  sub: { color: colors.muted, lineHeight: 20, marginTop: 7 },
-  petPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
-  petChip: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
-  petChipActive: { backgroundColor: colors.primary },
-  petChipText: { color: colors.text, fontWeight: '700' },
-  petChipTextActive: { color: colors.white },
-  section: { color: colors.text, fontSize: 19, fontWeight: '900', marginBottom: 11, marginTop: 24 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  metricCard: { ...shadow, backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 17, borderWidth: 1, padding: 14, width: '48%' },
-  metricIcon: { fontSize: 20 },
-  metricLabel: { color: colors.muted, fontSize: 11, fontWeight: '800', marginTop: 7 },
-  metricValue: { color: colors.text, fontSize: 19, fontWeight: '900', marginTop: 4 },
-  metricCount: { color: colors.muted, fontSize: 10, marginTop: 3 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  chip: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 11, paddingVertical: 8 },
-  chipActive: { backgroundColor: colors.primary },
-  chipText: { color: colors.muted, fontSize: 11, fontWeight: '800' },
-  chipTextActive: { color: colors.white },
-  formCard: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 18, borderWidth: 1, marginTop: 12, padding: 14 },
-  input: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 12, borderWidth: 1, color: colors.text, marginBottom: 9, paddingHorizontal: 12, paddingVertical: 11 },
-  multiline: { minHeight: 72, textAlignVertical: 'top' },
-  saveButton: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 13, paddingVertical: 12 },
-  saveButtonText: { color: colors.white, fontWeight: '900' },
-  okCard: { backgroundColor: '#EEF7F4', borderRadius: 16, padding: 15 },
-  okTitle: { color: colors.primaryDark, fontWeight: '900' },
-  okText: { color: colors.muted, lineHeight: 18, marginTop: 5 },
-  alertCard: { backgroundColor: '#FFF7ED', borderRadius: 16, marginBottom: 9, padding: 15 },
-  alertSeverity: { color: colors.accent, fontSize: 10, fontWeight: '900' },
-  alertTitle: { color: colors.text, fontSize: 14, fontWeight: '900', marginTop: 3 },
-  alertText: { color: colors.muted, lineHeight: 18, marginTop: 4 },
-  disclaimer: { color: colors.muted, fontSize: 10, lineHeight: 15, marginTop: 16 },
-});
+const styles=StyleSheet.create({page:{padding:22},eyebrow:{color:colors.primary,fontSize:11,fontWeight:'900',letterSpacing:1.2},title:{color:colors.text,fontSize:30,fontWeight:'900',marginTop:6},sub:{color:colors.muted,lineHeight:20,marginTop:7},petPicker:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:16},petChip:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:999,borderWidth:1,paddingHorizontal:12,paddingVertical:8},petChipActive:{backgroundColor:colors.primary},petChipText:{color:colors.text,fontWeight:'700'},petChipTextActive:{color:colors.white},section:{color:colors.text,fontSize:19,fontWeight:'900',marginBottom:11,marginTop:24},grid:{flexDirection:'row',flexWrap:'wrap',gap:10},metricCard:{...shadow,backgroundColor:colors.surface,borderColor:colors.border,borderRadius:17,borderWidth:1,padding:14,width:'48%'},metricIcon:{fontSize:20},metricLabel:{color:colors.muted,fontSize:11,fontWeight:'800',marginTop:7},metricValue:{color:colors.text,fontSize:19,fontWeight:'900',marginTop:4},metricCount:{color:colors.muted,fontSize:10,marginTop:3},chips:{flexDirection:'row',flexWrap:'wrap',gap:7},chip:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:999,borderWidth:1,paddingHorizontal:11,paddingVertical:8},chipActive:{backgroundColor:colors.primary},chipText:{color:colors.muted,fontSize:11,fontWeight:'800'},chipTextActive:{color:colors.white},formCard:{backgroundColor:colors.surface,borderColor:colors.border,borderRadius:18,borderWidth:1,marginTop:12,padding:14},input:{backgroundColor:colors.background,borderColor:colors.border,borderRadius:12,borderWidth:1,color:colors.text,marginBottom:9,paddingHorizontal:12,paddingVertical:11},multiline:{minHeight:72,textAlignVertical:'top'},saveButton:{alignItems:'center',backgroundColor:colors.primary,borderRadius:13,paddingVertical:12},saveButtonText:{color:colors.white,fontWeight:'900'},okCard:{backgroundColor:'#EEF7F4',borderRadius:16,padding:15},okTitle:{color:colors.primaryDark,fontWeight:'900'},okText:{color:colors.muted,lineHeight:18,marginTop:5},alertCard:{backgroundColor:'#FFF7ED',borderRadius:16,marginBottom:9,padding:15},alertSeverity:{color:colors.accent,fontSize:10,fontWeight:'900'},alertTitle:{color:colors.text,fontSize:14,fontWeight:'900',marginTop:3},alertText:{color:colors.muted,lineHeight:18,marginTop:4},disclaimer:{color:colors.muted,fontSize:10,lineHeight:15,marginTop:16}});
