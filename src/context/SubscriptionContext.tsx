@@ -5,23 +5,12 @@ import { supabase } from '../lib/supabase';
 const TRIAL_LENGTH_MS = 7 * 24 * 60 * 60 * 1000;
 
 type AccessState = 'loading' | 'trial' | 'expired' | 'subscribed';
-
-type SubscriptionContextValue = {
-  accessState: AccessState;
-  trialDaysRemaining: number;
-  trialEndsAt?: number;
-  refresh: () => Promise<void>;
-};
-
+type SubscriptionRow = { trial_started_at: string; subscribed: boolean };
+type SubscriptionContextValue = { accessState: AccessState; trialDaysRemaining: number; trialEndsAt?: number; refresh: () => Promise<void> };
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
 
 function applyTrialState(startedAt: number, subscribed: boolean, setAccessState: (value: AccessState) => void, setTrialDaysRemaining: (value: number) => void, setTrialEndsAt: (value: number | undefined) => void) {
-  if (subscribed) {
-    setAccessState('subscribed');
-    setTrialDaysRemaining(0);
-    setTrialEndsAt(undefined);
-    return;
-  }
+  if (subscribed) { setAccessState('subscribed'); setTrialDaysRemaining(0); setTrialEndsAt(undefined); return; }
   const endsAt = startedAt + TRIAL_LENGTH_MS;
   const remainingMs = endsAt - Date.now();
   setTrialEndsAt(endsAt);
@@ -37,23 +26,14 @@ export function SubscriptionProvider({ children, userKey }: { children: React.Re
 
   async function refresh() {
     setAccessState('loading');
-
     if (userKey !== 'demo' && supabase) {
-      const { data, error } = await supabase
-        .from('subscription_access')
-        .select('trial_started_at,subscribed')
-        .eq('user_id', userKey)
-        .maybeSingle();
-
-      if (!error) {
-        let row = data;
+      const accessClient = supabase as any;
+      const query = await accessClient.from('subscription_access').select('trial_started_at,subscribed').eq('user_id', userKey).maybeSingle();
+      if (!query.error) {
+        let row = query.data as SubscriptionRow | null;
         if (!row) {
-          const inserted = await supabase
-            .from('subscription_access')
-            .insert({ user_id: userKey })
-            .select('trial_started_at,subscribed')
-            .single();
-          row = inserted.data;
+          const inserted = await accessClient.from('subscription_access').insert({ user_id: userKey }).select('trial_started_at,subscribed').single();
+          row = (inserted.data ?? null) as SubscriptionRow | null;
         }
         if (row?.trial_started_at) {
           applyTrialState(new Date(row.trial_started_at).getTime(), Boolean(row.subscribed), setAccessState, setTrialDaysRemaining, setTrialEndsAt);
@@ -61,24 +41,15 @@ export function SubscriptionProvider({ children, userKey }: { children: React.Re
         }
       }
     }
-
     const subscribed = (await AsyncStorage.getItem(`${storagePrefix}_subscribed`)) === 'true';
     let startedAt = Number(await AsyncStorage.getItem(`${storagePrefix}_trial_started_at`));
-    if (!Number.isFinite(startedAt) || startedAt <= 0) {
-      startedAt = Date.now();
-      await AsyncStorage.setItem(`${storagePrefix}_trial_started_at`, String(startedAt));
-    }
+    if (!Number.isFinite(startedAt) || startedAt <= 0) { startedAt = Date.now(); await AsyncStorage.setItem(`${storagePrefix}_trial_started_at`, String(startedAt)); }
     applyTrialState(startedAt, subscribed, setAccessState, setTrialDaysRemaining, setTrialEndsAt);
   }
 
   useEffect(() => { void refresh(); }, [userKey]);
-
   const value = useMemo(() => ({ accessState, trialDaysRemaining, trialEndsAt, refresh }), [accessState, trialDaysRemaining, trialEndsAt]);
   return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;
 }
 
-export function useSubscription() {
-  const value = useContext(SubscriptionContext);
-  if (!value) throw new Error('useSubscription must be used inside SubscriptionProvider');
-  return value;
-}
+export function useSubscription() { const value = useContext(SubscriptionContext); if (!value) throw new Error('useSubscription must be used inside SubscriptionProvider'); return value; }
