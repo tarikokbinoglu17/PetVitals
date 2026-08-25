@@ -7,6 +7,7 @@ import { AuthScreen } from './src/screens/AuthScreen';
 import { AppShell } from './src/components/AppShell';
 import { AppErrorBoundary } from './src/components/AppErrorBoundary';
 import { colors } from './src/theme';
+import { PreferencesProvider } from './src/context/PreferencesContext';
 
 function Root() {
   const { user, demoMode, loading } = useAuth();
@@ -16,7 +17,7 @@ function Root() {
 }
 
 export default function App() {
-  return <SafeAreaProvider><StatusBar style="dark" /><AppErrorBoundary><AuthProvider><Root /></AuthProvider></AppErrorBoundary></SafeAreaProvider>;
+  return <SafeAreaProvider><StatusBar style="dark" /><AppErrorBoundary><PreferencesProvider><AuthProvider><Root /></AuthProvider></PreferencesProvider></AppErrorBoundary></SafeAreaProvider>;
 }
 
 const styles = StyleSheet.create({ loading: { alignItems:'center', backgroundColor:colors.background, flex:1, justifyContent:'center' } });
