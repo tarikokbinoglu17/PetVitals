@@ -12,18 +12,24 @@ import { LifeScreen } from '../screens/LifeScreen';
 import { NearMeScreen } from '../screens/NearMeScreen';
 import { PlatformScreen } from '../screens/PlatformScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { usePreferences } from '../context/PreferencesContext';
 
-const tabs: { key: TabName; label: string; icon: string }[] = [
-  { key: 'home', label: 'Bugün', icon: '⌂' },
-  { key: 'pets', label: 'Dostlarım', icon: '🐾' },
-  { key: 'health', label: 'Sağlık', icon: '♥' },
-  { key: 'life', label: 'Yaşam', icon: '◉' },
-  { key: 'nearby', label: 'Yakınımda', icon: '⌖' },
-  { key: 'platform', label: 'PetVitals+', icon: '✦' },
-  { key: 'profile', label: 'Profil', icon: '' },
+const tabCopy = {
+  tr: ['Bugün', 'Dostlarım', 'Sağlık', 'Yaşam', 'Yakınımda', 'PetVitals+', 'Profil'],
+  en: ['Today', 'My Pets', 'Health', 'Life', 'Nearby', 'PetVitals+', 'Profile'],
+  de: ['Heute', 'Tiere', 'Gesundheit', 'Leben', 'In der Nähe', 'PetVitals+', 'Profil'],
+  es: ['Hoy', 'Mascotas', 'Salud', 'Vida', 'Cerca', 'PetVitals+', 'Perfil'],
+} as const;
+
+const tabKeys: { key: TabName; icon: string }[] = [
+  { key: 'home', icon: '⌂' }, { key: 'pets', icon: '🐾' }, { key: 'health', icon: '♥' },
+  { key: 'life', icon: '◉' }, { key: 'nearby', icon: '⌖' }, { key: 'platform', icon: '✦' },
+  { key: 'profile', icon: '' },
 ];
 
 export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: string }) {
+  const { language } = usePreferences();
+  const tabs = tabKeys.map((item, index) => ({ ...item, label: tabCopy[language][index] }));
   const [tab, setTab] = useState<TabName>('home');
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);

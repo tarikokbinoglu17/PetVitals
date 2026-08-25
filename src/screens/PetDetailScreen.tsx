@@ -3,9 +3,11 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { getPetAgeLabel, getPetRecords, getPetRecordSummary } from '../lib/petDetails';
 import type { HealthRecord, Pet } from '../types';
 import { colors, shadow } from '../theme';
+import { usePreferences } from '../context/PreferencesContext';
+import { formatWeight } from '../lib/globalization';
 
-function formatDate(value: string) {
-  return new Date(`${value}T00:00:00`).toLocaleDateString('tr-TR', {
+function formatDate(value: string, locale: string) {
+  return new Date(`${value}T00:00:00`).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -47,6 +49,7 @@ export function PetDetailScreen({
   records: HealthRecord[];
   onBack: () => void;
 }) {
+  const { language, unitSystem } = usePreferences();
   const petRecords = getPetRecords(pet.id, records);
   const summary = getPetRecordSummary(pet.id, records);
   const ageLabel = getPetAgeLabel(pet.birthDate);
@@ -87,7 +90,7 @@ export function PetDetailScreen({
 
       <View style={styles.metrics}>
         <View style={styles.metric}>
-          <Text style={styles.metricValue}>{pet.weight > 0 ? `${pet.weight} kg` : '—'}</Text>
+          <Text style={styles.metricValue}>{pet.weight > 0 ? formatWeight(pet.weight, unitSystem, language) : '—'}</Text>
           <Text style={styles.metricLabel}>Kilo</Text>
         </View>
         <View style={styles.metric}>
@@ -104,7 +107,7 @@ export function PetDetailScreen({
       <View style={styles.card}>
         <DetailLine label="Tür" value={pet.species} />
         <DetailLine label="Irk" value={pet.breed || 'Belirtilmedi'} />
-        <DetailLine label="Doğum tarihi" value={pet.birthDate ? formatDate(pet.birthDate) : 'Belirtilmedi'} />
+        <DetailLine label="Doğum tarihi" value={pet.birthDate ? formatDate(pet.birthDate, language) : 'Belirtilmedi'} />
         <DetailLine label="Yaş" value={ageLabel} />
         <DetailLine label="Cinsiyet" value="Henüz eklenmedi" />
         <DetailLine label="Mikroçip" value="Henüz eklenmedi" last />
@@ -119,7 +122,7 @@ export function PetDetailScreen({
           </Text>
           <Text style={styles.healthText}>
             {upcoming
-              ? `${upcoming.title} · ${formatDate(upcoming.date)}`
+              ? `${upcoming.title} · ${formatDate(upcoming.date, language)}`
               : 'Yeni bir aşı veya kontrol tarihi ekleyebilirsiniz.'}
           </Text>
           <Text style={[styles.allergy, summary.allergyCount > 0 && styles.allergyWarning]}>
@@ -149,7 +152,7 @@ export function PetDetailScreen({
             <View style={styles.recordCopy}>
               <View style={styles.recordTop}>
                 <Text style={styles.category}>{record.category}</Text>
-                <Text style={styles.recordDate}>{formatDate(record.date)}</Text>
+                <Text style={styles.recordDate}>{formatDate(record.date, language)}</Text>
               </View>
               <Text style={styles.recordTitle}>{record.title}</Text>
               {record.vaccineType ? <Text style={styles.recordMeta}>{record.vaccineType}</Text> : null}

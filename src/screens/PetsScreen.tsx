@@ -3,6 +3,8 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { PetForm } from '../components/PetForm';
 import type { Pet, PetDraft, SavePetResult } from '../types';
 import { colors, shadow } from '../theme';
+import { usePreferences } from '../context/PreferencesContext';
+import { formatWeight } from '../lib/globalization';
 
 export function PetsScreen({
   pets,
@@ -15,6 +17,7 @@ export function PetsScreen({
   onAddPet: (draft: PetDraft) => Promise<SavePetResult>;
   onSelectPet: (pet: Pet) => void;
 }) {
+  const { language, unitSystem } = usePreferences();
   const [showPetForm, setShowPetForm] = useState(false);
 
   return (
@@ -55,9 +58,9 @@ export function PetsScreen({
           <View style={styles.info}>
             <Text style={styles.name}>{pet.name}</Text>
             <Text style={styles.meta}>
-              {pet.breed || pet.species}{pet.weight > 0 ? ` • ${pet.weight} kg` : ''}
+              {pet.breed || pet.species}{pet.weight > 0 ? ` • ${formatWeight(pet.weight, unitSystem, language)}` : ''}
             </Text>
-            {pet.birthDate ? <Text style={styles.birth}>Doğum: {new Date(`${pet.birthDate}T00:00:00`).toLocaleDateString('tr-TR')}</Text> : null}
+            {pet.birthDate ? <Text style={styles.birth}>Doğum: {new Date(`${pet.birthDate}T00:00:00`).toLocaleDateString(language)}</Text> : null}
           </View>
           <Text accessible={false} style={styles.arrow}>›</Text>
         </Pressable>

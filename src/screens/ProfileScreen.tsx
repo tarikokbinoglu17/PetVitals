@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { deleteCurrentAccount, exportUserData } from '../lib/privacy';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { colors } from '../theme';
+import { usePreferences } from '../context/PreferencesContext';
+import type { SupportedLocale, UnitSystem } from '../lib/globalization';
 
 const PRIVACY_URL = 'https://html-preview.github.io/?url=https://github.com/tarikokbinoglu17/PetVitals/blob/main/privacy.html';
 const DELETE_URL = 'https://html-preview.github.io/?url=https://github.com/tarikokbinoglu17/PetVitals/blob/main/account-deletion.html';
@@ -12,8 +14,10 @@ const SUPPORT_URL = 'https://html-preview.github.io/?url=https://github.com/tari
 
 export function ProfileScreen() {
   const { user, demoMode, signOut } = useAuth();
+  const { language, unitSystem, setLanguage, setUnitSystem } = usePreferences();
   const [busy, setBusy] = useState<'export' | 'delete' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [showPreferences, setShowPreferences] = useState(false);
   const name = user?.user_metadata?.full_name || (demoMode ? 'Demo Kullanıcı' : 'PetVitals Kullanıcısı');
 
   const handleExport = async () => {
@@ -80,7 +84,53 @@ export function ProfileScreen() {
         <Text style={styles.menuText}>🔔  Bildirim tercihleri</Text>
         <Pressable onPress={() => void Linking.openURL(PRIVACY_URL)}><Text style={styles.menuText}>🔒  Gizlilik Politikası</Text></Pressable>
         <Pressable onPress={() => void Linking.openURL(DELETE_URL)}><Text style={styles.menuText}>🗑️  Hesap ve Veri Silme</Text></Pressable>
-        <Text style={styles.menuText}>🌍  Dil ve ölçü birimleri</Text>
+        <Pressable
+          accessibilityLabel="Dil ve ölçü birimlerini değiştir"
+          accessibilityRole="button"
+          onPress={() => setShowPreferences(value => !value)}
+        >
+          <View style={styles.menuRow}>
+            <Text style={[styles.menuText, styles.menuTextFlexible]}>🌍  Dil ve ölçü birimleri</Text>
+            <Text style={styles.menuValue}>{language.toUpperCase()} · {unitSystem === 'metric' ? 'kg' : 'lb'}  {showPreferences ? '⌃' : '⌄'}</Text>
+          </View>
+        </Pressable>
+        {showPreferences ? (
+          <View style={styles.preferences}>
+            <Text style={styles.preferenceTitle}>Uygulama dili</Text>
+            <View style={styles.options}>
+              {([
+                ['tr', 'Türkçe'], ['en', 'English'], ['de', 'Deutsch'], ['es', 'Español'],
+              ] as [SupportedLocale, string][]).map(([value, label]) => (
+                <Pressable
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: language === value }}
+                  key={value}
+                  onPress={() => void setLanguage(value)}
+                  style={[styles.option, language === value && styles.optionSelected]}
+                >
+                  <Text style={[styles.optionText, language === value && styles.optionTextSelected]}>{label}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.preferenceTitle}>Ölçü birimleri</Text>
+            <View style={styles.options}>
+              {([
+                ['metric', 'Metrik · kg'], ['imperial', 'İngiliz · lb'],
+              ] as [UnitSystem, string][]).map(([value, label]) => (
+                <Pressable
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: unitSystem === value }}
+                  key={value}
+                  onPress={() => void setUnitSystem(value)}
+                  style={[styles.option, unitSystem === value && styles.optionSelected]}
+                >
+                  <Text style={[styles.optionText, unitSystem === value && styles.optionTextSelected]}>{label}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.savedText}>Seçiminiz otomatik kaydedilir.</Text>
+          </View>
+        ) : null}
         <Pressable onPress={() => void Linking.openURL(SUPPORT_URL)}><Text style={styles.menuText}>❓  Yardım ve destek</Text></Pressable>
       </View>
 
@@ -114,6 +164,17 @@ const styles = StyleSheet.create({
   statusText: { color: colors.muted, lineHeight: 19, marginTop: 4 },
   menu: { backgroundColor: colors.surface, borderRadius: 18, marginBottom: 14, marginTop: 14, paddingHorizontal: 17 },
   menuText: { borderBottomColor: colors.border, borderBottomWidth: 1, color: colors.text, fontWeight: '600', paddingVertical: 17 },
+  menuRow: { alignItems: 'center', borderBottomColor: colors.border, borderBottomWidth: 1, flexDirection: 'row' },
+  menuTextFlexible: { borderBottomWidth: 0, flex: 1 },
+  menuValue: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  preferences: { borderBottomColor: colors.border, borderBottomWidth: 1, paddingBottom: 17 },
+  preferenceTitle: { color: colors.text, fontSize: 13, fontWeight: '900', marginBottom: 9, marginTop: 13 },
+  options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  option: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 9 },
+  optionSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  optionText: { color: colors.text, fontSize: 12, fontWeight: '800' },
+  optionTextSelected: { color: colors.white },
+  savedText: { color: colors.muted, fontSize: 11, marginTop: 13 },
   privacyBox: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 18, borderWidth: 1, marginBottom: 22, padding: 17 },
   privacyTitle: { color: colors.text, fontWeight: '900' },
   privacyText: { color: colors.muted, lineHeight: 19, marginTop: 5 },
