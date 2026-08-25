@@ -14,13 +14,13 @@ import { PlatformScreen } from '../screens/PlatformScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 
 const tabs: { key: TabName; label: string; icon: string }[] = [
-  { key: 'home', label: 'Today', icon: '⌂' },
+  { key: 'home', label: 'Bugün', icon: '⌂' },
   { key: 'pets', label: 'Dostlarım', icon: '🐾' },
   { key: 'health', label: 'Sağlık', icon: '♥' },
-  { key: 'life', label: 'Life', icon: '◉' },
+  { key: 'life', label: 'Yaşam', icon: '◉' },
   { key: 'nearby', label: 'Yakınımda', icon: '⌖' },
   { key: 'platform', label: 'PetVitals+', icon: '✦' },
-  { key: 'profile', label: 'Profil', icon: '☺' },
+  { key: 'profile', label: 'Profil', icon: '' },
 ];
 
 export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: string }) {
@@ -83,19 +83,29 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
         {screen}
       </ScrollView>
       <View style={styles.tabs}>
-        {tabs.map(item => (
-          <Pressable
-            accessibilityLabel={item.label}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: tab === item.key }}
-            key={item.key}
-            onPress={() => selectTab(item.key)}
-            style={styles.tab}
-          >
-            <Text style={[styles.icon, tab === item.key && styles.active]}>{item.icon}</Text>
-            <Text style={[styles.label, tab === item.key && styles.active]}>{item.label}</Text>
-          </Pressable>
-        ))}
+        {tabs.map(item => {
+          const selected = tab === item.key;
+          return (
+            <Pressable
+              accessibilityLabel={item.label}
+              accessibilityRole="tab"
+              accessibilityState={{ selected }}
+              key={item.key}
+              onPress={() => selectTab(item.key)}
+              style={styles.tab}
+            >
+              {item.key === 'profile' ? (
+                <View accessible={false} style={styles.profileIcon}>
+                  <View style={[styles.profileHead, selected && styles.profilePartActive]} />
+                  <View style={[styles.profileBody, selected && styles.profilePartActive]} />
+                </View>
+              ) : (
+                <Text style={[styles.icon, selected && styles.active]}>{item.icon}</Text>
+              )}
+              <Text style={[styles.label, selected && styles.active]}>{item.label}</Text>
+            </Pressable>
+          );
+        })}
       </View>
     </SafeAreaView>
   );
@@ -110,6 +120,10 @@ const styles = StyleSheet.create({
   tabs: { ...shadow, backgroundColor: colors.surface, borderTopColor: colors.border, borderTopWidth: 1, flexDirection: 'row', paddingBottom: 10, paddingTop: 9 },
   tab: { alignItems: 'center', flex: 1, gap: 3, minWidth: 0 },
   icon: { color: colors.muted, fontSize: 17 },
+  profileIcon: { alignItems: 'center', height: 20, justifyContent: 'center', width: 20 },
+  profileHead: { backgroundColor: colors.muted, borderRadius: 4, height: 7, width: 7 },
+  profileBody: { backgroundColor: colors.muted, borderTopLeftRadius: 7, borderTopRightRadius: 7, height: 7, marginTop: 2, width: 15 },
+  profilePartActive: { backgroundColor: colors.primary },
   label: { color: colors.muted, fontSize: 7, fontWeight: '700' },
   active: { color: colors.primary },
 });
