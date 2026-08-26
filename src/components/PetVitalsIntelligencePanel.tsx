@@ -1,0 +1,180 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { usePreferences } from '../context/PreferencesContext';
+import { evaluateSmartHealthAlerts, type SmartHealthAlert } from '../lib/healthBrain';
+import { sendIntelligenceAlertNotification } from '../lib/notifications';
+import { colors, shadow } from '../theme';
+import type { HealthRecord, Pet } from '../types';
+
+const NOTIFIED_KEY = 'petvitals:intelligence:last-notified';
+const DAY = 86_400_000;
+
+const copy = {
+  tr: {
+    eyebrow: 'PETVITALS INTELLIGENCE',
+    title: 'Sağlık skoru',
+    checking: 'Sağlık verileri analiz ediliyor…',
+    noData: 'Skor oluşturmak için daha fazla sağlık verisi ekleyin.',
+    why: 'Neden?',
+    alerts: 'Erken uyarılar',
+    clean: 'Şu anda önemli bir değişim görünmüyor.',
+    disclaimer: 'Bu skor tanı değildir; sağlık takibi için erken sinyal sağlar.',
+    excellent: 'Mükemmel', good: 'İyi', attention: 'Dikkat gerekli',
+  },
+  en: {
+    eyebrow: 'PETVITALS INTELLIGENCE',
+    title: 'Health score',
+    checking: 'Analysing health data…',
+    noData: 'Add more health data to build a score.',
+    why: 'Why?',
+    alerts: 'Early warnings',
+    clean: 'No meaningful change is visible right now.',
+    disclaimer: 'This score is not a diagnosis; it is an early wellness tracking signal.',
+    excellent: 'Excellent', good: 'Good', attention: 'Needs attention',
+  },
+  de: {
+    eyebrow: 'PETVITALS INTELLIGENCE',
+    title: 'Gesundheitsscore',
+    checking: 'Gesundheitsdaten werden analysiert…',
+    noData: 'Fügen Sie mehr Gesundheitsdaten hinzu, um einen Score zu erstellen.',
+    why: 'Warum?',
+    alerts: 'Frühwarnungen',
+    clean: 'Derzeit ist keine bedeutsame Veränderung sichtbar.',
+    disclaimer: 'Dieser Score ist keine Diagnose, sondern ein Frühsignal für die Gesundheitsbeobachtung.',
+    excellent: 'Ausgezeichnet', good: 'Gut', attention: 'Aufmerksamkeit nötig',
+  },
+  es: {
+    eyebrow: 'PETVITALS INTELLIGENCE',
+    title: 'Puntuación de salud',
+    checking: 'Analizando los datos de salud…',
+    noData: 'Añade más datos de salud para crear una puntuación.',
+    why: '¿Por qué?',
+    alerts: 'Alertas tempranas',
+    clean: 'No se detectan cambios importantes en este momento.',
+    disclaimer: 'Esta puntuación no es un diagnóstico; es una señal temprana de seguimiento de bienestar.',
+    excellent: 'Excelente', good: 'Bien', attention: 'Necesita atención',
+  },
+} as const;
+
+function parseScore(alert?: SmartHealthAlert) {
+  const match = alert?.title?.match(/(\d{1,3})\/100/);
+  return match ? Number(match[1]) : null;
+}
+
+function scoreLabel(score: number | null, c: typeof copy.en) {
+  if (score == null) return '';
+  if (score >= 85) return c.excellent;
+  if (score >= 70) return c.good;
+  return c.attention;
+}
+
+function reasonText(scoreAlert?: SmartHealthAlert) {
+  if (!scoreAlert?.message) return '';
+  return scoreAlert.message
+    .replace(/^Why:\s*/i, '')
+    .replace(/\s*This score is a wellness tracking signal, not a diagnosis\.\s*$/i, '')
+    .trim();
+}
+
+async function maybeNotify(pet: Pet, alerts: SmartHealthAlert[]) {
+  const important = alerts.find(alert => alert.alert_type !== 'health_score' && (alert.severity === 'high' || alert.severity === 'medium'));
+  const scoreAlert = alerts.find(alert => alert.alert_type === 'health_score');
+  const score = parseScore(scoreAlert);
+  const target = important ?? (score != null && score < 70 ? scoreAlert : undefined);
+  if (!target) return;
+
+  const fingerprint = `${pet.id}:${target.id}:${target.severity}:${target.title}`;
+  try {
+    const raw = await AsyncStorage.getItem(NOTIFIED_KEY);
+    const previous = raw ? JSON.parse(raw) as { fingerprint?: string; notifiedAt?: number } : null;
+    if (previous?.fingerprint === fingerprint && previous.notifiedAt && Date.now() - previous.notifiedAt < DAY) return;
+    const sent = await sendIntelligenceAlertNotification(pet.name, target.title, target.message, target.severity);
+    if (sent) await AsyncStorage.setItem(NOTIFIED_KEY, JSON.stringify({ fingerprint, notifiedAt: Date.now() }));
+  } catch {
+    // Notification failures must never block the Intelligence card.
+  }
+}
+
+export function PetVitalsIntelligencePanel({ pets, records, userId, demoMode }: { pets: Pet[]; records: HealthRecord[]; userId?: string; demoMode: boolean }) {
+  const { language } = usePreferences();
+  const c = copy[language];
+  const [selectedPetId, setSelectedPetId] = useState(pets[0]?.id ?? '');
+  const [alerts, setAlerts] = useState<SmartHealthAlert[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const selectedPet = pets.find(pet => pet.id === selectedPetId) ?? pets[0];
+  const scoreAlert = alerts.find(alert => alert.alert_type === 'health_score');
+  const score = parseScore(scoreAlert);
+  const earlyWarnings = alerts.filter(alert => alert.alert_type !== 'health_score').slice(0, 3);
+  const recordSignature = useMemo(() => records.filter(record => record.petId === selectedPet?.id).map(record => `${record.id}:${record.date}:${record.nextDueDate ?? ''}`).join('|'), [records, selectedPet?.id]);
+
+  useEffect(() => {
+    if (!pets.some(pet => pet.id === selectedPetId)) setSelectedPetId(pets[0]?.id ?? '');
+  }, [pets, selectedPetId]);
+
+  useEffect(() => {
+    let active = true;
+    if (!selectedPet || demoMode || !userId) {
+      setAlerts([]);
+      return () => { active = false; };
+    }
+    setLoading(true);
+    setError('');
+    void evaluateSmartHealthAlerts(selectedPet.id)
+      .then(next => {
+        if (!active) return;
+        setAlerts(next);
+        void maybeNotify(selectedPet, next);
+      })
+      .catch(err => { if (active) setError(err instanceof Error ? err.message : 'PetVitals Intelligence unavailable.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [selectedPet?.id, userId, demoMode, recordSignature]);
+
+  if (!pets.length) return null;
+
+  return <View style={styles.wrap}>
+    <View style={styles.headerRow}>
+      <View style={{ flex: 1 }}><Text style={styles.eyebrow}>{c.eyebrow}</Text><Text style={styles.title}>{c.title}</Text></View>
+      {score != null ? <View style={[styles.scorePill, score < 70 && styles.scorePillWarning]}><Text style={styles.score}>{score}</Text><Text style={styles.scoreMax}>/100</Text></View> : null}
+    </View>
+    {pets.length > 1 ? <View style={styles.chips}>{pets.map(pet => <Pressable key={pet.id} onPress={() => setSelectedPetId(pet.id)} style={[styles.chip, selectedPet?.id === pet.id && styles.chipActive]}><Text style={[styles.chipText, selectedPet?.id === pet.id && styles.chipTextActive]}>{pet.name}</Text></Pressable>)}</View> : null}
+    {loading ? <View style={styles.loading}><ActivityIndicator color={colors.primary}/><Text style={styles.muted}>{c.checking}</Text></View> : null}
+    {!loading && score != null ? <><Text style={styles.label}>{scoreLabel(score, c as typeof copy.en)}</Text><Text style={styles.reasonTitle}>{c.why}</Text><Text style={styles.reason}>{reasonText(scoreAlert) || c.clean}</Text></> : null}
+    {!loading && score == null && !error ? <Text style={styles.muted}>{c.noData}</Text> : null}
+    {earlyWarnings.length ? <><Text style={styles.warningTitle}>{c.alerts}</Text>{earlyWarnings.map(alert => <View key={alert.id} style={[styles.warning, alert.severity === 'high' && styles.warningHigh]}><Text style={styles.warningSeverity}>{String(alert.severity).toUpperCase()}</Text><Text style={styles.warningText}>{alert.title}</Text><Text style={styles.warningMessage}>{alert.message}</Text></View>)}</> : (!loading && score != null ? <Text style={styles.clean}>{c.clean}</Text> : null)}
+    {error ? <Text style={styles.error}>{error}</Text> : null}
+    <Text style={styles.disclaimer}>{c.disclaimer}</Text>
+  </View>;
+}
+
+const styles = StyleSheet.create({
+  wrap: { ...shadow, backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 22, borderWidth: 1, marginHorizontal: 22, marginTop: 18, padding: 18 },
+  headerRow: { alignItems: 'center', flexDirection: 'row', gap: 12 },
+  eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1.1 },
+  title: { color: colors.text, fontSize: 21, fontWeight: '900', marginTop: 4 },
+  scorePill: { alignItems: 'baseline', backgroundColor: colors.primarySoft, borderRadius: 18, flexDirection: 'row', paddingHorizontal: 13, paddingVertical: 9 },
+  scorePillWarning: { backgroundColor: '#FFF1E8' },
+  score: { color: colors.primaryDark, fontSize: 25, fontWeight: '900' },
+  scoreMax: { color: colors.muted, fontSize: 11, fontWeight: '800' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 13 },
+  chip: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 999, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 6 },
+  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipText: { color: colors.muted, fontSize: 11, fontWeight: '800' },
+  chipTextActive: { color: colors.white },
+  loading: { alignItems: 'center', flexDirection: 'row', gap: 9, marginTop: 15 },
+  muted: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 12 },
+  label: { color: colors.primaryDark, fontSize: 14, fontWeight: '900', marginTop: 13 },
+  reasonTitle: { color: colors.text, fontSize: 12, fontWeight: '900', marginTop: 12 },
+  reason: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 4 },
+  warningTitle: { color: colors.text, fontSize: 14, fontWeight: '900', marginTop: 16 },
+  warning: { backgroundColor: '#FFF8EC', borderRadius: 13, marginTop: 8, padding: 11 },
+  warningHigh: { backgroundColor: '#FFF0F0' },
+  warningSeverity: { color: colors.danger, fontSize: 9, fontWeight: '900' },
+  warningText: { color: colors.text, fontSize: 13, fontWeight: '900', marginTop: 3 },
+  warningMessage: { color: colors.muted, fontSize: 11, lineHeight: 16, marginTop: 3 },
+  clean: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', marginTop: 14 },
+  error: { color: colors.danger, fontSize: 11, marginTop: 12 },
+  disclaimer: { color: colors.muted, fontSize: 9, lineHeight: 14, marginTop: 14 },
+});
