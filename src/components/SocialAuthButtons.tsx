@@ -1,6 +1,7 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import React from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { usePreferences } from '../context/PreferencesContext';
 import type { SocialProvider } from '../lib/socialAuth';
 import { colors } from '../theme';
 
@@ -10,7 +11,16 @@ type Props = {
   onPress: (provider: SocialProvider) => void;
 };
 
+const copy = {
+  tr: { apple: 'Apple ile devam et', google: 'Google ile devam et' },
+  en: { apple: 'Continue with Apple', google: 'Continue with Google' },
+  de: { apple: 'Mit Apple fortfahren', google: 'Mit Google fortfahren' },
+  es: { apple: 'Continuar con Apple', google: 'Continuar con Google' },
+} as const;
+
 export function SocialAuthButtons({ busyProvider, disabled = false, onPress }: Props) {
+  const { language } = usePreferences();
+  const c = copy[language];
   const blocked = disabled || busyProvider !== null;
 
   return (
@@ -27,26 +37,16 @@ export function SocialAuthButtons({ busyProvider, disabled = false, onPress }: P
           {busyProvider === 'apple' ? <View pointerEvents="none" style={styles.appleLoading}><ActivityIndicator color={colors.white} /></View> : null}
         </View>
       ) : (
-        <Pressable
-          accessibilityRole="button"
-          disabled={blocked}
-          onPress={() => onPress('apple')}
-          style={({ pressed }) => [styles.button, styles.appleButton, blocked && styles.disabled, pressed && styles.pressed]}
-        >
+        <Pressable accessibilityLabel={c.apple} accessibilityRole="button" disabled={blocked} onPress={() => onPress('apple')} style={({ pressed }) => [styles.button, styles.appleButton, blocked && styles.disabled, pressed && styles.pressed]}>
           <Text style={styles.appleMark}></Text>
-          <Text style={styles.appleText}>Apple ile devam et</Text>
+          <Text style={styles.appleText}>{c.apple}</Text>
           {busyProvider === 'apple' ? <ActivityIndicator color={colors.white} /> : <View style={styles.trailingSpace} />}
         </Pressable>
       )}
 
-      <Pressable
-        accessibilityRole="button"
-        disabled={blocked}
-        onPress={() => onPress('google')}
-        style={({ pressed }) => [styles.button, styles.googleButton, blocked && styles.disabled, pressed && styles.pressed]}
-      >
+      <Pressable accessibilityLabel={c.google} accessibilityRole="button" disabled={blocked} onPress={() => onPress('google')} style={({ pressed }) => [styles.button, styles.googleButton, blocked && styles.disabled, pressed && styles.pressed]}>
         <View style={styles.googleMark}><Text style={styles.googleMarkText}>G</Text></View>
-        <Text style={styles.googleText}>Google ile devam et</Text>
+        <Text style={styles.googleText}>{c.google}</Text>
         {busyProvider === 'google' ? <ActivityIndicator color={colors.primary} /> : <View style={styles.trailingSpace} />}
       </Pressable>
     </View>
