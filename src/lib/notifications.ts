@@ -4,6 +4,7 @@ import { buildVaccineReminderPlan, getVaccineReminderBody } from './vaccineRemin
 
 const VACCINE_CHANNEL_ID = 'vaccine-reminders';
 const SMART_CHANNEL_ID = 'smart-reminders';
+const INTELLIGENCE_CHANNEL_ID = 'intelligence-alerts';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -35,6 +36,20 @@ async function ensureNotificationPermission(channelId = VACCINE_CHANNEL_ID, chan
   if (hasNotificationPermission(current)) return true;
   const requested = await Notifications.requestPermissionsAsync();
   return hasNotificationPermission(requested);
+}
+
+export async function sendIntelligenceAlertNotification(petName: string, title: string, message: string, severity: string) {
+  const granted = await ensureNotificationPermission(INTELLIGENCE_CHANNEL_ID, 'PetVitals Intelligence');
+  if (!granted) return null;
+  return Notifications.scheduleNotificationAsync({
+    content: {
+      title: `PetVitals Intelligence · ${petName}`,
+      body: `${title}: ${message}`,
+      sound: 'default',
+      data: { screen: 'home', recordType: 'petvitals-intelligence', severity, petName },
+    },
+    trigger: null,
+  });
 }
 
 export async function scheduleSmartReminderNotification(remindAt: string) {

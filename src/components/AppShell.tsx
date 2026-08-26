@@ -15,6 +15,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { usePreferences } from '../context/PreferencesContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { SubscriptionGate } from './SubscriptionGate';
+import { PetVitalsIntelligencePanel } from './PetVitalsIntelligencePanel';
 
 const tabCopy = {
   tr: ['Bugün', 'Dostlarım', 'Sağlık', 'Yaşam', 'Yakınımda', 'PetVitals+', 'Profil'],
@@ -68,7 +69,7 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
     }
     if (tab === 'health') return <HealthScreen onAddVaccine={addVaccine} pets={pets} records={records} savingVaccine={savingVaccine} />;
     if (tab === 'platform') return <PlatformScreen demoMode={demoMode} pets={pets} records={records} userId={userId} />;
-    return <HomeScreen demoMode={demoMode} pets={pets} records={records} userId={userId} />;
+    return <><PetVitalsIntelligencePanel demoMode={demoMode} pets={pets} records={records} userId={userId} /><HomeScreen demoMode={demoMode} pets={pets} records={records} userId={userId} /></>;
   })();
 
   return <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
