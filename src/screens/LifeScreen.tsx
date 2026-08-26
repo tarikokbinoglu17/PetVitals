@@ -31,7 +31,21 @@ export function LifeScreen({pets,userId,demoMode}:{pets:Pet[];userId?:string;dem
  useEffect(()=>{void refresh();},[selectedPet?.id,userId,demoMode]);
  function chooseType(type:PetLifeEntryType){setSelectedType(type);const p=quickTypes.find(x=>x.key===type);setUnit(p?.unit??'');setValue('');setNote('');}
  async function save(){if(!selectedPet||!userId||demoMode){Alert.alert(c.real,c.realText);return;}const numeric=value.trim()?Number(value.replace(',','.')):undefined;setSaving(true);try{await addLifeEntry(userId,selectedPet.id,{entryType:selectedType,valueNumeric:Number.isFinite(numeric)?numeric:undefined,valueText:Number.isFinite(numeric)?undefined:value.trim()||undefined,unit,notes:note});setValue('');setNote('');await refresh();}catch(e){Alert.alert(c.fail,e instanceof Error?e.message:c.failText);}finally{setSaving(false);}}
- async function saveQuick(action:QuickAction){if(!selectedPet||!userId||demoMode){Alert.alert(c.real,c.realText);return;}setQuickSaving(action);try{const entryType:PetLifeEntryType=action==='parasite'?'parasite':'custom';await addLifeEntry(userId,selectedPet.id,{entryType,valueText:`quick:${action}`});await refresh();Alert.alert(c.saved,c.savedText);}catch(e){Alert.alert(c.fail,e instanceof Error?e.message:c.failText);}finally{setQuickSaving(null);}}
+ async function saveQuick(action:QuickAction){
+  if(!selectedPet){Alert.alert(c.fail,c.failText);return;}
+  setQuickSaving(action);
+  try{
+   const entryType:PetLifeEntryType=action==='parasite'?'parasite':'custom';
+   if(demoMode||!userId){
+    const localEntry={id:`demo-${Date.now()}-${action}`,petId:selectedPet.id,entryType,valueText:`quick:${action}`,occurredAt:new Date().toISOString()};
+    setSnapshot(current=>({...current,lifeEntries:[localEntry,...current.lifeEntries]}));
+   }else{
+    await addLifeEntry(userId,selectedPet.id,{entryType,valueText:`quick:${action}`});
+    await refresh();
+   }
+   Alert.alert(c.saved,c.savedText);
+  }catch(e){Alert.alert(c.fail,e instanceof Error?e.message:c.failText);}finally{setQuickSaving(null);}
+ }
  function trendText(t:HealthTrend){if(t.kind==='recurring_symptom')return c.symptomTrend(t.count??0);if(t.kind==='frequent_vet_visits')return c.vetTrend(t.count??0);const p=Math.round(t.percent??0);return t.direction==='down'?c.weightDown(p):c.weightUp(p);}
  const quickActions:[QuickAction,string,string][]=[['medication','💊',c.medication],['parasite','🛡️',c.parasite],['symptom','⚠️',c.symptom],['vet_visit','🩺',c.vetVisit]];
  return<View style={s.page}>
