@@ -1,9 +1,9 @@
-export type SupportedLocale = 'tr' | 'en' | 'de' | 'es';
+export type SupportedLocale = 'tr' | 'en' | 'de' | 'es' | 'ja';
 export type UnitSystem = 'metric' | 'imperial';
 
 export function normalizeLocale(locale?: string | null): SupportedLocale {
   const base = String(locale ?? '').toLowerCase().split(/[-_]/)[0];
-  if (base === 'tr' || base === 'de' || base === 'es') return base;
+  if (base === 'tr' || base === 'de' || base === 'es' || base === 'ja') return base;
   return 'en';
 }
 
@@ -29,4 +29,5 @@ export const coreCopy: Record<SupportedLocale, { today: string; tasks: string; p
   en: { today: 'Today', tasks: "Today's tasks", passport: 'Health Passport', vetSummary: 'Prepare for vet', offline: 'Offline' },
   de: { today: 'Heute', tasks: 'Heutige Aufgaben', passport: 'Gesundheitspass', vetSummary: 'Tierarzt vorbereiten', offline: 'Offline' },
   es: { today: 'Hoy', tasks: 'Tareas de hoy', passport: 'Pasaporte de salud', vetSummary: 'Preparar visita veterinaria', offline: 'Sin conexión' },
+  ja: { today: '今日', tasks: '今日のタスク', passport: '健康パスポート', vetSummary: '診察の準備', offline: 'オフライン' },
 };

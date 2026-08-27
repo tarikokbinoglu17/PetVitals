@@ -16,6 +16,7 @@ const copy = {
   en: { apple: 'Continue with Apple', google: 'Continue with Google' },
   de: { apple: 'Mit Apple fortfahren', google: 'Mit Google fortfahren' },
   es: { apple: 'Continuar con Apple', google: 'Continuar con Google' },
+  ja: { apple: 'Appleで続ける', google: 'Googleで続ける' },
 } as const;
 
 export function SocialAuthButtons({ busyProvider, disabled = false, onPress }: Props) {

@@ -22,12 +22,14 @@ const tabCopy = {
   en: ['Today', 'My Pets', 'Health', 'Life', 'Nearby', 'PetVitals+', 'Profile'],
   de: ['Heute', 'Tiere', 'Gesundheit', 'Leben', 'In der Nähe', 'PetVitals+', 'Profil'],
   es: ['Hoy', 'Mascotas', 'Salud', 'Vida', 'Cerca', 'PetVitals+', 'Perfil'],
+  ja: ['今日', 'ペット', '健康', '生活', '周辺', 'PetVitals+', 'プロフィール'],
 } as const;
 const statusCopy = {
   tr: { checking: 'Üyelik durumunuz kontrol ediliyor…', loading: 'Bilgileriniz yükleniyor…', failed: 'Bilgiler yüklenemedi', trial: (days:number) => `Premium deneme · ${days} gün kaldı` },
   en: { checking: 'Checking your membership…', loading: 'Loading your information…', failed: 'Could not load information', trial: (days:number) => `Premium trial · ${days} days left` },
   de: { checking: 'Mitgliedschaft wird geprüft…', loading: 'Daten werden geladen…', failed: 'Daten konnten nicht geladen werden', trial: (days:number) => `Premium-Test · ${days} Tage übrig` },
   es: { checking: 'Comprobando tu membresía…', loading: 'Cargando tu información…', failed: 'No se pudo cargar la información', trial: (days:number) => `Prueba Premium · quedan ${days} días` },
+  ja: { checking: 'メンバーシップを確認しています…', loading: '情報を読み込んでいます…', failed: '情報を読み込めませんでした', trial: (days:number) => `Premium無料体験 · 残り${days}日` },
 } as const;
 const tabKeys: { key: TabName; icon: string }[] = [
   { key: 'home', icon: '⌂' }, { key: 'pets', icon: '🐾' }, { key: 'health', icon: '♥' }, { key: 'life', icon: '◉' }, { key: 'nearby', icon: '⌖' }, { key: 'platform', icon: '✦' }, { key: 'profile', icon: '' },

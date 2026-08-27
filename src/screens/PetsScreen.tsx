@@ -6,6 +6,7 @@ import { colors, shadow } from '../theme';
 import { usePreferences } from '../context/PreferencesContext';
 import { formatWeight } from '../lib/globalization';
 import { t } from '../lib/i18n';
+import { petSpeciesIcon } from '../lib/petSpecies';
 
 export function PetsScreen({ pets, savingPet, onAddPet, onSelectPet }: { pets: Pet[]; savingPet: boolean; onAddPet: (draft: PetDraft) => Promise<SavePetResult>; onSelectPet: (pet: Pet) => void }) {
   const { language, unitSystem } = usePreferences();
@@ -20,7 +21,7 @@ export function PetsScreen({ pets, savingPet, onAddPet, onSelectPet }: { pets: P
       {pets.length === 0 ? <Text style={styles.empty}>{t(language, 'Henüz bir dost eklenmemiş.')}</Text> : null}
       {pets.map((pet, index) => (
         <Pressable accessibilityRole="button" key={pet.id} onPress={() => onSelectPet(pet)} style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
-          <View style={[styles.avatar, { backgroundColor: index ? '#FDE8DF' : colors.primarySoft }]}>{pet.photoUrl ? <Image source={{ uri: pet.photoUrl }} style={styles.photo} /> : <Text style={styles.emoji}>{pet.species === 'Kedi' ? '🐱' : pet.species === 'Köpek' ? '🐶' : '🐾'}</Text>}</View>
+          <View style={[styles.avatar, { backgroundColor: index ? '#FDE8DF' : colors.primarySoft }]}>{pet.photoUrl ? <Image source={{ uri: pet.photoUrl }} style={styles.photo} /> : <Text style={styles.emoji}>{petSpeciesIcon(pet.species)}</Text>}</View>
           <View style={styles.info}>
             <Text style={styles.name}>{pet.name}</Text>
             <Text style={styles.meta}>{pet.breed || t(language, pet.species)}{pet.weight > 0 ? ` • ${formatWeight(pet.weight, unitSystem, language)}` : ''}</Text>

@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export type IntelligenceLanguage = 'tr' | 'en' | 'de' | 'es';
+export type IntelligenceLanguage = 'tr' | 'en' | 'de' | 'es' | 'ja';
 
 export type SmartHealthAlert = {
   id: string;
@@ -62,6 +62,16 @@ const I = {
     waterReason:(p:string)=>`La ingesta de agua cambió un ${p}%`, waterTitle:'Cambió el patrón de consumo de agua', waterMessage:(p:string,up:boolean)=>`La ingesta media de agua es aproximadamente un ${p}% ${up?'mayor':'menor'} que en los 7 días anteriores.`,
     activityReason:(p:string)=>`La actividad bajó un ${p}%`, activityTitle:'La actividad está bajando', activityMessage:(p:string)=>`La actividad media de los últimos 7 días es aproximadamente un ${p}% menor que en los 7 días anteriores.`,
     excellent:'Excelente', good:'Bien', attention:'Necesita atención', why:'¿Por qué?', clean:'No se observa ninguna tendencia negativa importante en los registros disponibles.', disclaimer:'Esta puntuación no es un diagnóstico; es una señal temprana de seguimiento del bienestar.'
+  },
+  ja: {
+    overdueReason:(n:number)=>`期限切れのワクチン ${n}件`, overdueTitle:'ワクチンの確認が必要です', overdueMessage:(n:number)=>`${n}件のワクチン予定日が過ぎています。`,
+    noVet:'過去12か月の受診記録がありません', frequentVetReason:(n:number)=>`90日間の受診 ${n}回`, frequentVetTitle:'受診回数が増えています', frequentVetMessage:(n:number)=>`過去90日間に${n}回の受診が記録されています。この傾向を獣医師と確認してください。`,
+    symptomReason:(n:number)=>`90日間の症状記録 ${n}件`, symptomTitle:'症状が繰り返されています', symptomMessage:(n:number)=>`過去90日間に症状が${n}回記録されています。PetVitalsが繰り返しの傾向を検出しました。`,
+    weightReason:(p:string)=>`体重が${p}%変化`, weightTitle:'体重の傾向が変化しました', weightMessage:(p:string,up:boolean)=>`記録された体重は最初の測定より${p}%${up?'増加':'減少'}しています。`, weightNeed:'定期的な体重測定で傾向検出の精度が上がります',
+    foodReason:(p:string)=>`食事量が${p}%減少傾向`, foodTitle:'食事量が減少しています', foodMessage:(p:string)=>`直近7日間の平均食事量は、その前の7日間より約${p}%少なくなっています。`,
+    waterReason:(p:string)=>`飲水量が${p}%変化`, waterTitle:'飲水量の傾向が変化しました', waterMessage:(p:string,up:boolean)=>`直近7日間の平均飲水量は、その前の7日間より約${p}%${up?'多く':'少なく'}なっています。`,
+    activityReason:(p:string)=>`活動量が${p}%減少傾向`, activityTitle:'活動量が減少しています', activityMessage:(p:string)=>`直近7日間の平均活動量は、その前の7日間より約${p}%少なくなっています。`,
+    excellent:'とても良好', good:'良好', attention:'注意が必要', why:'理由：', clean:'現在の記録に重要な悪化傾向は見られません。', disclaimer:'このスコアは診断ではなく、健康変化の早期サインです。'
   }
 } as const;
 

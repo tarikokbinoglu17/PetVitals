@@ -1,0 +1,10 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "PetVitals",
+    "NSLocationWhenInUseUsageDescription": "PetVitals usa tu ubicación solo mientras utilizas la app para mostrar veterinarios y tiendas de mascotas cercanos.",
+    "NSPhotoLibraryUsageDescription": "PetVitals accede a tus fotos para que puedas elegir una foto de perfil o un documento veterinario.",
+    "NSCameraUsageDescription": "PetVitals usa la cámara para escanear cartillas de vacunación y documentos veterinarios.",
+    "NSMicrophoneUsageDescription": "PetVitals accede al micrófono solo con tu consentimiento explícito para grabar y transcribir una consulta veterinaria."
+  },
+  "android": { "app_name": "PetVitals" }
+}
