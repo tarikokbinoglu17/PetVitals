@@ -15,7 +15,7 @@ type MutationResult = { error?: string; message?: string };
 
 type PetRow = { id: string; name: string; species: string; breed: string | null; birth_date: string | null; weight: number | string | null; photo_url: string | null };
 type VaccineRow = { id: string; pet_id: string; vaccine_name: string; vaccine_type: string | null; administered_date: string | null; next_due_date: string | null; repeat_interval_months: number | null; veterinarian: string | null; notes: string | null; document_url: string | null; notifications_enabled: boolean; reminder_30_days_id: string | null; reminder_7_days_id: string | null; reminder_1_day_id: string | null; reminder_same_day_id: string | null; created_at: string };
-const petSpecies: Pet['species'][] = ['Kedi', 'Köpek', 'Diğer'];
+const petSpecies: Pet['species'][] = ['Kedi', 'Köpek', 'Kuş', 'Tavşan', 'Sürüngen', 'Balık', 'Diğer'];
 
 function mapPet(row: PetRow, photoUrl?: string): Pet {
   const species = petSpecies.includes(row.species as Pet['species']) ? (row.species as Pet['species']) : 'Diğer';

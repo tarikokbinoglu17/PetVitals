@@ -1,12 +1,15 @@
 export type Pet = {
   id: string;
   name: string;
-  species: 'Kedi' | 'Köpek' | 'Diğer';
+  species: 'Kedi' | 'Köpek' | 'Kuş' | 'Tavşan' | 'Sürüngen' | 'Balık' | 'Diğer';
   breed: string;
   birthDate: string;
   weight: number;
   photoPath?: string;
   photoUrl?: string;
+  ownerId?: string;
+  accessRole?: 'owner' | 'partner' | 'caregiver' | 'veterinarian' | 'viewer';
+  canEdit?: boolean;
 };
 
 export type LocalImage = {
@@ -58,7 +61,7 @@ export type WeightEntry = {
   notes?: string;
 };
 
-export type PetMemberRole = 'caregiver' | 'veterinarian' | 'viewer';
+export type PetMemberRole = 'partner' | 'caregiver' | 'veterinarian' | 'viewer';
 
 export type PetShare = {
   id: string;

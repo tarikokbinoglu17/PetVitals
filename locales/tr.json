@@ -1,0 +1,10 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "PetVitals",
+    "NSLocationWhenInUseUsageDescription": "PetVitals, yakındaki veterinerleri ve petshopları göstermek için konumunuzu yalnızca uygulamayı kullanırken kullanır.",
+    "NSPhotoLibraryUsageDescription": "PetVitals, profil fotoğrafı ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+    "NSCameraUsageDescription": "PetVitals, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
+    "NSMicrophoneUsageDescription": "PetVitals, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir."
+  },
+  "android": { "app_name": "PetVitals" }
+}

@@ -15,7 +15,8 @@
       "supportsTablet": true,
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true
       }
     },
     "android": {
@@ -45,9 +46,18 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "PetVitals, dostunuzun profil fotoğrafını seçebilmeniz için fotoğraflarınıza erişir.",
-          "cameraPermission": false,
+          "photosPermission": "PetVitals, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+          "cameraPermission": "PetVitals, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "PetVitals, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
+          "recordAudioAndroid": true,
+          "enableBackgroundRecording": false,
+          "enableBackgroundPlayback": false
         }
       ],
       [
@@ -58,6 +68,13 @@
         }
       ]
     ],
+    "locales": {
+      "tr": "./locales/tr.json",
+      "en": "./locales/en.json",
+      "de": "./locales/de.json",
+      "es": "./locales/es.json",
+      "ja": "./locales/ja.json"
+    },
     "experiments": {
       "baseUrl": "/PetVitals"
     }

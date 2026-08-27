@@ -1,6 +1,6 @@
 import type { SupportedLocale } from './globalization';
 
-type Copy = Record<SupportedLocale, string>;
+type Copy = Record<Exclude<SupportedLocale, 'ja'>, string>;
 
 const strings: Record<string, Copy> = {
   'Dostlarım': { tr: 'Dostlarım', en: 'My Pets', de: 'Meine Tiere', es: 'Mis mascotas' },
@@ -26,7 +26,10 @@ const strings: Record<string, Copy> = {
   'Tür': { tr: 'Tür', en: 'Species', de: 'Tierart', es: 'Especie' }, 'Adı': { tr: 'Adı', en: 'Name', de: 'Name', es: 'Nombre' }, 'Irkı': { tr: 'Irkı', en: 'Breed', de: 'Rasse', es: 'Raza' },
   'Doğum tarihi': { tr: 'Doğum tarihi', en: 'Birth date', de: 'Geburtsdatum', es: 'Fecha de nacimiento' }, 'Ağırlık': { tr: 'Ağırlık', en: 'Weight', de: 'Gewicht', es: 'Peso' },
   'Dostumu ekle': { tr: 'Dostumu ekle', en: 'Add my pet', de: 'Tier hinzufügen', es: 'Añadir mascota' }, 'Dostunuz başarıyla eklendi.': { tr: 'Dostunuz başarıyla eklendi.', en: 'Your pet was added successfully.', de: 'Ihr Tier wurde erfolgreich hinzugefügt.', es: 'Tu mascota se añadió correctamente.' },
-  'Kedi': { tr: 'Kedi', en: 'Cat', de: 'Katze', es: 'Gato' }, 'Köpek': { tr: 'Köpek', en: 'Dog', de: 'Hund', es: 'Perro' }, 'Diğer': { tr: 'Diğer', en: 'Other', de: 'Andere', es: 'Otro' },
+  'Kedi': { tr: 'Kedi', en: 'Cat', de: 'Katze', es: 'Gato' }, 'Köpek': { tr: 'Köpek', en: 'Dog', de: 'Hund', es: 'Perro' },
+  'Kuş': { tr: 'Kuş', en: 'Bird', de: 'Vogel', es: 'Ave' }, 'Tavşan': { tr: 'Tavşan', en: 'Rabbit', de: 'Kaninchen', es: 'Conejo' },
+  'Sürüngen': { tr: 'Sürüngen', en: 'Reptile', de: 'Reptil', es: 'Reptil' }, 'Balık': { tr: 'Balık', en: 'Fish', de: 'Fisch', es: 'Pez' },
+  'Diğer': { tr: 'Diğer', en: 'Other', de: 'Andere', es: 'Otro' },
   'Kilo': { tr: 'Kilo', en: 'Weight', de: 'Gewicht', es: 'Peso' }, 'Sağlık kaydı': { tr: 'Sağlık kaydı', en: 'Health records', de: 'Gesundheitsakten', es: 'Registros de salud' }, 'Aşı': { tr: 'Aşı', en: 'Vaccines', de: 'Impfungen', es: 'Vacunas' },
   'Profil bilgileri': { tr: 'Profil bilgileri', en: 'Profile information', de: 'Profilinformationen', es: 'Información del perfil' }, 'Irk': { tr: 'Irk', en: 'Breed', de: 'Rasse', es: 'Raza' }, 'Yaş': { tr: 'Yaş', en: 'Age', de: 'Alter', es: 'Edad' }, 'Cinsiyet': { tr: 'Cinsiyet', en: 'Gender', de: 'Geschlecht', es: 'Sexo' }, 'Mikroçip': { tr: 'Mikroçip', en: 'Microchip', de: 'Mikrochip', es: 'Microchip' },
   'Belirtilmedi': { tr: 'Belirtilmedi', en: 'Not specified', de: 'Nicht angegeben', es: 'No especificado' }, 'Henüz eklenmedi': { tr: 'Henüz eklenmedi', en: 'Not added yet', de: 'Noch nicht hinzugefügt', es: 'Aún no añadido' },
@@ -44,4 +47,33 @@ const strings: Record<string, Copy> = {
   'Kayıt ol': { tr: 'Kayıt ol', en: 'Sign up', de: 'Registrieren', es: 'Registrarse' }, 'Giriş yap': { tr: 'Giriş yap', en: 'Sign in', de: 'Anmelden', es: 'Iniciar sesión' }, 'Zaten hesabınız var mı? Giriş yapın': { tr: 'Zaten hesabınız var mı? Giriş yapın', en: 'Already have an account? Sign in', de: 'Schon ein Konto? Anmelden', es: '¿Ya tienes cuenta? Inicia sesión' }, 'Hesabınız yok mu? Kayıt olun': { tr: 'Hesabınız yok mu? Kayıt olun', en: "Don't have an account? Sign up", de: 'Noch kein Konto? Registrieren', es: '¿No tienes cuenta? Regístrate' }, 'Uygulamayı demo verileriyle incele →': { tr: 'Uygulamayı demo verileriyle incele →', en: 'Explore with demo data →', de: 'Mit Demodaten ansehen →', es: 'Explorar con datos demo →' },
 };
 
-export function t(language: SupportedLocale, key: string) { return strings[key]?.[language] ?? key; }
+const jaStrings: Record<string, string> = {
+  'Dostlarım': 'ペット', 'Tüm sağlık bilgileri tek yerde。': '健康情報を一か所にまとめます。',
+  'Tüm sağlık bilgileri tek yerde.': '健康情報を一か所にまとめます。', 'Kapat': '閉じる', 'Dost ekle': 'ペットを追加',
+  'Yeni dost ekle': '新しいペットを追加', 'Henüz bir dost eklenmemiş.': 'ペットはまだ登録されていません。', 'Doğum': '生年月日',
+  'Yeni dost profili': '新しいペットプロフィール', 'Dost profilini düzenle': 'ペットプロフィールを編集', 'Profil güncellendi': 'プロフィールを更新しました',
+  'Değişiklikleri kaydet': '変更を保存', 'Düzenle': '編集', 'Sil': '削除', 'Dostu sil': 'ペットを削除', 'Kaydı sil': '記録を削除',
+  'Profil fotoğrafı': 'プロフィール写真', 'İsteğe bağlı • en fazla 10 MB': '任意 • 最大10MB', 'Fotoğrafı değiştir': '写真を変更',
+  'Galeriden seç': 'ライブラリから選択', 'Fotoğrafı kaldır': '写真を削除', 'Tür': '種類', 'Adı': '名前', 'Irkı': '品種',
+  'Doğum tarihi': '生年月日', 'Ağırlık': '体重', 'Dostumu ekle': 'ペットを追加', 'Dostunuz başarıyla eklendi.': 'ペットを追加しました。',
+  'Kedi': '猫', 'Köpek': '犬', 'Kuş': '鳥', 'Tavşan': 'ウサギ', 'Sürüngen': '爬虫類', 'Balık': '魚', 'Diğer': 'その他',
+  'Kilo': '体重', 'Sağlık kaydı': '健康記録', 'Aşı': 'ワクチン', 'Profil bilgileri': 'プロフィール情報', 'Irk': '品種', 'Yaş': '年齢',
+  'Cinsiyet': '性別', 'Mikroçip': 'マイクロチップ', 'Belirtilmedi': '未設定', 'Henüz eklenmedi': '未登録', 'Sağlık özeti': '健康サマリー',
+  'Yaklaşan bakım kaydı': '今後のケア予定', 'Yaklaşan bakım kaydı yok': '今後のケア予定はありません',
+  'Yeni bir aşı veya kontrol tarihi ekleyebilirsiniz.': 'ワクチンや健診日を追加できます。', 'Kayıtlı alerji bulunmuyor': '登録済みのアレルギーはありません',
+  'Sağlık geçmişi': '健康履歴', 'kayıt': '件', 'Henüz sağlık kaydı yok': '健康記録はまだありません',
+  'Bu dosta ait aşı ve kontrol kayıtları burada görünecek.': 'このペットのワクチンと健診記録がここに表示されます。',
+  'Profil': 'プロフィール', 'Bildirim tercihleri': '通知設定', 'Gizlilik Politikası': 'プライバシーポリシー', 'Hesap ve Veri Silme': 'アカウントとデータを削除',
+  'Dil ve ölçü birimleri': '言語と単位', 'Uygulama dili': 'アプリの言語', 'Ölçü birimleri': '単位', 'Seçiminiz otomatik kaydedilir.': '選択内容は自動的に保存されます。',
+  'Yardım ve destek': 'ヘルプとサポート', 'Verileriniz sizin kontrolünüzde': 'データはご自身で管理できます', 'Oturumu kapat': 'ログアウト',
+  'Dostunuzun sağlığı, her zaman yanınızda.': '大切なペットの健康を、いつもそばに。', 'Hesap oluştur': 'アカウントを作成', 'Tekrar hoş geldiniz': 'おかえりなさい',
+  'Evcil dostlarınızı takip etmeye başlayın.': 'ペットの健康管理を始めましょう。', 'Bilgilerinize ulaşmak için giriş yapın.': '情報を確認するにはログインしてください。',
+  'veya e-posta ile': 'またはメールで', 'Ad soyad': '氏名', 'E-posta': 'メールアドレス', 'Şifre': 'パスワード', 'Kayıt ol': '登録', 'Giriş yap': 'ログイン',
+  'Zaten hesabınız var mı? Giriş yapın': 'アカウントをお持ちですか？ ログイン', 'Hesabınız yok mu? Kayıt olun': 'アカウントをお持ちでないですか？ 登録',
+  'Uygulamayı demo verileriyle incele →': 'デモデータでアプリを見る →',
+};
+
+export function t(language: SupportedLocale, key: string) {
+  if (language === 'ja') return jaStrings[key] ?? strings[key]?.en ?? key;
+  return strings[key]?.[language] ?? key;
+}

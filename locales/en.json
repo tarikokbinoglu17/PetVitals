@@ -1,0 +1,10 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "PetVitals",
+    "NSLocationWhenInUseUsageDescription": "PetVitals uses your location only while you use the app to show nearby veterinarians and pet stores.",
+    "NSPhotoLibraryUsageDescription": "PetVitals accesses your photos so you can choose a profile photo or veterinary document.",
+    "NSCameraUsageDescription": "PetVitals uses the camera to scan vaccination cards and veterinary documents.",
+    "NSMicrophoneUsageDescription": "PetVitals accesses the microphone only with your explicit consent to record and transcribe a veterinary visit."
+  },
+  "android": { "app_name": "PetVitals" }
+}

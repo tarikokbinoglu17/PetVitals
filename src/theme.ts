@@ -8,6 +8,7 @@ export const colors = {
   text: '#1B2925',
   muted: '#6E7D78',
   border: '#E1E7E3',
+  success: '#238A64',
   danger: '#B33A3A',
   white: '#FFFFFF',
 };
@@ -19,4 +20,3 @@ export const shadow = {
   shadowRadius: 12,
   elevation: 3,
 };
-
