@@ -1,9 +1,9 @@
-# Faunvia Store Release Plan
+# PetSolea Store Release Plan
 
 ## V1 release target
 - iOS App Store + Google Play
 - Version 1.0.0
-- Bundle/package ID: `com.tarikokbinoglu.faunvia`
+- Bundle/package ID: `com.tarikokbinoglu.petsolea`
 
 ## Required before submission
 1. Production EAS project and credentials

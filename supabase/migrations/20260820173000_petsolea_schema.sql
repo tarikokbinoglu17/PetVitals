@@ -490,12 +490,12 @@ set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
-drop policy if exists "Faunvia users can view own files" on storage.objects;
-drop policy if exists "Faunvia users can upload own files" on storage.objects;
-drop policy if exists "Faunvia users can update own files" on storage.objects;
-drop policy if exists "Faunvia users can delete own files" on storage.objects;
+drop policy if exists "PetSolea users can view own files" on storage.objects;
+drop policy if exists "PetSolea users can upload own files" on storage.objects;
+drop policy if exists "PetSolea users can update own files" on storage.objects;
+drop policy if exists "PetSolea users can delete own files" on storage.objects;
 
-create policy "Faunvia users can view own files"
+create policy "PetSolea users can view own files"
 on storage.objects for select
 to authenticated
 using (
@@ -503,7 +503,7 @@ using (
   and owner_id = (select auth.uid())::text
 );
 
-create policy "Faunvia users can upload own files"
+create policy "PetSolea users can upload own files"
 on storage.objects for insert
 to authenticated
 with check (
@@ -511,7 +511,7 @@ with check (
   and (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
-create policy "Faunvia users can update own files"
+create policy "PetSolea users can update own files"
 on storage.objects for update
 to authenticated
 using (
@@ -524,7 +524,7 @@ with check (
   and (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
-create policy "Faunvia users can delete own files"
+create policy "PetSolea users can delete own files"
 on storage.objects for delete
 to authenticated
 using (

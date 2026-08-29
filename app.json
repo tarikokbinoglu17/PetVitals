@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Faunvia",
-    "slug": "faunvia",
+    "name": "PetSolea",
+    "slug": "petsolea",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "scheme": "faunvia",
+    "scheme": "petsolea",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "ios": {
-      "bundleIdentifier": "com.tarikokbinoglu.faunvia",
+      "bundleIdentifier": "com.tarikokbinoglu.petsolea",
       "buildNumber": "1",
       "supportsTablet": true,
       "usesAppleSignIn": true,
@@ -20,7 +20,7 @@
       }
     },
     "android": {
-      "package": "com.tarikokbinoglu.faunvia",
+      "package": "com.tarikokbinoglu.petsolea",
       "versionCode": 1,
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -33,28 +33,28 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Faunvia, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+          "locationWhenInUsePermission": "PetSolea, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
         }
       ],
       [
         "expo-maps",
         {
           "requestLocationPermission": true,
-          "locationPermission": "Faunvia, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+          "locationPermission": "PetSolea, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Faunvia, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
-          "cameraPermission": "Faunvia, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
+          "photosPermission": "PetSolea, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+          "cameraPermission": "PetSolea, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
           "microphonePermission": false
         }
       ],
       [
         "expo-audio",
         {
-          "microphonePermission": "Faunvia, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
+          "microphonePermission": "PetSolea, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
           "recordAudioAndroid": true,
           "enableBackgroundRecording": false,
           "enableBackgroundPlayback": false
@@ -76,7 +76,7 @@
       "ja": "./locales/ja.json"
     },
     "experiments": {
-      "baseUrl": "/Faunvia"
+      "baseUrl": "/PetSolea"
     }
   }
 }

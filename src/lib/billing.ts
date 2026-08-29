@@ -5,9 +5,9 @@ import Purchases, {
   type PurchasesPackage,
 } from "react-native-purchases";
 
-export const FAUNVIA_PRO_ENTITLEMENT = "faunvia_pro";
-export const FAUNVIA_PRO_MONTHLY_PRODUCT = "faunvia_pro_monthly";
-export const FAUNVIA_PRO_ANNUAL_PRODUCT = "faunvia_pro_annual";
+export const PETSOLEA_PRO_ENTITLEMENT = "petsolea_pro";
+export const PETSOLEA_PRO_MONTHLY_PRODUCT = "petsolea_pro_monthly";
+export const PETSOLEA_PRO_ANNUAL_PRODUCT = "petsolea_pro_annual";
 
 const iosApiKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY?.trim();
 const androidApiKey =
@@ -37,14 +37,14 @@ export type BillingPrices = Partial<Record<BillingPlanId, string>>;
 export const billingPlans: BillingPlan[] = [
   {
     id: "annual",
-    productId: FAUNVIA_PRO_ANNUAL_PRODUCT,
+    productId: PETSOLEA_PRO_ANNUAL_PRODUCT,
     title: "Yıllık Pro",
     subtitle: "En avantajlı plan",
     badge: "ÖNERİLEN",
   },
   {
     id: "monthly",
-    productId: FAUNVIA_PRO_MONTHLY_PRODUCT,
+    productId: PETSOLEA_PRO_MONTHLY_PRODUCT,
     title: "Aylık Pro",
     subtitle: "Esnek aylık abonelik",
   },
@@ -54,7 +54,7 @@ let configuredUserId: string | null = null;
 
 export function hasProEntitlement(customerInfo: CustomerInfo) {
   return Boolean(
-    customerInfo.entitlements.active[FAUNVIA_PRO_ENTITLEMENT]?.isActive,
+    customerInfo.entitlements.active[PETSOLEA_PRO_ENTITLEMENT]?.isActive,
   );
 }
 
@@ -85,8 +85,8 @@ function packageForPlan(
 ) {
   const productId =
     plan === "annual"
-      ? FAUNVIA_PRO_ANNUAL_PRODUCT
-      : FAUNVIA_PRO_MONTHLY_PRODUCT;
+      ? PETSOLEA_PRO_ANNUAL_PRODUCT
+      : PETSOLEA_PRO_MONTHLY_PRODUCT;
   return packages.find((item) => item.product.identifier === productId);
 }
 

@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
-const PRO_ENTITLEMENT = "faunvia_pro";
+const PRO_ENTITLEMENT = "petsolea_pro";
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

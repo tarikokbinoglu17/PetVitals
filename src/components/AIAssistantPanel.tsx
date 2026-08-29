@@ -20,7 +20,7 @@ const copy = {
     ask: "Sor",
     error: "AI yanıtı alınamadı.",
     disclaimer:
-      "Faunvia AI eğitim amaçlı destek sunar; veteriner tanısının yerini tutmaz.",
+      "PetSolea AI eğitim amaçlı destek sunar; veteriner tanısının yerini tutmaz.",
   },
   en: {
     close: "Close",
@@ -30,7 +30,7 @@ const copy = {
     ask: "Ask",
     error: "Could not get an AI response.",
     disclaimer:
-      "Faunvia AI provides educational support and does not replace veterinary diagnosis.",
+      "PetSolea AI provides educational support and does not replace veterinary diagnosis.",
   },
   de: {
     close: "Schließen",
@@ -40,7 +40,7 @@ const copy = {
     ask: "Fragen",
     error: "AI-Antwort konnte nicht geladen werden.",
     disclaimer:
-      "Faunvia AI bietet pädagogische Unterstützung und ersetzt keine tierärztliche Diagnose.",
+      "PetSolea AI bietet pädagogische Unterstützung und ersetzt keine tierärztliche Diagnose.",
   },
   es: {
     close: "Cerrar",
@@ -50,7 +50,7 @@ const copy = {
     ask: "Preguntar",
     error: "No se pudo obtener una respuesta de IA.",
     disclaimer:
-      "Faunvia AI ofrece apoyo educativo y no sustituye el diagnóstico veterinario.",
+      "PetSolea AI ofrece apoyo educativo y no sustituye el diagnóstico veterinario.",
   },
   ja: {
     close: "閉じる",
@@ -60,7 +60,7 @@ const copy = {
     ask: "質問する",
     error: "AIの回答を取得できませんでした。",
     disclaimer:
-      "Faunvia AIは情報提供を目的としており、獣医師の診断に代わるものではありません。",
+      "PetSolea AIは情報提供を目的としており、獣医師の診断に代わるものではありません。",
   },
 } as const;
 export function AIAssistantPanel({

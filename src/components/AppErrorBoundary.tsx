@@ -15,29 +15,29 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error) {
-    console.error("Faunvia UI crash", error.message);
+    console.error("PetSolea UI crash", error.message);
   }
 
   render() {
     if (!this.state.hasError) return this.props.children;
     const copy = {
       tr: [
-        "Faunvia bu ekranı açamadı.",
+        "PetSolea bu ekranı açamadı.",
         "Verileriniz silinmedi. Ekranı güvenli şekilde yeniden yükleyebilirsiniz.",
         "Tekrar dene",
       ],
       en: [
-        "Faunvia could not open this screen.",
+        "PetSolea could not open this screen.",
         "Your data was not deleted. You can safely reload the screen.",
         "Try again",
       ],
       de: [
-        "Faunvia konnte diesen Bildschirm nicht öffnen.",
+        "PetSolea konnte diesen Bildschirm nicht öffnen.",
         "Ihre Daten wurden nicht gelöscht. Sie können den Bildschirm sicher neu laden.",
         "Erneut versuchen",
       ],
       es: [
-        "Faunvia no pudo abrir esta pantalla.",
+        "PetSolea no pudo abrir esta pantalla.",
         "Tus datos no se han eliminado. Puedes volver a cargar la pantalla de forma segura.",
         "Intentar de nuevo",
       ],

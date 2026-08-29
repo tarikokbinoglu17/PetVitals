@@ -8,8 +8,8 @@ import { getPetPhotoUrl, removePetPhoto, uploadPetPhoto } from '../lib/storage';
 import { validateVaccineDraft } from '../lib/vaccineReminders';
 import type { HealthRecord, Pet, PetDraft, SavePetResult, SaveVaccineResult, VaccineDraft, VaccineNotificationStatus } from '../types';
 
-const DEMO_VACCINES_KEY = '@faunvia/demo-vaccines/v1';
-const DEMO_PETS_KEY = '@faunvia/demo-pets/v1';
+const DEMO_VACCINES_KEY = '@petsolea/demo-vaccines/v1';
+const DEMO_PETS_KEY = '@petsolea/demo-pets/v1';
 const VACCINE_SELECT = 'id,pet_id,vaccine_name,vaccine_type,administered_date,next_due_date,repeat_interval_months,veterinarian,notes,document_url,notifications_enabled,reminder_30_days_id,reminder_7_days_id,reminder_1_day_id,reminder_same_day_id,created_at';
 type MutationResult = { error?: string; message?: string };
 

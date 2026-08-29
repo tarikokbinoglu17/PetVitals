@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "Faunvia",
-    "NSLocationWhenInUseUsageDescription": "Faunvia, yakındaki veterinerleri ve petshopları göstermek için konumunuzu yalnızca uygulamayı kullanırken kullanır.",
-    "NSPhotoLibraryUsageDescription": "Faunvia, profil fotoğrafı ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
-    "NSCameraUsageDescription": "Faunvia, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
-    "NSMicrophoneUsageDescription": "Faunvia, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir."
+    "CFBundleDisplayName": "PetSolea",
+    "NSLocationWhenInUseUsageDescription": "PetSolea, yakındaki veterinerleri ve petshopları göstermek için konumunuzu yalnızca uygulamayı kullanırken kullanır.",
+    "NSPhotoLibraryUsageDescription": "PetSolea, profil fotoğrafı ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+    "NSCameraUsageDescription": "PetSolea, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
+    "NSMicrophoneUsageDescription": "PetSolea, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir."
   },
-  "android": { "app_name": "Faunvia" }
+  "android": { "app_name": "PetSolea" }
 }

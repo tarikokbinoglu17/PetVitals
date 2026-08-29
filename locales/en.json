@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "Faunvia",
-    "NSLocationWhenInUseUsageDescription": "Faunvia uses your location only while you use the app to show nearby veterinarians and pet stores.",
-    "NSPhotoLibraryUsageDescription": "Faunvia accesses your photos so you can choose a profile photo or veterinary document.",
-    "NSCameraUsageDescription": "Faunvia uses the camera to scan vaccination cards and veterinary documents.",
-    "NSMicrophoneUsageDescription": "Faunvia accesses the microphone only with your explicit consent to record and transcribe a veterinary visit."
+    "CFBundleDisplayName": "PetSolea",
+    "NSLocationWhenInUseUsageDescription": "PetSolea uses your location only while you use the app to show nearby veterinarians and pet stores.",
+    "NSPhotoLibraryUsageDescription": "PetSolea accesses your photos so you can choose a profile photo or veterinary document.",
+    "NSCameraUsageDescription": "PetSolea uses the camera to scan vaccination cards and veterinary documents.",
+    "NSMicrophoneUsageDescription": "PetSolea accesses the microphone only with your explicit consent to record and transcribe a veterinary visit."
   },
-  "android": { "app_name": "Faunvia" }
+  "android": { "app_name": "PetSolea" }
 }

@@ -17,18 +17,18 @@ import { usePreferences } from "../context/PreferencesContext";
 import type { SupportedLocale, UnitSystem } from "../lib/globalization";
 import { t } from "../lib/i18n";
 
-const PUBLIC_SITE = "https://tarikokbinoglu17.github.io/Faunvia";
+const PUBLIC_SITE = "https://tarikokbinoglu17.github.io/PetSolea";
 
 const copy = {
   tr: {
     demoUser: "Demo Kullanıcı",
-    user: "Faunvia Kullanıcısı",
+    user: "PetSolea Kullanıcısı",
     exportReal: "Veri dışa aktarma gerçek hesapta kullanılabilir.",
     exportFail: "Veriler dışa aktarılamadı. Lütfen tekrar deneyin.",
     deleteReal: "Hesap silme gerçek hesapta kullanılabilir.",
     deleteTitle: "Hesabı kalıcı olarak sil?",
     deleteBody:
-      "Faunvia hesabınız ve hesabınıza bağlı veriler silinecek. Bu işlem geri alınamaz.",
+      "PetSolea hesabınız ve hesabınıza bağlı veriler silinecek. Bu işlem geri alınamaz.",
     cancel: "Vazgeç",
     delete: "Hesabı sil",
     deleteFail: "Hesap silinemedi. Lütfen tekrar deneyin.",
@@ -36,22 +36,22 @@ const copy = {
     demo: "Demo modu etkin.",
     demoTitle: "Demo",
     privacy:
-      "Faunvia verilerinizi dışa aktarabilir veya hesabınızı uygulama içinden kalıcı olarak silebilirsiniz.",
+      "PetSolea verilerinizi dışa aktarabilir veya hesabınızı uygulama içinden kalıcı olarak silebilirsiniz.",
     export: "Verilerimi dışa aktar",
     deleteForever: "Hesabımı kalıcı olarak sil",
     metric: "Metrik · kg",
     imperial: "İngiliz · lb",
-    exportTitle: "Faunvia veri dışa aktarımı",
+    exportTitle: "PetSolea veri dışa aktarımı",
   },
   en: {
     demoUser: "Demo User",
-    user: "Faunvia User",
+    user: "PetSolea User",
     exportReal: "Data export is available for real accounts.",
     exportFail: "Data could not be exported. Please try again.",
     deleteReal: "Account deletion is available for real accounts.",
     deleteTitle: "Delete account permanently?",
     deleteBody:
-      "Your Faunvia account and related data will be deleted permanently. This cannot be undone.",
+      "Your PetSolea account and related data will be deleted permanently. This cannot be undone.",
     cancel: "Cancel",
     delete: "Delete account",
     deleteFail: "Account could not be deleted. Please try again.",
@@ -59,23 +59,23 @@ const copy = {
     demo: "Demo mode is active.",
     demoTitle: "Demo",
     privacy:
-      "You can export your Faunvia data or permanently delete your account from the app.",
+      "You can export your PetSolea data or permanently delete your account from the app.",
     export: "Export my data",
     deleteForever: "Delete my account permanently",
     metric: "Metric · kg",
     imperial: "Imperial · lb",
-    exportTitle: "Faunvia data export",
+    exportTitle: "PetSolea data export",
   },
   de: {
     demoUser: "Demo-Benutzer",
-    user: "Faunvia-Benutzer",
+    user: "PetSolea-Benutzer",
     exportReal: "Der Datenexport ist für echte Konten verfügbar.",
     exportFail:
       "Daten konnten nicht exportiert werden. Bitte erneut versuchen.",
     deleteReal: "Die Kontolöschung ist für echte Konten verfügbar.",
     deleteTitle: "Konto dauerhaft löschen?",
     deleteBody:
-      "Ihr Faunvia-Konto und die zugehörigen Daten werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "Ihr PetSolea-Konto und die zugehörigen Daten werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
     cancel: "Abbrechen",
     delete: "Konto löschen",
     deleteFail: "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
@@ -83,22 +83,22 @@ const copy = {
     demo: "Demo-Modus ist aktiv.",
     demoTitle: "Demo",
     privacy:
-      "Sie können Ihre Faunvia-Daten exportieren oder Ihr Konto in der App dauerhaft löschen.",
+      "Sie können Ihre PetSolea-Daten exportieren oder Ihr Konto in der App dauerhaft löschen.",
     export: "Meine Daten exportieren",
     deleteForever: "Mein Konto dauerhaft löschen",
     metric: "Metrisch · kg",
     imperial: "Imperial · lb",
-    exportTitle: "Faunvia-Datenexport",
+    exportTitle: "PetSolea-Datenexport",
   },
   es: {
     demoUser: "Usuario demo",
-    user: "Usuario de Faunvia",
+    user: "Usuario de PetSolea",
     exportReal: "La exportación de datos está disponible para cuentas reales.",
     exportFail: "No se pudieron exportar los datos. Inténtalo de nuevo.",
     deleteReal: "La eliminación de cuenta está disponible para cuentas reales.",
     deleteTitle: "¿Eliminar la cuenta permanentemente?",
     deleteBody:
-      "Tu cuenta de Faunvia y los datos relacionados se eliminarán de forma permanente. Esta acción no se puede deshacer.",
+      "Tu cuenta de PetSolea y los datos relacionados se eliminarán de forma permanente. Esta acción no se puede deshacer.",
     cancel: "Cancelar",
     delete: "Eliminar cuenta",
     deleteFail: "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
@@ -106,22 +106,22 @@ const copy = {
     demo: "El modo demo está activo.",
     demoTitle: "Demo",
     privacy:
-      "Puedes exportar tus datos de Faunvia o eliminar permanentemente tu cuenta desde la app.",
+      "Puedes exportar tus datos de PetSolea o eliminar permanentemente tu cuenta desde la app.",
     export: "Exportar mis datos",
     deleteForever: "Eliminar mi cuenta permanentemente",
     metric: "Métrico · kg",
     imperial: "Imperial · lb",
-    exportTitle: "Exportación de datos de Faunvia",
+    exportTitle: "Exportación de datos de PetSolea",
   },
   ja: {
     demoUser: "デモユーザー",
-    user: "Faunviaユーザー",
+    user: "PetSoleaユーザー",
     exportReal: "データの書き出しは実アカウントで利用できます。",
     exportFail: "データを書き出せませんでした。もう一度お試しください。",
     deleteReal: "アカウント削除は実アカウントで利用できます。",
     deleteTitle: "アカウントを完全に削除しますか？",
     deleteBody:
-      "Faunviaアカウントと関連データは完全に削除されます。この操作は元に戻せません。",
+      "PetSoleaアカウントと関連データは完全に削除されます。この操作は元に戻せません。",
     cancel: "キャンセル",
     delete: "アカウントを削除",
     deleteFail: "アカウントを削除できませんでした。もう一度お試しください。",
@@ -129,12 +129,12 @@ const copy = {
     demo: "デモモードが有効です。",
     demoTitle: "デモ",
     privacy:
-      "アプリ内でFaunviaデータを書き出したり、アカウントを完全に削除できます。",
+      "アプリ内でPetSoleaデータを書き出したり、アカウントを完全に削除できます。",
     export: "データを書き出す",
     deleteForever: "アカウントを完全に削除",
     metric: "メートル法 · kg",
     imperial: "ヤード・ポンド法 · lb",
-    exportTitle: "Faunviaデータの書き出し",
+    exportTitle: "PetSoleaデータの書き出し",
   },
 } as const;
 
@@ -201,7 +201,7 @@ export function ProfileScreen() {
         </Text>
       </View>
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.email}>{user?.email || "demo@faunvia.app"}</Text>
+      <Text style={styles.email}>{user?.email || "demo@petsolea.app"}</Text>
       <View style={styles.status}>
         <View
           style={[

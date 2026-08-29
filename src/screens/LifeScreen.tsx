@@ -56,7 +56,7 @@ const copy = {
     trends: "Sağlık trendleri",
     ok: "✓ Aktif uyarı yok",
     okText:
-      "Faunvia kayıtları açılışta ve yeni Life kaydı sonrasında otomatik kontrol eder.",
+      "PetSolea kayıtları açılışta ve yeni Life kaydı sonrasında otomatik kontrol eder.",
     trendOk: "✓ Dikkat çeken tekrar eden bir trend yok",
     trendDisc:
       "Trendler kayıtlarınızdaki tekrarları ve değişimleri gösterir; tanı değildir.",
@@ -109,7 +109,7 @@ const copy = {
     trends: "Health trends",
     ok: "✓ No active alerts",
     okText:
-      "Faunvia checks your records at launch and after each new Life entry.",
+      "PetSolea checks your records at launch and after each new Life entry.",
     trendOk: "✓ No notable recurring trend detected",
     trendDisc:
       "Trends highlight repeated events and changes in your records; they are not a diagnosis.",
@@ -170,7 +170,7 @@ const copy = {
     trends: "Gesundheitstrends",
     ok: "✓ Keine aktiven Warnungen",
     okText:
-      "Faunvia prüft Ihre Daten beim Start und nach neuen Life-Einträgen.",
+      "PetSolea prüft Ihre Daten beim Start und nach neuen Life-Einträgen.",
     trendOk: "✓ Kein auffälliger wiederkehrender Trend erkannt",
     trendDisc:
       "Trends zeigen wiederholte Ereignisse und Veränderungen in Ihren Daten; sie sind keine Diagnose.",
@@ -231,7 +231,7 @@ const copy = {
     trends: "Tendencias de salud",
     ok: "✓ No hay alertas activas",
     okText:
-      "Faunvia revisa tus registros al abrir y tras cada nueva entrada de Life.",
+      "PetSolea revisa tus registros al abrir y tras cada nueva entrada de Life.",
     trendOk: "✓ No se detectan tendencias repetidas destacables",
     trendDisc:
       "Las tendencias muestran repeticiones y cambios en tus registros; no son un diagnóstico.",
@@ -274,7 +274,7 @@ const copy = {
     title: "今日はどうですか？", sub: "食事、水分、活動、睡眠、ケアの習慣を一か所で記録します。", summary: "今日のサマリー", quick: "クイック記録", oneTap: "ワンタップ健康記録",
     oneTapHint: "よく使う健康イベントをフォームなしで保存します。", medication: "薬を投与", parasite: "寄生虫予防", symptom: "症状を確認", vetVisit: "動物病院を受診", saved: "保存しました", savedText: "健康イベントを追加しました。",
     recent: "最近の健康記録", unit: "単位", note: "メモ（任意）", save: "今日に追加", saving: "保存中…", alerts: "スマート健康アラート", trends: "健康傾向", ok: "✓ 有効なアラートはありません",
-    okText: "Faunviaは起動時と新しい生活記録の追加後に自動で確認します。", trendOk: "✓ 注目すべき繰り返し傾向はありません", trendDisc: "傾向は記録の繰り返しや変化を示すもので、診断ではありません。",
+    okText: "PetSoleaは起動時と新しい生活記録の追加後に自動で確認します。", trendOk: "✓ 注目すべき繰り返し傾向はありません", trendDisc: "傾向は記録の繰り返しや変化を示すもので、診断ではありません。",
     symptomTrend: (n:number) => `過去90日間に症状を${n}回記録しました。続く場合はこの傾向を獣医師に共有してください。`, vetTrend: (n:number) => `過去90日間に${n}回の受診記録があります。回数が増えている場合は履歴と合わせて確認してください。`,
     weightUp: (p:number) => `過去6か月の記録体重は約${p}%増加しました。`, weightDown: (p:number) => `過去6か月の記録体重は約${p}%減少しました。`, none: "記録はまだありません", record: "件",
     real: "アカウントが必要です", realText: "生活記録は実アカウントに保存されます。", fail: "保存できませんでした", failText: "生活記録を追加できませんでした。", disc: "スマートアラートは記録の変化や不足を示すもので、獣医師の診断ではありません。",
@@ -467,7 +467,7 @@ export function LifeScreen({
   }
   return (
     <View style={s.page}>
-      <Text style={s.eyebrow}>FAUNVIA LIFE</Text>
+      <Text style={s.eyebrow}>PETSOLEA LIFE</Text>
       <Text style={s.title}>{c.title}</Text>
       <Text style={s.sub}>{c.sub}</Text>
       {pets.length > 1 ? (

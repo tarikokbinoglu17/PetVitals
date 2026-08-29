@@ -1,5 +1,5 @@
 {
-  "name": "faunvia",
+  "name": "petsolea",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
@@ -38,6 +38,7 @@
   },
   "scripts": {
     "start": "expo start",
+    "build": "expo export --platform web --output-dir dist",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",

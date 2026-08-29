@@ -247,7 +247,7 @@ export function HealthScreen({
       ) : null}
       {pets.length > 0 ? (
         <View style={styles.brainCard}>
-          <Text style={styles.brainEyebrow}>FAUNVIA AI</Text>
+          <Text style={styles.brainEyebrow}>PETSOLEA AI</Text>
           <Text style={styles.brainTitle}>Health Brain</Text>
           <Text style={styles.brainCopy}>{c.brain}</Text>
           <View style={styles.petPicker}>

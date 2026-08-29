@@ -1,4 +1,4 @@
-name: Deploy Faunvia App
+name: Deploy PetSolea App
 
 on:
   push:
