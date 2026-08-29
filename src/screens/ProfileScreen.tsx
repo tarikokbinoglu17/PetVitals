@@ -34,6 +34,7 @@ const copy = {
     deleteFail: "Hesap silinemedi. Lütfen tekrar deneyin.",
     secure: "Oturumunuz güvenli biçimde saklanıyor.",
     demo: "Demo modu etkin.",
+    demoTitle: "Demo",
     privacy:
       "PetVitals verilerinizi dışa aktarabilir veya hesabınızı uygulama içinden kalıcı olarak silebilirsiniz.",
     export: "Verilerimi dışa aktar",
@@ -56,6 +57,7 @@ const copy = {
     deleteFail: "Account could not be deleted. Please try again.",
     secure: "Your session is stored securely.",
     demo: "Demo mode is active.",
+    demoTitle: "Demo",
     privacy:
       "You can export your PetVitals data or permanently delete your account from the app.",
     export: "Export my data",
@@ -79,6 +81,7 @@ const copy = {
     deleteFail: "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
     secure: "Ihre Sitzung wird sicher gespeichert.",
     demo: "Demo-Modus ist aktiv.",
+    demoTitle: "Demo",
     privacy:
       "Sie können Ihre PetVitals-Daten exportieren oder Ihr Konto in der App dauerhaft löschen.",
     export: "Meine Daten exportieren",
@@ -101,6 +104,7 @@ const copy = {
     deleteFail: "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
     secure: "Tu sesión se almacena de forma segura.",
     demo: "El modo demo está activo.",
+    demoTitle: "Demo",
     privacy:
       "Puedes exportar tus datos de PetVitals o eliminar permanentemente tu cuenta desde la app.",
     export: "Exportar mis datos",
@@ -123,6 +127,7 @@ const copy = {
     deleteFail: "アカウントを削除できませんでした。もう一度お試しください。",
     secure: "セッションは安全に保存されています。",
     demo: "デモモードが有効です。",
+    demoTitle: "デモ",
     privacy:
       "アプリ内でPetVitalsデータを書き出したり、アカウントを完全に削除できます。",
     export: "データを書き出す",
@@ -142,6 +147,9 @@ export function ProfileScreen() {
   const [showPreferences, setShowPreferences] = useState(false);
   const name =
     user?.user_metadata?.full_name || (demoMode ? c.demoUser : c.user);
+  const hasLiveSession = Boolean(
+    user?.id && !demoMode && isSupabaseConfigured,
+  );
 
   const handleExport = async () => {
     if (!user?.id || demoMode) {
@@ -199,18 +207,16 @@ export function ProfileScreen() {
           style={[
             styles.dot,
             {
-              backgroundColor: isSupabaseConfigured
-                ? colors.primary
-                : colors.accent,
+              backgroundColor: hasLiveSession ? colors.primary : colors.accent,
             },
           ]}
         />
         <View style={{ flex: 1 }}>
           <Text style={styles.statusTitle}>
-            {isSupabaseConfigured ? "Supabase" : "Demo"}
+            {hasLiveSession ? "Supabase" : c.demoTitle}
           </Text>
           <Text style={styles.statusText}>
-            {isSupabaseConfigured ? c.secure : c.demo}
+            {hasLiveSession ? c.secure : c.demo}
           </Text>
         </View>
       </View>

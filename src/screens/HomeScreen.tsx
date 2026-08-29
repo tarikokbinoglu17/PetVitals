@@ -31,6 +31,7 @@ import type { HealthRecord, Pet } from "../types";
 import { colors, shadow } from "../theme";
 import { usePreferences } from "../context/PreferencesContext";
 import { coreCopy } from "../lib/globalization";
+import { localizeRecordText } from "../lib/demoLocalization";
 const C = {
   tr: {
     sub: "Bugün önemli olan her şey tek yerde.",
@@ -343,7 +344,7 @@ export function HomeScreen({
           </Text>
           <Text style={styles.heroMeta}>
             {next
-              ? `${nextPet?.name ?? ""} • ${next.title} • ${formatRecordDate(next.date, language as any)}`
+              ? `${nextPet?.name ?? ""} • ${localizeRecordText(next.title, language)} • ${formatRecordDate(next.date, language)}`
               : c.noUpcoming}
           </Text>
         </View>

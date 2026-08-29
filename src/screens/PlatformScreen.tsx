@@ -14,7 +14,11 @@ import { ClinicalCareSuite } from "../components/ClinicalCareSuite";
 import { DocumentScannerPanel } from "../components/DocumentScannerPanel";
 import { ProPaywall } from "../components/ProPaywall";
 import { VerificationCenter } from "../components/VerificationCenter";
-import { calculateHealthScore } from "../lib/healthScore";
+import {
+  calculateHealthScore,
+  localizeHealthScoreLabel,
+  localizeHealthScoreReason,
+} from "../lib/healthScore";
 import {
   addLifeEntry,
   addWeightEntry,
@@ -42,7 +46,12 @@ type FeatureCardProps = {
 };
 function FeatureCard(p: FeatureCardProps) {
   return (
-    <Pressable onPress={p.onPress} style={styles.card}>
+    <Pressable
+      accessibilityLabel={p.title}
+      accessibilityRole="button"
+      onPress={p.onPress}
+      style={styles.card}
+    >
       <View style={styles.cardIcon}>
         <Text style={styles.cardIconText}>{p.icon}</Text>
       </View>
@@ -73,6 +82,7 @@ const C = {
     title: "Dostunuzun tüm sağlık hayatı tek yerde.",
     sub: "Sağlık skoru, paylaşım, pasaport, AI ve günlük yaşam araçları.",
     waiting: "Kayıt bekleniyor",
+    healthScore: "Sağlık Skoru",
     smart: "Akıllı araçlar",
     assistant:
       "Kayıtları özetler, veteriner ziyaretine hazırlanmanıza yardım eder. Tanı koymaz.",
@@ -92,7 +102,7 @@ const C = {
     activeAccess: "aktif erişim",
     recent: "yakın dönem kaydı",
     noWeight: "Henüz kilo geçmişi yok",
-    free: "Free plan",
+    free: "Ücretsiz plan",
     active: "Aktif",
     weight: "Kilo kaydı",
     save: "Kaydet",
@@ -110,6 +120,8 @@ const C = {
     preparing: "Hazırlanıyor…",
     createPassport: "Pasaport oluştur",
     createLost: "Lost Mode oluştur",
+    healthPassport: "Sağlık Pasaportu",
+    lostMode: "Kayıp Modu",
     sharePdf: "PDF olarak paylaş",
     lostOn: "Lost aç",
     lostOff: "Lost kapat",
@@ -124,6 +136,7 @@ const C = {
     title: "Your pet's entire health life in one place.",
     sub: "Health score, sharing, passport, AI and daily life tools.",
     waiting: "Waiting for records",
+    healthScore: "Health Score",
     smart: "Smart tools",
     assistant:
       "Summarizes records and helps you prepare for vet visits. It does not diagnose.",
@@ -160,6 +173,8 @@ const C = {
     preparing: "Preparing…",
     createPassport: "Create passport",
     createLost: "Create Lost Mode",
+    healthPassport: "Health Passport",
+    lostMode: "Lost Mode",
     sharePdf: "Share as PDF",
     lostOn: "Turn Lost on",
     lostOff: "Turn Lost off",
@@ -174,6 +189,7 @@ const C = {
     title: "Das gesamte Gesundheitsleben Ihres Tieres an einem Ort.",
     sub: "Gesundheitsscore, Freigabe, Pass, AI und Alltagstools.",
     waiting: "Warte auf Einträge",
+    healthScore: "Gesundheitsscore",
     smart: "Intelligente Werkzeuge",
     assistant:
       "Fasst Daten zusammen und hilft bei der Vorbereitung auf Tierarztbesuche. Keine Diagnose.",
@@ -210,6 +226,8 @@ const C = {
     preparing: "Vorbereiten…",
     createPassport: "Pass erstellen",
     createLost: "Lost Mode erstellen",
+    healthPassport: "Gesundheitspass",
+    lostMode: "Vermisst-Modus",
     sharePdf: "Als PDF teilen",
     lostOn: "Lost aktivieren",
     lostOff: "Lost deaktivieren",
@@ -224,6 +242,7 @@ const C = {
     title: "Toda la vida de salud de tu mascota en un solo lugar.",
     sub: "Puntuación de salud, compartir, pasaporte, AI y herramientas diarias.",
     waiting: "Esperando registros",
+    healthScore: "Puntuación de salud",
     smart: "Herramientas inteligentes",
     assistant:
       "Resume registros y ayuda a preparar visitas al veterinario. No diagnostica.",
@@ -260,6 +279,8 @@ const C = {
     preparing: "Preparando…",
     createPassport: "Crear pasaporte",
     createLost: "Crear Lost Mode",
+    healthPassport: "Pasaporte de salud",
+    lostMode: "Modo perdido",
     sharePdf: "Compartir como PDF",
     lostOn: "Activar Lost",
     lostOff: "Desactivar Lost",
@@ -274,6 +295,7 @@ const C = {
     title: "ペットの健康をすべて一か所に。",
     sub: "健康スコア、共有、パスポート、AI、日々の生活ツール。",
     waiting: "記録を待っています",
+    healthScore: "健康スコア",
     smart: "スマートツール",
     assistant: "記録を要約し、診察の準備を支援します。診断は行いません。",
     scanner:
@@ -309,6 +331,8 @@ const C = {
     preparing: "準備中…",
     createPassport: "パスポートを作成",
     createLost: "迷子モードを作成",
+    healthPassport: "健康パスポート",
+    lostMode: "迷子モード",
     sharePdf: "PDFで共有",
     lostOn: "迷子モードを有効化",
     lostOff: "迷子モードを無効化",
@@ -588,9 +612,11 @@ export function PlatformScreen({
       <View style={styles.scoreCard}>
         <View>
           <Text style={styles.scoreLabel}>
-            {selectedPet?.name ?? ""} Health Score
+            {selectedPet?.name ?? ""} {c.healthScore}
           </Text>
-          <Text style={styles.scoreMeta}>{score?.label ?? c.waiting}</Text>
+          <Text style={styles.scoreMeta}>
+            {score ? localizeHealthScoreLabel(score.label, language) : c.waiting}
+          </Text>
         </View>
         <View style={styles.scoreBubble}>
           <Text style={styles.scoreValue}>{score?.score ?? "—"}</Text>
@@ -598,7 +624,7 @@ export function PlatformScreen({
       </View>
       {score?.reasons.slice(0, 2).map((r) => (
         <Text key={r} style={styles.reason}>
-          • {r}
+          • {localizeHealthScoreReason(r, language)}
         </Text>
       ))}
       {selectedPet ? (
@@ -639,9 +665,7 @@ export function PlatformScreen({
           <Text style={styles.actionTitle}>{c.weight}</Text>
           <TextInput
             keyboardType="decimal-pad"
-            placeholder={
-              unitSystem === "imperial" ? "e.g. 18.5 lb" : "e.g. 8.4 kg"
-            }
+            placeholder={unitSystem === "imperial" ? "18.5 lb" : "8.4 kg"}
             placeholderTextColor={colors.muted}
             style={styles.input}
             value={weightValue}
@@ -802,7 +826,7 @@ export function PlatformScreen({
             <View key={p.id} style={styles.passportRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.passportTitle}>
-                  {p.lostMode ? "⚑ Lost Mode" : "Health Passport"}
+                  {p.lostMode ? `⚑ ${c.lostMode}` : c.healthPassport}
                 </Text>
                 <Text style={styles.passportMeta}>
                   {new Date(p.createdAt).toLocaleDateString(language)}

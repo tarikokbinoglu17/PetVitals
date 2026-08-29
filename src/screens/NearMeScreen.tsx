@@ -40,6 +40,7 @@ const C = {
     sub: "Veterinerleri ve petshopları konumunuza göre bulun. Acil mod, şu anda açık görünen veterinerleri öne çıkarır.",
     all: "Tümü",
     vet: "Veteriner",
+    shop: "Petshop",
     emergency: "⚕ ACİL · ŞU AN AÇIK VETERİNER",
     emergencyText: "25 km içinde açık görünen klinikleri ara",
     refresh: "↻ Yenile",
@@ -81,6 +82,7 @@ const C = {
     sub: "Find veterinarians and pet shops based on your location. Emergency mode prioritizes clinics that appear open now.",
     all: "All",
     vet: "Veterinarian",
+    shop: "Pet shop",
     emergency: "⚕ EMERGENCY · VET OPEN NOW",
     emergencyText: "Search clinics that appear open within 25 km",
     refresh: "↻ Refresh",
@@ -122,6 +124,7 @@ const C = {
     sub: "Finden Sie Tierärzte und Tierhandlungen nach Standort. Der Notfallmodus priorisiert aktuell geöffnete Praxen.",
     all: "Alle",
     vet: "Tierarzt",
+    shop: "Tierhandlung",
     emergency: "⚕ NOTFALL · JETZT GEÖFFNETER TIERARZT",
     emergencyText: "Geöffnete Praxen im Umkreis von 25 km suchen",
     refresh: "↻ Aktualisieren",
@@ -163,6 +166,7 @@ const C = {
     sub: "Encuentra veterinarios y tiendas para mascotas según tu ubicación. El modo de emergencia prioriza clínicas que parecen estar abiertas.",
     all: "Todos",
     vet: "Veterinario",
+    shop: "Tienda de mascotas",
     emergency: "⚕ EMERGENCIA · VETERINARIO ABIERTO",
     emergencyText: "Buscar clínicas abiertas en 25 km",
     refresh: "↻ Actualizar",
@@ -204,6 +208,7 @@ const C = {
     sub: "現在地から動物病院とペットショップを検索します。緊急モードでは現在営業中と表示される病院を優先します。",
     all: "すべて",
     vet: "動物病院",
+    shop: "ペットショップ",
     emergency: "⚕ 緊急 · 現在営業中の動物病院",
     emergencyText: "25km以内で営業中と表示される病院を検索",
     refresh: "↻ 更新",
@@ -485,7 +490,7 @@ export function NearMeScreen({
       <View style={styles.filters}>
         {(["all", "veterinary", "petshop"] as NearbyCategory[]).map((item) => {
           const label =
-            item === "all" ? c.all : item === "veterinary" ? c.vet : "Petshop";
+            item === "all" ? c.all : item === "veterinary" ? c.vet : c.shop;
           const active = category === item && !emergencyOnly;
           return (
             <Pressable

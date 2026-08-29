@@ -12,6 +12,7 @@ import { formatWeight } from "../lib/globalization";
 import { t } from "../lib/i18n";
 import { PetForm } from "../components/PetForm";
 import { petSpeciesIcon } from "../lib/petSpecies";
+import { localizeRecordText } from "../lib/demoLocalization";
 
 type MutationResult = { error?: string; message?: string };
 
@@ -98,7 +99,10 @@ export function PetDetailScreen({
     );
 
   const deleteRecord = (record: HealthRecord) =>
-    Alert.alert(t(language, "Kaydı sil"), record.title, [
+    Alert.alert(
+      t(language, "Kaydı sil"),
+      localizeRecordText(record.title, language),
+      [
       { text: t(language, "Kapat"), style: "cancel" },
       {
         text: t(language, "Sil"),
@@ -108,7 +112,8 @@ export function PetDetailScreen({
           if (result.error) Alert.alert("PetVitals", result.error);
         },
       },
-    ]);
+      ],
+    );
 
   return (
     <View style={styles.page}>
@@ -225,7 +230,7 @@ export function PetDetailScreen({
           </Text>
           <Text style={styles.healthText}>
             {upcoming
-              ? `${upcoming.title} · ${formatDate(upcoming.date, language)}`
+              ? `${localizeRecordText(upcoming.title, language)} · ${formatDate(upcoming.date, language)}`
               : t(
                   language,
                   "Yeni bir aşı veya kontrol tarihi ekleyebilirsiniz.",
@@ -281,13 +286,15 @@ export function PetDetailScreen({
             <View style={styles.recordCopy}>
               <View style={styles.recordTop}>
                 <Text style={styles.category}>
-                  {t(language, record.category)}
+                  {localizeRecordText(record.category, language)}
                 </Text>
                 <Text style={styles.recordDate}>
                   {formatDate(record.date, language)}
                 </Text>
               </View>
-              <Text style={styles.recordTitle}>{record.title}</Text>
+              <Text style={styles.recordTitle}>
+                {localizeRecordText(record.title, language)}
+              </Text>
               {record.vaccineType ? (
                 <Text style={styles.recordMeta}>{record.vaccineType}</Text>
               ) : null}
@@ -306,7 +313,9 @@ export function PetDetailScreen({
                 </Text>
               ) : null}
               {record.notes ? (
-                <Text style={styles.notes}>{record.notes}</Text>
+                <Text style={styles.notes}>
+                  {localizeRecordText(record.notes, language)}
+                </Text>
               ) : null}
               <Pressable
                 onPress={() => deleteRecord(record)}

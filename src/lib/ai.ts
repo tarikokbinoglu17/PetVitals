@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { SupportedLocale } from './globalization';
 
 export type AssistantReply = {
   answer: string;
@@ -17,10 +18,14 @@ export type ConfirmedDocumentEntity = {
   entityId: string;
 };
 
-export async function askPetHealthAssistant(petId: string, question: string): Promise<AssistantReply> {
+export async function askPetHealthAssistant(
+  petId: string,
+  question: string,
+  language: SupportedLocale = 'en',
+): Promise<AssistantReply> {
   if (!supabase) throw new Error('Supabase yapılandırılmamış.');
   const { data, error } = await supabase.functions.invoke('pet-health-assistant', {
-    body: { petId, question },
+    body: { petId, question, language },
   });
   if (error) throw error;
   if (data?.error) throw new Error(data.error);

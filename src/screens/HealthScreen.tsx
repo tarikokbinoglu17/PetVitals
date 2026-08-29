@@ -22,6 +22,7 @@ import type {
 } from "../types";
 import { colors } from "../theme";
 import { usePreferences } from "../context/PreferencesContext";
+import { localizeRecordText } from "../lib/demoLocalization";
 
 const copy = {
   tr: {
@@ -151,54 +152,6 @@ const copy = {
   },
 } as const;
 
-const demoRecordCopy = {
-  tr: {
-    Aşı: "Aşı",
-    Kontrol: "Kontrol",
-    İlaç: "İlaç",
-    "Karma aşı tekrarı": "Karma aşı tekrarı",
-    "Rutin veteriner kontrolü": "Rutin veteriner kontrolü",
-    "Parazit tablet uygulaması": "Parazit tablet uygulaması",
-    "Aylık doz tamamlandı.": "Aylık doz tamamlandı.",
-  },
-  en: {
-    Aşı: "Vaccine",
-    Kontrol: "Checkup",
-    İlaç: "Medication",
-    "Karma aşı tekrarı": "Combination vaccine booster",
-    "Rutin veteriner kontrolü": "Routine veterinary checkup",
-    "Parazit tablet uygulaması": "Parasite tablet treatment",
-    "Aylık doz tamamlandı.": "Monthly dose completed.",
-  },
-  de: {
-    Aşı: "Impfung",
-    Kontrol: "Kontrolle",
-    İlaç: "Medikament",
-    "Karma aşı tekrarı": "Auffrischung der Kombinationsimpfung",
-    "Rutin veteriner kontrolü": "Routineuntersuchung beim Tierarzt",
-    "Parazit tablet uygulaması": "Parasiten-Tablettenbehandlung",
-    "Aylık doz tamamlandı.": "Monatliche Dosis abgeschlossen.",
-  },
-  es: {
-    Aşı: "Vacuna",
-    Kontrol: "Revisión",
-    İlaç: "Medicamento",
-    "Karma aşı tekrarı": "Refuerzo de vacuna combinada",
-    "Rutin veteriner kontrolü": "Revisión veterinaria rutinaria",
-    "Parazit tablet uygulaması": "Tratamiento antiparasitario en tableta",
-    "Aylık doz tamamlandı.": "Dosis mensual completada.",
-  },
-  ja: {
-    Aşı: "ワクチン",
-    Kontrol: "健診",
-    İlaç: "薬",
-    "Karma aşı tekrarı": "混合ワクチン追加接種",
-    "Rutin veteriner kontrolü": "定期健診",
-    "Parazit tablet uygulaması": "寄生虫予防薬の投与",
-    "Aylık doz tamamlandı.": "月次投与完了。",
-  },
-} as const;
-
 export function HealthScreen({
   pets,
   records,
@@ -229,9 +182,7 @@ export function HealthScreen({
   }, [pets, selectedPetId]);
   const selectedPet = pets.find((p) => p.id === selectedPetId);
   const localizeDemo = (value?: string) =>
-    value
-      ? ((demoRecordCopy[language] as Record<string, string>)[value] ?? value)
-      : "";
+    localizeRecordText(value, language);
   const notificationLabel = (status?: VaccineNotificationStatus) =>
     status === "scheduled"
       ? c.scheduled
@@ -249,7 +200,7 @@ export function HealthScreen({
     setLoadingAlerts(true);
     setHealthBrainError("");
     try {
-      setSmartAlerts(await evaluateSmartHealthAlerts(selectedPetId));
+      setSmartAlerts(await evaluateSmartHealthAlerts(selectedPetId, language));
     } catch (e) {
       setHealthBrainError(e instanceof Error ? e.message : c.alertError);
     } finally {
@@ -262,7 +213,7 @@ export function HealthScreen({
     setHealthBrainError("");
     setAiAnswer("");
     try {
-      const r = await askPetHealthBrain(selectedPetId, question);
+      const r = await askPetHealthBrain(selectedPetId, question, language);
       setAiAnswer(r.answer);
     } catch (e) {
       setHealthBrainError(e instanceof Error ? e.message : c.aiError);

@@ -82,7 +82,7 @@ export function AIAssistantPanel({
     setLoading(true);
     setError(null);
     try {
-      const result = await askPetHealthAssistant(pet.id, value);
+      const result = await askPetHealthAssistant(pet.id, value, language);
       setAnswer(result.answer);
     } catch (err) {
       setError(err instanceof Error ? err.message : c.error);
