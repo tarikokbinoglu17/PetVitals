@@ -1,4 +1,4 @@
--- PetVitals global platform extensions.
+-- Faunvia global platform extensions.
 -- Idempotent where practical so a fresh project can reproduce the production schema.
 
 create table if not exists public.weight_entries (

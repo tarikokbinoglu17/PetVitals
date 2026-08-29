@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "PetVitals",
-    "NSLocationWhenInUseUsageDescription": "PetVitals verwendet Ihren Standort nur während der App-Nutzung, um Tierärzte und Tierhandlungen in der Nähe anzuzeigen.",
-    "NSPhotoLibraryUsageDescription": "PetVitals greift auf Ihre Fotos zu, damit Sie ein Profilfoto oder tierärztliche Dokumente auswählen können.",
-    "NSCameraUsageDescription": "PetVitals verwendet die Kamera zum Scannen von Impfpässen und tierärztlichen Dokumenten.",
-    "NSMicrophoneUsageDescription": "PetVitals greift nur mit Ihrer ausdrücklichen Zustimmung auf das Mikrofon zu, um einen Tierarztbesuch aufzunehmen und zu transkribieren."
+    "CFBundleDisplayName": "Faunvia",
+    "NSLocationWhenInUseUsageDescription": "Faunvia verwendet Ihren Standort nur während der App-Nutzung, um Tierärzte und Tierhandlungen in der Nähe anzuzeigen.",
+    "NSPhotoLibraryUsageDescription": "Faunvia greift auf Ihre Fotos zu, damit Sie ein Profilfoto oder tierärztliche Dokumente auswählen können.",
+    "NSCameraUsageDescription": "Faunvia verwendet die Kamera zum Scannen von Impfpässen und tierärztlichen Dokumenten.",
+    "NSMicrophoneUsageDescription": "Faunvia greift nur mit Ihrer ausdrücklichen Zustimmung auf das Mikrofon zu, um einen Tierarztbesuch aufzunehmen und zu transkribieren."
   },
-  "android": { "app_name": "PetVitals" }
+  "android": { "app_name": "Faunvia" }
 }

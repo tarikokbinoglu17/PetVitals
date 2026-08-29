@@ -75,7 +75,7 @@ const C = {
     passportFail: "Health Passport paylaşımı oluşturulamadı.",
     apptFail: "Randevu talebi hazırlanamadı.",
     trust: "Bu kodu yalnızca güvendiğiniz veterinerle paylaşın.",
-    hello: "Merhaba, PetVitals üzerinden randevu talep ediyorum.",
+    hello: "Merhaba, Faunvia üzerinden randevu talep ediyorum.",
   },
   en: {
     title: "Care near you",
@@ -117,7 +117,7 @@ const C = {
     passportFail: "Health Passport share could not be created.",
     apptFail: "Appointment request could not be prepared.",
     trust: "Share this code only with a veterinarian you trust.",
-    hello: "Hello, I am requesting an appointment through PetVitals.",
+    hello: "Hello, I am requesting an appointment through Faunvia.",
   },
   de: {
     title: "Versorgung in Ihrer Nähe",
@@ -159,7 +159,7 @@ const C = {
     passportFail: "Health Passport konnte nicht geteilt werden.",
     apptFail: "Terminanfrage konnte nicht vorbereitet werden.",
     trust: "Teilen Sie diesen Code nur mit einem Tierarzt Ihres Vertrauens.",
-    hello: "Hallo, ich möchte über PetVitals einen Termin anfragen.",
+    hello: "Hallo, ich möchte über Faunvia einen Termin anfragen.",
   },
   es: {
     title: "Cuidados cerca de ti",
@@ -201,7 +201,7 @@ const C = {
     passportFail: "No se pudo crear el acceso Health Passport.",
     apptFail: "No se pudo preparar la solicitud de cita.",
     trust: "Comparte este código solo con un veterinario de confianza.",
-    hello: "Hola, solicito una cita a través de PetVitals.",
+    hello: "Hola, solicito una cita a través de Faunvia.",
   },
   ja: {
     title: "周辺のケア施設",
@@ -242,7 +242,7 @@ const C = {
     passportFail: "健康パスポートの共有を作成できませんでした。",
     apptFail: "予約リクエストを作成できませんでした。",
     trust: "このコードは信頼できる獣医師とのみ共有してください。",
-    hello: "PetVitalsから予約を希望します。",
+    hello: "Faunviaから予約を希望します。",
   },
 } as const;
 function distanceLabel(m: number | null) {
@@ -434,7 +434,7 @@ export function NearMeScreen({
     try {
       const s = await createPassportShare(selectedPet.id, false, language);
       await Share.share({
-        message: `PetVitals Health Passport — ${selectedPet.name}\n${s.token}\n\n${c.trust}`,
+        message: `Faunvia Health Passport — ${selectedPet.name}\n${s.token}\n\n${c.trust}`,
       });
     } catch {
       setError(c.passportFail);
@@ -484,7 +484,7 @@ export function NearMeScreen({
   };
   return (
     <View style={styles.page}>
-      <Text style={styles.eyebrow}>PETVITALS NEARBY</Text>
+      <Text style={styles.eyebrow}>FAUNVIA NEARBY</Text>
       <Text style={styles.title}>{c.title}</Text>
       <Text style={styles.sub}>{c.sub}</Text>
       <View style={styles.filters}>

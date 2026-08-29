@@ -11,7 +11,7 @@ import { usePreferences } from "../context/PreferencesContext";
 import { useSubscription } from "../context/SubscriptionContext";
 const copy = {
   tr: {
-    active: "PetVitals Premium aktif",
+    active: "Faunvia Premium aktif",
     activeText:
       "AI, gelişmiş analiz ve premium paylaşım özelliklerine erişiminiz açık.",
     close: "Kapat",
@@ -37,7 +37,7 @@ const copy = {
       "Abonelik mağaza hesabınız üzerinden yönetilir. Satın alma öncesinde yerel fiyat ve yenileme koşulları gösterilir.",
   },
   en: {
-    active: "PetVitals Premium active",
+    active: "Faunvia Premium active",
     activeText:
       "You have access to AI, advanced analytics and premium sharing features.",
     close: "Close",
@@ -63,7 +63,7 @@ const copy = {
       "Your subscription is managed through your store account. Local pricing and renewal terms are shown before purchase.",
   },
   de: {
-    active: "PetVitals Premium aktiv",
+    active: "Faunvia Premium aktiv",
     activeText: "AI, erweiterte Analysen und Premium-Freigaben sind verfügbar.",
     close: "Schließen",
     title: "Intelligentere Gesundheitsüberwachung.",
@@ -89,7 +89,7 @@ const copy = {
       "Das Abonnement wird über Ihr Store-Konto verwaltet. Lokale Preise und Verlängerungsbedingungen werden vor dem Kauf angezeigt.",
   },
   es: {
-    active: "PetVitals Premium activo",
+    active: "Faunvia Premium activo",
     activeText:
       "Tienes acceso a IA, análisis avanzados y funciones premium para compartir.",
     close: "Cerrar",
@@ -116,7 +116,7 @@ const copy = {
       "La suscripción se gestiona desde tu cuenta de la tienda. Los precios locales y condiciones de renovación se muestran antes de comprar.",
   },
   ja: {
-    active: "PetVitals Premiumは有効です", activeText: "AI、高度な分析、Premium共有機能を利用できます。", close: "閉じる", title: "よりスマートな健康管理。",
+    active: "Faunvia Premiumは有効です", activeText: "AI、高度な分析、Premium共有機能を利用できます。", close: "閉じる", title: "よりスマートな健康管理。",
     benefits: ["AI Health Assistant", "書類・ワクチン証明書のスキャン", "高度なHealth Scoreと傾向分析", "家族・ケア担当者・獣医師との共有", "高度な健康パスポートと迷子モード"],
     annual: "年間Premium", monthly: "月間Premium", annualSub: "最もお得なプラン", monthlySub: "柔軟な月額プラン", recommended: "おすすめ",
     goAnnual: "年間Premiumを選択", goMonthly: "月間Premiumを選択", pending: "決済設定を準備中", restore: "購入を復元",
@@ -158,7 +158,7 @@ export function ProPaywall({
     <View style={styles.wrap}>
       <View style={styles.headerRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.eyebrow}>PETVITALS PREMIUM</Text>
+          <Text style={styles.eyebrow}>FAUNVIA PREMIUM</Text>
           <Text style={styles.title}>{c.title}</Text>
         </View>
         <Pressable accessibilityLabel={c.close} onPress={onClose}>

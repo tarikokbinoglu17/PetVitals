@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "PetVitals",
-    "slug": "petvitals",
+    "name": "Faunvia",
+    "slug": "faunvia",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "scheme": "petvitals",
+    "scheme": "faunvia",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "ios": {
-      "bundleIdentifier": "com.tarikokbinoglu.petvitals",
+      "bundleIdentifier": "com.tarikokbinoglu.faunvia",
       "buildNumber": "1",
       "supportsTablet": true,
       "usesAppleSignIn": true,
@@ -20,7 +20,7 @@
       }
     },
     "android": {
-      "package": "com.tarikokbinoglu.petvitals",
+      "package": "com.tarikokbinoglu.faunvia",
       "versionCode": 1,
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -33,28 +33,28 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "PetVitals, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+          "locationWhenInUsePermission": "Faunvia, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
         }
       ],
       [
         "expo-maps",
         {
           "requestLocationPermission": true,
-          "locationPermission": "PetVitals, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+          "locationPermission": "Faunvia, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "PetVitals, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
-          "cameraPermission": "PetVitals, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
+          "photosPermission": "Faunvia, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+          "cameraPermission": "Faunvia, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
           "microphonePermission": false
         }
       ],
       [
         "expo-audio",
         {
-          "microphonePermission": "PetVitals, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
+          "microphonePermission": "Faunvia, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
           "recordAudioAndroid": true,
           "enableBackgroundRecording": false,
           "enableBackgroundPlayback": false
@@ -76,7 +76,7 @@
       "ja": "./locales/ja.json"
     },
     "experiments": {
-      "baseUrl": "/PetVitals"
+      "baseUrl": "/Faunvia"
     }
   }
 }

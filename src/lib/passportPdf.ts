@@ -124,7 +124,7 @@ export async function createAndSharePassportPdf(input: {
     .card{border:1px solid #dfe8e3;border-radius:14px;padding:14px;margin:10px 0}.badge{background:#fff3df;border-radius:12px;color:#8b581d;display:inline-block;padding:5px 8px;font-size:9px;font-weight:800}
     li{margin:0 0 8px}.muted{color:#6e7d78}.footer{color:#6e7d78;font-size:9px;margin-top:22px}
   </style></head><body>
-    <div class="brand">PETVITALS · ${escapeHtml(c.title)}</div>
+    <div class="brand">FAUNVIA · ${escapeHtml(c.title)}</div>
     <div class="hero"><span class="badge">${escapeHtml(c.shared)}</span><h1>${escapeHtml(input.pet.name)}</h1><p>${escapeHtml(input.pet.species)} · ${escapeHtml(input.pet.breed)}</p></div>
     <table>${row(c.birth, input.pet.birthDate)}${row(c.weight, input.pet.weight ? `${input.pet.weight} kg` : "")}${row(c.emergency, input.emergencyNotes)}</table>
     <div class="card"><h2>${escapeHtml(c.vaccines)}</h2>${items(vaccines)}</div>

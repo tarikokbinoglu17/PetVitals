@@ -10,7 +10,7 @@ import React, {
 import { defaultUnitSystem, normalizeLocale } from "../lib/globalization";
 import type { SupportedLocale, UnitSystem } from "../lib/globalization";
 
-const STORAGE_KEY = "@petvitals/preferences";
+const STORAGE_KEY = "@faunvia/preferences";
 
 type PreferencesContextValue = {
   language: SupportedLocale;

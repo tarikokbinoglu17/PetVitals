@@ -1,4 +1,4 @@
-name: PetVitals CI
+name: Faunvia CI
 
 on:
   pull_request:

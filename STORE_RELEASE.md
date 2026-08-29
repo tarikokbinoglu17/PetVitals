@@ -1,9 +1,9 @@
-# PetVitals Store Release Plan
+# Faunvia Store Release Plan
 
 ## V1 release target
 - iOS App Store + Google Play
 - Version 1.0.0
-- Bundle/package ID: `com.tarikokbinoglu.petvitals`
+- Bundle/package ID: `com.tarikokbinoglu.faunvia`
 
 ## Required before submission
 1. Production EAS project and credentials

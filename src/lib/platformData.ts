@@ -143,7 +143,7 @@ export async function loadPlatformSnapshot(
     activePassportCount: passports.length,
     passports,
     // App-wide access is controlled by the 7-day trial / Premium gate.
-    // Anyone who passes that gate receives every PetVitals feature.
+    // Anyone who passes that gate receives every Faunvia feature.
     pro: {
       plan: "pro",
       provider: entitlementResult.data?.provider ?? undefined,

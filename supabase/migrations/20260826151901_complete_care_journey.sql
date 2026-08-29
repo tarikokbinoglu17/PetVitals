@@ -1,4 +1,4 @@
--- Longitudinal care foundation for PetVitals.
+-- Longitudinal care foundation for Faunvia.
 -- Every exposed table is protected by RLS and explicitly granted to authenticated users.
 
 begin;
