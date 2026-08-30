@@ -298,7 +298,7 @@ export function HomeScreen({
     try {
       const r = await generateVetVisitSummary(selectedPet.id, 90);
       await Share.share({
-        message: `PetSolea · ${selectedPet.name}\n\n${r.summary}\n\n${r.disclaimer}`,
+        message: `Pawly · ${selectedPet.name}\n\n${r.summary}\n\n${r.disclaimer}`,
       });
     } catch (e) {
       Alert.alert(c.summaryFail, e instanceof Error ? e.message : c.fail);

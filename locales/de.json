@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "PetSolea",
-    "NSLocationWhenInUseUsageDescription": "PetSolea verwendet Ihren Standort nur während der App-Nutzung, um Tierärzte und Tierhandlungen in der Nähe anzuzeigen.",
-    "NSPhotoLibraryUsageDescription": "PetSolea greift auf Ihre Fotos zu, damit Sie ein Profilfoto oder tierärztliche Dokumente auswählen können.",
-    "NSCameraUsageDescription": "PetSolea verwendet die Kamera zum Scannen von Impfpässen und tierärztlichen Dokumenten.",
-    "NSMicrophoneUsageDescription": "PetSolea greift nur mit Ihrer ausdrücklichen Zustimmung auf das Mikrofon zu, um einen Tierarztbesuch aufzunehmen und zu transkribieren."
+    "CFBundleDisplayName": "Pawly",
+    "NSLocationWhenInUseUsageDescription": "Pawly verwendet Ihren Standort nur während der App-Nutzung, um Tierärzte und Tierhandlungen in der Nähe anzuzeigen.",
+    "NSPhotoLibraryUsageDescription": "Pawly greift auf Ihre Fotos zu, damit Sie ein Profilfoto oder tierärztliche Dokumente auswählen können.",
+    "NSCameraUsageDescription": "Pawly verwendet die Kamera zum Scannen von Impfpässen und tierärztlichen Dokumenten.",
+    "NSMicrophoneUsageDescription": "Pawly greift nur mit Ihrer ausdrücklichen Zustimmung auf das Mikrofon zu, um einen Tierarztbesuch aufzunehmen und zu transkribieren."
   },
-  "android": { "app_name": "PetSolea" }
+  "android": { "app_name": "Pawly" }
 }

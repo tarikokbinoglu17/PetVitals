@@ -91,7 +91,7 @@ export function PetDetailScreen({
           style: "destructive",
           onPress: async () => {
             const result = await onDeletePet();
-            if (result.error) Alert.alert("PetSolea", result.error);
+            if (result.error) Alert.alert("Pawly", result.error);
             else onBack();
           },
         },
@@ -109,7 +109,7 @@ export function PetDetailScreen({
         style: "destructive",
         onPress: async () => {
           const result = await onDeleteRecord(record.id);
-          if (result.error) Alert.alert("PetSolea", result.error);
+          if (result.error) Alert.alert("Pawly", result.error);
         },
       },
       ],

@@ -1,4 +1,4 @@
--- Longitudinal care foundation for PetSolea.
+-- Longitudinal care foundation for Pawly.
 -- Every exposed table is protected by RLS and explicitly granted to authenticated users.
 
 begin;

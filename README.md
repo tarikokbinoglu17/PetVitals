@@ -1,4 +1,4 @@
-# PetSolea
+# Pawly
 
 Evcil hayvanların profil, aşı, kontrol ve ilaç kayıtlarını tek yerde izlemek için Expo / React Native uygulaması.
 
@@ -43,7 +43,7 @@ Her iki tabloda da Row Level Security etkindir. Politikalar yalnızca `auth.uid(
 
 `pet-photos` ve `health-documents` depoları özeldir. Dosya yolları `<kullanıcı-id>/...` biçimindedir ve uygulama görüntüleme için kısa ömürlü imzalı bağlantılar üretir. Profil fotoğrafları en fazla 10 MB olabilir; desteklenen biçimler JPEG, PNG, WebP, HEIC ve HEIF'tir.
 
-Hazır tablolar, indeksler, en az yetkili Data API izinleri, RLS politikaları ve özel depolar için `supabase/migrations/20260820173000_petsolea_schema.sql` dosyasını bir Supabase migration'ı olarak uygulayın.
+Hazır tablolar, indeksler, en az yetkili Data API izinleri, RLS politikaları ve özel depolar için `supabase/migrations/20260820173000_pawly_schema.sql` dosyasını bir Supabase migration'ı olarak uygulayın.
 
 ## Aşı hatırlatmaları
 

@@ -4,5 +4,5 @@
     "strict": true,
     "types": ["jest", "react", "react-native"]
   },
-  "exclude": ["supabase/functions"]
+  "exclude": ["dist", "web-build", "supabase/functions"]
 }

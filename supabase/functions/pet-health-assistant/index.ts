@@ -43,31 +43,31 @@ const localizedAiCopy: Record<
   tr: {
     moka: "Moka’nın kayıtlı sağlık geçmişinde 12 Ağustos 2026’da parazit tablet uygulaması ve 2 Eylül 2026 için planlanan karma aşı tekrarı görünüyor. Kayıtlarda şu anda acil bir risk işareti yok. Veteriner görüşmesinde yaklaşan karma aşının zamanlamasını, parazit korumasının devam planını ve güncel kilo kontrolünü sorabilirsiniz.",
     luna: "Luna’nın kayıtlı sağlık geçmişinde 18 Eylül 2026 için rutin veteriner kontrolü planlanmış görünüyor. Mevcut demo kayıtlarında acil bir risk işareti yok. Kontrolde genel muayene, kilo takibi, aşı takvimi ve parazit koruma planını gözden geçirmek uygun olur.",
-    disclaimer: "PetSolea AI eğitim amaçlı destek sunar; veteriner tanısının yerini tutmaz.",
+    disclaimer: "Pawly AI eğitim amaçlı destek sunar; veteriner tanısının yerini tutmaz.",
     languageName: "Turkish",
   },
   en: {
     moka: "Moka’s recorded history shows a parasite treatment on 12 Aug 2026 and a combination-vaccine booster planned for 2 Sep 2026. No urgent risk signal is visible in the demo history. Ask the veterinarian about booster timing, parasite prevention and an updated weight check.",
     luna: "Luna’s recorded history shows a routine veterinary checkup planned for 18 Sep 2026. No urgent risk signal is visible in the demo history. Review general exam findings, weight, vaccination schedule and parasite prevention at the visit.",
-    disclaimer: "PetSolea AI provides educational support, not a veterinary diagnosis.",
+    disclaimer: "Pawly AI provides educational support, not a veterinary diagnosis.",
     languageName: "English",
   },
   de: {
     moka: "Mokas Gesundheitsverlauf enthält eine Parasitenbehandlung am 12. August 2026 und eine Auffrischung der Kombinationsimpfung am 2. September 2026. In den Demo-Daten ist kein akutes Risikosignal erkennbar. Fragen Sie nach Impfzeitpunkt, Parasitenprophylaxe und einer aktuellen Gewichtskontrolle.",
     luna: "Für Luna ist laut Gesundheitsverlauf am 18. September 2026 eine Routineuntersuchung geplant. In den Demo-Daten ist kein akutes Risikosignal erkennbar. Besprechen Sie Allgemeinuntersuchung, Gewicht, Impfplan und Parasitenprophylaxe.",
-    disclaimer: "PetSolea AI bietet Informationen und ersetzt keine tierärztliche Diagnose.",
+    disclaimer: "Pawly AI bietet Informationen und ersetzt keine tierärztliche Diagnose.",
     languageName: "German",
   },
   es: {
     moka: "El historial de Moka registra un tratamiento antiparasitario el 12 de agosto de 2026 y un refuerzo de vacuna combinada previsto para el 2 de septiembre de 2026. No aparece ninguna señal urgente en los datos demo. Consulta el momento del refuerzo, la prevención antiparasitaria y un control actualizado del peso.",
     luna: "El historial de Luna muestra una revisión veterinaria rutinaria prevista para el 18 de septiembre de 2026. No aparece ninguna señal urgente en los datos demo. Revisa la exploración general, el peso, el calendario de vacunas y la prevención antiparasitaria.",
-    disclaimer: "PetSolea AI ofrece información educativa y no sustituye un diagnóstico veterinario.",
+    disclaimer: "Pawly AI ofrece información educativa y no sustituye un diagnóstico veterinario.",
     languageName: "Spanish",
   },
   ja: {
     moka: "Mokaの記録には、2026年8月12日の寄生虫予防薬投与と、2026年9月2日に予定された混合ワクチン追加接種があります。デモ記録に緊急性の高い兆候はありません。受診時に接種時期、寄生虫予防の継続、最新の体重測定について確認してください。",
     luna: "Lunaの記録では、2026年9月18日に定期健診が予定されています。デモ記録に緊急性の高い兆候はありません。健診時に一般状態、体重、ワクチン予定、寄生虫予防について確認してください。",
-    disclaimer: "PetSolea AIは情報提供を目的としており、獣医師の診断に代わるものではありません。",
+    disclaimer: "Pawly AIは情報提供を目的としており、獣医師の診断に代わるものではありません。",
     languageName: "Japanese",
   },
 };
@@ -309,7 +309,7 @@ Deno.serve(async (req) => {
       careMeasurements: measurementsResult.data ?? [],
       confirmedVetVisits: visitsResult.data ?? [],
     };
-    const instructions = `You are PetSolea Health Brain, a longitudinal memory and visit-preparation assistant for a pet owner. Use only the supplied context for claims about this pet. Separate recorded facts from general educational guidance. You may summarize timelines, adherence and trends, but never diagnose, prescribe, recommend changing a medication dose, or invent missing facts. Treat owner-entered and unverified records as unverified. If breathing difficulty, collapse, seizure, uncontrolled bleeding, repeated vomiting or suspected poisoning is mentioned, say to contact an emergency veterinarian immediately. Respond in ${localizedAiCopy[language].languageName}. Keep the answer concise and actionable. Context: ${JSON.stringify(context)}`;
+    const instructions = `You are Pawly Health Brain, a longitudinal memory and visit-preparation assistant for a pet owner. Use only the supplied context for claims about this pet. Separate recorded facts from general educational guidance. You may summarize timelines, adherence and trends, but never diagnose, prescribe, recommend changing a medication dose, or invent missing facts. Treat owner-entered and unverified records as unverified. If breathing difficulty, collapse, seizure, uncontrolled bleeding, repeated vomiting or suspected poisoning is mentioned, say to contact an emergency veterinarian immediately. Respond in ${localizedAiCopy[language].languageName}. Keep the answer concise and actionable. Context: ${JSON.stringify(context)}`;
     const aiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {

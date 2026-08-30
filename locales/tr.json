@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "PetSolea",
-    "NSLocationWhenInUseUsageDescription": "PetSolea, yakındaki veterinerleri ve petshopları göstermek için konumunuzu yalnızca uygulamayı kullanırken kullanır.",
-    "NSPhotoLibraryUsageDescription": "PetSolea, profil fotoğrafı ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
-    "NSCameraUsageDescription": "PetSolea, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
-    "NSMicrophoneUsageDescription": "PetSolea, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir."
+    "CFBundleDisplayName": "Pawly",
+    "NSLocationWhenInUseUsageDescription": "Pawly, yakındaki veterinerleri ve petshopları göstermek için konumunuzu yalnızca uygulamayı kullanırken kullanır.",
+    "NSPhotoLibraryUsageDescription": "Pawly, profil fotoğrafı ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+    "NSCameraUsageDescription": "Pawly, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
+    "NSMicrophoneUsageDescription": "Pawly, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir."
   },
-  "android": { "app_name": "PetSolea" }
+  "android": { "app_name": "Pawly" }
 }

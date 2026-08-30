@@ -1,16 +1,22 @@
 {
   "expo": {
-    "name": "PetSolea",
-    "slug": "petsolea",
+    "name": "Pawly",
+    "slug": "pawly",
     "version": "1.0.0",
+    "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "scheme": "petsolea",
+    "scheme": "pawly",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#073F42"
+    },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "ios": {
-      "bundleIdentifier": "com.tarikokbinoglu.petsolea",
+      "bundleIdentifier": "com.tarikokbinoglu.pawly",
       "buildNumber": "1",
       "supportsTablet": true,
       "usesAppleSignIn": true,
@@ -20,9 +26,13 @@
       }
     },
     "android": {
-      "package": "com.tarikokbinoglu.petsolea",
+      "package": "com.tarikokbinoglu.pawly",
       "versionCode": 1,
       "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#073F42"
+      },
       "permissions": [
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.SCHEDULE_EXACT_ALARM"
@@ -33,28 +43,28 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "PetSolea, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+          "locationWhenInUsePermission": "Pawly, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
         }
       ],
       [
         "expo-maps",
         {
           "requestLocationPermission": true,
-          "locationPermission": "PetSolea, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
+          "locationPermission": "Pawly, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "PetSolea, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
-          "cameraPermission": "PetSolea, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
+          "photosPermission": "Pawly, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+          "cameraPermission": "Pawly, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
           "microphonePermission": false
         }
       ],
       [
         "expo-audio",
         {
-          "microphonePermission": "PetSolea, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
+          "microphonePermission": "Pawly, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
           "recordAudioAndroid": true,
           "enableBackgroundRecording": false,
           "enableBackgroundPlayback": false
@@ -75,8 +85,11 @@
       "es": "./locales/es.json",
       "ja": "./locales/ja.json"
     },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "experiments": {
-      "baseUrl": "/PetSolea"
+      "baseUrl": "/PetVitals"
     }
   }
 }

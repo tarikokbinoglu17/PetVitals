@@ -1,9 +1,9 @@
 node_modules/
 .expo/
+supabase/.temp/
 dist/
 web-build/
 .env
 .env.local
 *.log
 .DS_Store
-

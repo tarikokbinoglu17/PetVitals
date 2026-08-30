@@ -128,7 +128,7 @@ const C = {
     cancel: "İptal",
     privacy:
       "AI istekleri kimliği doğrulanmış sunucu fonksiyonundan yapılır. Gizli AI anahtarları mobil uygulamada tutulmaz ve belge sonuçları siz onaylamadan sağlık kaydına dönüşmez.",
-    loadFail: "PetSolea+ verileri şu anda yüklenemedi.",
+    loadFail: "Pawly+ verileri şu anda yüklenemedi.",
     account: "Gerçek hesap gerekli",
     accountText: "Bu işlem demo modunda kullanılamaz.",
   },
@@ -181,7 +181,7 @@ const C = {
     cancel: "Revoke",
     privacy:
       "AI requests run through authenticated server functions. Secret AI keys are not stored in the mobile app, and document results never become health records without your approval.",
-    loadFail: "PetSolea+ data could not be loaded.",
+    loadFail: "Pawly+ data could not be loaded.",
     account: "Account required",
     accountText: "This action is unavailable in demo mode.",
   },
@@ -234,7 +234,7 @@ const C = {
     cancel: "Widerrufen",
     privacy:
       "AI-Anfragen laufen über authentifizierte Serverfunktionen. Geheime AI-Schlüssel werden nicht in der App gespeichert; Dokumentergebnisse werden erst nach Ihrer Bestätigung zu Gesundheitsdaten.",
-    loadFail: "PetSolea+-Daten konnten nicht geladen werden.",
+    loadFail: "Pawly+-Daten konnten nicht geladen werden.",
     account: "Konto erforderlich",
     accountText: "Diese Aktion ist im Demo-Modus nicht verfügbar.",
   },
@@ -287,7 +287,7 @@ const C = {
     cancel: "Revocar",
     privacy:
       "Las solicitudes de AI pasan por funciones de servidor autenticadas. Las claves secretas no se guardan en la app y los resultados de documentos no se convierten en registros sin tu aprobación.",
-    loadFail: "No se pudieron cargar los datos de PetSolea+.",
+    loadFail: "No se pudieron cargar los datos de Pawly+.",
     account: "Se requiere una cuenta",
     accountText: "Esta acción no está disponible en modo demo.",
   },
@@ -339,7 +339,7 @@ const C = {
     cancel: "取り消す",
     privacy:
       "AIリクエストは認証済みのサーバー機能を通じて処理されます。秘密のAIキーはアプリに保存されず、書類の結果は承認するまで健康記録になりません。",
-    loadFail: "PetSolea+のデータを読み込めませんでした。",
+    loadFail: "Pawly+のデータを読み込めませんでした。",
     account: "アカウントが必要です",
     accountText: "この操作はデモモードでは利用できません。",
   },
@@ -541,7 +541,7 @@ export function PlatformScreen({
       setLastPassportUrl(r.url);
       await refresh();
       await Share.share({
-        message: `PetSolea Health Passport — ${selectedPet.name}\n${r.url}`,
+        message: `Pawly Health Passport — ${selectedPet.name}\n${r.url}`,
       });
     } finally {
       setBusy(false);
@@ -583,7 +583,7 @@ export function PlatformScreen({
   }
   return (
     <View style={styles.page}>
-      <Text style={styles.eyebrow}>PETSOLEA PLATFORM</Text>
+      <Text style={styles.eyebrow}>PAWLY PLATFORM</Text>
       <Text style={styles.title}>{c.title}</Text>
       <Text style={styles.sub}>{c.sub}</Text>
       {pets.length > 1 ? (
@@ -684,7 +684,7 @@ export function PlatformScreen({
       ) : null}
       {actionPanel === "life" ? (
         <View style={styles.actionBox}>
-          <Text style={styles.actionTitle}>PetSolea Life</Text>
+          <Text style={styles.actionTitle}>Pawly Life</Text>
           <View style={styles.chips}>
             {lifeTypes.map((t) => (
               <Pressable
@@ -894,7 +894,7 @@ export function PlatformScreen({
       />
       <FeatureCard
         icon="◉"
-        title="PetSolea Life"
+        title="Pawly Life"
         text={c.life}
         status={`${snapshot.lifeEntries.length} ${c.recent}`}
         onPress={() => setActionPanel(actionPanel === "life" ? null : "life")}
@@ -920,7 +920,7 @@ export function PlatformScreen({
       />
       <FeatureCard
         icon="★"
-        title="PetSolea Pro"
+        title="Pawly Pro"
         text={c.pro}
         badge="PRO"
         status={proActive ? c.active : c.free}

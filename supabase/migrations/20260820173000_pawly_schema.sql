@@ -8,7 +8,7 @@ create table if not exists public.profiles (
   role text not null default 'pet_owner'
     check (role in ('pet_owner', 'veterinarian')),
   language text not null default 'en'
-    check (language in ('tr', 'en', 'de', 'es')),
+    check (language in ('tr', 'en', 'de', 'es', 'ja')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -490,12 +490,12 @@ set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
-drop policy if exists "PetSolea users can view own files" on storage.objects;
-drop policy if exists "PetSolea users can upload own files" on storage.objects;
-drop policy if exists "PetSolea users can update own files" on storage.objects;
-drop policy if exists "PetSolea users can delete own files" on storage.objects;
+drop policy if exists "Pawly users can view own files" on storage.objects;
+drop policy if exists "Pawly users can upload own files" on storage.objects;
+drop policy if exists "Pawly users can update own files" on storage.objects;
+drop policy if exists "Pawly users can delete own files" on storage.objects;
 
-create policy "PetSolea users can view own files"
+create policy "Pawly users can view own files"
 on storage.objects for select
 to authenticated
 using (
@@ -503,7 +503,7 @@ using (
   and owner_id = (select auth.uid())::text
 );
 
-create policy "PetSolea users can upload own files"
+create policy "Pawly users can upload own files"
 on storage.objects for insert
 to authenticated
 with check (
@@ -511,7 +511,7 @@ with check (
   and (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
-create policy "PetSolea users can update own files"
+create policy "Pawly users can update own files"
 on storage.objects for update
 to authenticated
 using (
@@ -524,7 +524,7 @@ with check (
   and (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
-create policy "PetSolea users can delete own files"
+create policy "Pawly users can delete own files"
 on storage.objects for delete
 to authenticated
 using (

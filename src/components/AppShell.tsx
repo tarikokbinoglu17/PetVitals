@@ -15,14 +15,14 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { usePreferences } from '../context/PreferencesContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { SubscriptionGate } from './SubscriptionGate';
-import { PetSoleaIntelligencePanel } from './PetSoleaIntelligencePanel';
+import { PawlyIntelligencePanel } from './PawlyIntelligencePanel';
 
 const tabCopy = {
-  tr: ['Bugün', 'Dostlarım', 'Sağlık', 'Yaşam', 'Yakınımda', 'PetSolea+', 'Profil'],
-  en: ['Today', 'My Pets', 'Health', 'Life', 'Nearby', 'PetSolea+', 'Profile'],
-  de: ['Heute', 'Tiere', 'Gesundheit', 'Leben', 'In der Nähe', 'PetSolea+', 'Profil'],
-  es: ['Hoy', 'Mascotas', 'Salud', 'Vida', 'Cerca', 'PetSolea+', 'Perfil'],
-  ja: ['今日', 'ペット', '健康', '生活', '周辺', 'PetSolea+', 'プロフィール'],
+  tr: ['Bugün', 'Dostlarım', 'Sağlık', 'Yaşam', 'Yakınımda', 'Pawly+', 'Profil'],
+  en: ['Today', 'My Pets', 'Health', 'Life', 'Nearby', 'Pawly+', 'Profile'],
+  de: ['Heute', 'Tiere', 'Gesundheit', 'Leben', 'In der Nähe', 'Pawly+', 'Profil'],
+  es: ['Hoy', 'Mascotas', 'Salud', 'Vida', 'Cerca', 'Pawly+', 'Perfil'],
+  ja: ['今日', 'ペット', '健康', '生活', '周辺', 'Pawly+', 'プロフィール'],
 } as const;
 const statusCopy = {
   tr: { checking: 'Üyelik durumunuz kontrol ediliyor…', loading: 'Bilgileriniz yükleniyor…', failed: 'Bilgiler yüklenemedi', trial: (days:number) => `Premium deneme · ${days} gün kaldı` },
@@ -71,7 +71,7 @@ export function AppShell({ demoMode, userId }: { demoMode: boolean; userId?: str
     }
     if (tab === 'health') return <HealthScreen onAddVaccine={addVaccine} pets={pets} records={records} savingVaccine={savingVaccine} />;
     if (tab === 'platform') return <PlatformScreen demoMode={demoMode} pets={pets} records={records} userId={userId} />;
-    return <><PetSoleaIntelligencePanel demoMode={demoMode} pets={pets} records={records} userId={userId} /><HomeScreen demoMode={demoMode} pets={pets} records={records} userId={userId} /></>;
+    return <><PawlyIntelligencePanel demoMode={demoMode} pets={pets} records={records} userId={userId} /><HomeScreen demoMode={demoMode} pets={pets} records={records} userId={userId} /></>;
   })();
 
   return <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>

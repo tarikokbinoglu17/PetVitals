@@ -77,7 +77,7 @@ export function SubscriptionProvider({
   const [billingBusy, setBillingBusy] = useState(false);
   const [billingError, setBillingError] = useState<string>();
   const [prices, setPrices] = useState<BillingPrices>({});
-  const storagePrefix = `petsolea_access_${userKey}`;
+  const storagePrefix = `pawly_access_${userKey}`;
 
   const apply = useCallback(
     (startedAt: number, subscribed: boolean) => {

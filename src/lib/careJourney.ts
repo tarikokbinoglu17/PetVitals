@@ -137,9 +137,9 @@ type OfflineMutation = {
   createdAt: string;
 };
 
-const DEMO_KEY = '@petsolea/care-journey/v1';
-const QUEUE_PREFIX = '@petsolea/care-queue/v1';
-const CACHE_PREFIX = '@petsolea/care-cache/v1';
+const DEMO_KEY = '@pawly/care-journey/v1';
+const QUEUE_PREFIX = '@pawly/care-queue/v1';
+const CACHE_PREFIX = '@pawly/care-cache/v1';
 const MS_PER_DAY = 86_400_000;
 
 const emptySnapshot = (): CareJourneySnapshot => ({

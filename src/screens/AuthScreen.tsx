@@ -83,7 +83,7 @@ export function AuthScreen() {
     const result = await signInWithSocial(provider);
     setSocialBusy(null);
     if (result.error) setError(result.error);
-    if (result.message) Alert.alert("PetSolea", result.message);
+    if (result.message) Alert.alert("Pawly", result.message);
   };
 
   return (
@@ -98,7 +98,7 @@ export function AuthScreen() {
         <View style={styles.logo}>
           <Text style={styles.logoIcon}>🐾</Text>
         </View>
-        <Text style={styles.brand}>PetSolea</Text>
+        <Text style={styles.brand}>Pawly</Text>
         <Text style={styles.tagline}>
           {t(language, "Dostunuzun sağlığı, her zaman yanınızda.")}
         </Text>

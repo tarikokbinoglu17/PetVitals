@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "PetSolea",
-    "NSLocationWhenInUseUsageDescription": "PetSoleaは、近くの動物病院やペットショップを表示するため、アプリ使用中のみ位置情報を利用します。",
-    "NSPhotoLibraryUsageDescription": "PetSoleaは、プロフィール写真や動物病院の書類を選択するために写真へアクセスします。",
-    "NSCameraUsageDescription": "PetSoleaは、ワクチン証明書や動物病院の書類をスキャンするためにカメラを使用します。",
-    "NSMicrophoneUsageDescription": "PetSoleaは、明確な同意を得た場合のみ、診察内容の録音と文字起こしのためにマイクへアクセスします。"
+    "CFBundleDisplayName": "Pawly",
+    "NSLocationWhenInUseUsageDescription": "Pawlyは、近くの動物病院やペットショップを表示するため、アプリ使用中のみ位置情報を利用します。",
+    "NSPhotoLibraryUsageDescription": "Pawlyは、プロフィール写真や動物病院の書類を選択するために写真へアクセスします。",
+    "NSCameraUsageDescription": "Pawlyは、ワクチン証明書や動物病院の書類をスキャンするためにカメラを使用します。",
+    "NSMicrophoneUsageDescription": "Pawlyは、明確な同意を得た場合のみ、診察内容の録音と文字起こしのためにマイクへアクセスします。"
   },
-  "android": { "app_name": "PetSolea" }
+  "android": { "app_name": "Pawly" }
 }
