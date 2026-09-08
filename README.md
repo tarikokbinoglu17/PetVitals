@@ -1,6 +1,10 @@
-# Pawly
+# PetCookieGo
 
 Evcil hayvanların profil, aşı, kontrol ve ilaç kayıtlarını tek yerde izlemek için Expo / React Native uygulaması.
+
+## Demo erişimi
+
+[PetCookieGo demosunu aç](https://tarikokbinoglu17.github.io/PetVitals/?demo=1). Demo, örnek verilerle süresiz kullanılabilir. Açık bir hesap veya daha önce dolmuş deneme süresi demo erişimini etkilemez. Gerçek hesapların 7 günlük deneme ve Premium kuralları devam eder.
 
 ## Başlangıç
 

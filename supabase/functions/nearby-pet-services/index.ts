@@ -210,7 +210,7 @@ async function searchOpenStreetMap(
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'Pawly/1.0 nearby-services',
+          'User-Agent': 'PetCookieGo/1.0 nearby-services',
         },
         body: `data=${encodeURIComponent(query)}`,
         signal: controller.signal,

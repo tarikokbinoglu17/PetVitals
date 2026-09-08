@@ -10,9 +10,9 @@ import { colors } from "./src/theme";
 import { PreferencesProvider } from "./src/context/PreferencesContext";
 import { SubscriptionProvider } from "./src/context/SubscriptionContext";
 
-function Root() {
+export function Root() {
   const { user, demoMode, loading } = useAuth();
-  if (loading)
+  if (loading && !demoMode)
     return (
       <View style={styles.loading}>
         <ActivityIndicator color={colors.primary} size="large" />
@@ -20,10 +20,10 @@ function Root() {
     );
   if (!user && !demoMode) return <AuthScreen />;
 
-  const userKey = user?.id || "demo";
+  const userKey = demoMode ? "demo" : user?.id || "demo";
   return (
-    <SubscriptionProvider userKey={userKey}>
-      <AppShell demoMode={demoMode} userId={user?.id} />
+    <SubscriptionProvider key={userKey} userKey={userKey}>
+      <AppShell demoMode={demoMode} userId={demoMode ? undefined : user?.id} />
     </SubscriptionProvider>
   );
 }

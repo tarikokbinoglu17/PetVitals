@@ -17,18 +17,18 @@ import { usePreferences } from "../context/PreferencesContext";
 import type { SupportedLocale, UnitSystem } from "../lib/globalization";
 import { t } from "../lib/i18n";
 
-const PUBLIC_SITE = "https://tarikokbinoglu17.github.io/Pawly";
+const PUBLIC_SITE = "https://tarikokbinoglu17.github.io/PetVitals";
 
 const copy = {
   tr: {
     demoUser: "Demo Kullanıcı",
-    user: "Pawly Kullanıcısı",
+    user: "PetCookieGo Kullanıcısı",
     exportReal: "Veri dışa aktarma gerçek hesapta kullanılabilir.",
     exportFail: "Veriler dışa aktarılamadı. Lütfen tekrar deneyin.",
     deleteReal: "Hesap silme gerçek hesapta kullanılabilir.",
     deleteTitle: "Hesabı kalıcı olarak sil?",
     deleteBody:
-      "Pawly hesabınız ve hesabınıza bağlı veriler silinecek. Bu işlem geri alınamaz.",
+      "PetCookieGo hesabınız ve hesabınıza bağlı veriler silinecek. Bu işlem geri alınamaz.",
     cancel: "Vazgeç",
     delete: "Hesabı sil",
     deleteFail: "Hesap silinemedi. Lütfen tekrar deneyin.",
@@ -36,22 +36,22 @@ const copy = {
     demo: "Demo modu etkin.",
     demoTitle: "Demo",
     privacy:
-      "Pawly verilerinizi dışa aktarabilir veya hesabınızı uygulama içinden kalıcı olarak silebilirsiniz.",
+      "PetCookieGo verilerinizi dışa aktarabilir veya hesabınızı uygulama içinden kalıcı olarak silebilirsiniz.",
     export: "Verilerimi dışa aktar",
     deleteForever: "Hesabımı kalıcı olarak sil",
     metric: "Metrik · kg",
     imperial: "İngiliz · lb",
-    exportTitle: "Pawly veri dışa aktarımı",
+    exportTitle: "PetCookieGo veri dışa aktarımı",
   },
   en: {
     demoUser: "Demo User",
-    user: "Pawly User",
+    user: "PetCookieGo User",
     exportReal: "Data export is available for real accounts.",
     exportFail: "Data could not be exported. Please try again.",
     deleteReal: "Account deletion is available for real accounts.",
     deleteTitle: "Delete account permanently?",
     deleteBody:
-      "Your Pawly account and related data will be deleted permanently. This cannot be undone.",
+      "Your PetCookieGo account and related data will be deleted permanently. This cannot be undone.",
     cancel: "Cancel",
     delete: "Delete account",
     deleteFail: "Account could not be deleted. Please try again.",
@@ -59,23 +59,23 @@ const copy = {
     demo: "Demo mode is active.",
     demoTitle: "Demo",
     privacy:
-      "You can export your Pawly data or permanently delete your account from the app.",
+      "You can export your PetCookieGo data or permanently delete your account from the app.",
     export: "Export my data",
     deleteForever: "Delete my account permanently",
     metric: "Metric · kg",
     imperial: "Imperial · lb",
-    exportTitle: "Pawly data export",
+    exportTitle: "PetCookieGo data export",
   },
   de: {
     demoUser: "Demo-Benutzer",
-    user: "Pawly-Benutzer",
+    user: "PetCookieGo-Benutzer",
     exportReal: "Der Datenexport ist für echte Konten verfügbar.",
     exportFail:
       "Daten konnten nicht exportiert werden. Bitte erneut versuchen.",
     deleteReal: "Die Kontolöschung ist für echte Konten verfügbar.",
     deleteTitle: "Konto dauerhaft löschen?",
     deleteBody:
-      "Ihr Pawly-Konto und die zugehörigen Daten werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "Ihr PetCookieGo-Konto und die zugehörigen Daten werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
     cancel: "Abbrechen",
     delete: "Konto löschen",
     deleteFail: "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
@@ -83,22 +83,22 @@ const copy = {
     demo: "Demo-Modus ist aktiv.",
     demoTitle: "Demo",
     privacy:
-      "Sie können Ihre Pawly-Daten exportieren oder Ihr Konto in der App dauerhaft löschen.",
+      "Sie können Ihre PetCookieGo-Daten exportieren oder Ihr Konto in der App dauerhaft löschen.",
     export: "Meine Daten exportieren",
     deleteForever: "Mein Konto dauerhaft löschen",
     metric: "Metrisch · kg",
     imperial: "Imperial · lb",
-    exportTitle: "Pawly-Datenexport",
+    exportTitle: "PetCookieGo-Datenexport",
   },
   es: {
     demoUser: "Usuario demo",
-    user: "Usuario de Pawly",
+    user: "Usuario de PetCookieGo",
     exportReal: "La exportación de datos está disponible para cuentas reales.",
     exportFail: "No se pudieron exportar los datos. Inténtalo de nuevo.",
     deleteReal: "La eliminación de cuenta está disponible para cuentas reales.",
     deleteTitle: "¿Eliminar la cuenta permanentemente?",
     deleteBody:
-      "Tu cuenta de Pawly y los datos relacionados se eliminarán de forma permanente. Esta acción no se puede deshacer.",
+      "Tu cuenta de PetCookieGo y los datos relacionados se eliminarán de forma permanente. Esta acción no se puede deshacer.",
     cancel: "Cancelar",
     delete: "Eliminar cuenta",
     deleteFail: "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
@@ -106,22 +106,22 @@ const copy = {
     demo: "El modo demo está activo.",
     demoTitle: "Demo",
     privacy:
-      "Puedes exportar tus datos de Pawly o eliminar permanentemente tu cuenta desde la app.",
+      "Puedes exportar tus datos de PetCookieGo o eliminar permanentemente tu cuenta desde la app.",
     export: "Exportar mis datos",
     deleteForever: "Eliminar mi cuenta permanentemente",
     metric: "Métrico · kg",
     imperial: "Imperial · lb",
-    exportTitle: "Exportación de datos de Pawly",
+    exportTitle: "Exportación de datos de PetCookieGo",
   },
   ja: {
     demoUser: "デモユーザー",
-    user: "Pawlyユーザー",
+    user: "PetCookieGoユーザー",
     exportReal: "データの書き出しは実アカウントで利用できます。",
     exportFail: "データを書き出せませんでした。もう一度お試しください。",
     deleteReal: "アカウント削除は実アカウントで利用できます。",
     deleteTitle: "アカウントを完全に削除しますか？",
     deleteBody:
-      "Pawlyアカウントと関連データは完全に削除されます。この操作は元に戻せません。",
+      "PetCookieGoアカウントと関連データは完全に削除されます。この操作は元に戻せません。",
     cancel: "キャンセル",
     delete: "アカウントを削除",
     deleteFail: "アカウントを削除できませんでした。もう一度お試しください。",
@@ -129,12 +129,12 @@ const copy = {
     demo: "デモモードが有効です。",
     demoTitle: "デモ",
     privacy:
-      "アプリ内でPawlyデータを書き出したり、アカウントを完全に削除できます。",
+      "アプリ内でPetCookieGoデータを書き出したり、アカウントを完全に削除できます。",
     export: "データを書き出す",
     deleteForever: "アカウントを完全に削除",
     metric: "メートル法 · kg",
     imperial: "ヤード・ポンド法 · lb",
-    exportTitle: "Pawlyデータの書き出し",
+    exportTitle: "PetCookieGoデータの書き出し",
   },
 } as const;
 
@@ -201,7 +201,7 @@ export function ProfileScreen() {
         </Text>
       </View>
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.email}>{user?.email || "demo@pawly.app"}</Text>
+      <Text style={styles.email}>{demoMode ? "PetCookieGo Demo" : user?.email}</Text>
       <View style={styles.status}>
         <View
           style={[

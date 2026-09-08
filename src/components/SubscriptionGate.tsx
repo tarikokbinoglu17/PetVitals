@@ -2,17 +2,21 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { usePreferences } from "../context/PreferencesContext";
+import { useAuth } from "../context/AuthContext";
 import { useSubscription } from "../context/SubscriptionContext";
 import type { BillingPlanId } from "../lib/billing";
 import { colors, shadow } from "../theme";
 
 const copy = {
   tr: {
+    demo: "Demo sürümünü aç",
+    demoSub: "Örnek verilerle süre sınırı olmadan inceleyin.",
     title: "7 günlük ücretsiz denemeniz sona erdi.",
     sub: "Dostunuzun sağlık geçmişine, hatırlatmalarına, AI araçlarına ve PetCookieGo'nun tüm özelliklerine devam etmek için Premium'u etkinleştirin.",
     benefits: [
@@ -35,6 +39,8 @@ const copy = {
     legal: "Abonelik otomatik yenilenir ve mağaza hesabınızdan yönetilir. Yerel fiyat ve yenileme koşulları satın alma ekranında gösterilir.",
   },
   en: {
+    demo: "Open demo",
+    demoSub: "Explore sample data without a time limit.",
     title: "Your 7-day free trial has ended.",
     sub: "Activate Premium to keep access to health history, reminders, AI tools and all PetCookieGo features.",
     benefits: [
@@ -57,6 +63,8 @@ const copy = {
     legal: "Subscription renews automatically and is managed through your store account. Local pricing and renewal terms are shown before purchase.",
   },
   de: {
+    demo: "Demo öffnen",
+    demoSub: "Beispieldaten ohne Zeitlimit ansehen.",
     title: "Ihre 7-tägige kostenlose Testphase ist beendet.",
     sub: "Aktivieren Sie Premium, um Gesundheitsdaten, Erinnerungen, AI-Tools und alle PetCookieGo-Funktionen weiter zu nutzen.",
     benefits: [
@@ -79,6 +87,8 @@ const copy = {
     legal: "Das Abonnement verlängert sich automatisch und wird über Ihr Store-Konto verwaltet. Lokale Preise und Bedingungen werden vor dem Kauf angezeigt.",
   },
   es: {
+    demo: "Abrir demo",
+    demoSub: "Explora datos de ejemplo sin límite de tiempo.",
     title: "Tu prueba gratuita de 7 días ha terminado.",
     sub: "Activa Premium para seguir accediendo al historial de salud, recordatorios, herramientas de IA y todas las funciones de PetCookieGo.",
     benefits: [
@@ -101,6 +111,8 @@ const copy = {
     legal: "La suscripción se renueva automáticamente y se gestiona desde tu cuenta de la tienda. Los precios y condiciones se muestran antes de comprar.",
   },
   ja: {
+    demo: "デモを開く",
+    demoSub: "サンプルデータを時間制限なしで確認できます。",
     title: "7日間の無料体験が終了しました。",
     sub: "健康履歴、リマインダー、AIツール、PetCookieGoのすべての機能を引き続き利用するにはPremiumを有効にしてください。",
     benefits: ["すべてのペットと健康記録", "ワクチンと投薬のリマインダー", "AI Health Assistantと書類スキャン", "健康パスポート、共有、健康傾向", "周辺の動物病院とPetCookieGo Life"],
@@ -112,6 +124,7 @@ const copy = {
 
 export function SubscriptionGate() {
   const { language } = usePreferences();
+  const { enterDemo } = useAuth();
   const {
     billingAvailable,
     billingBusy,
@@ -125,11 +138,15 @@ export function SubscriptionGate() {
     useState<BillingPlanId>("annual");
 
   return (
-    <View style={styles.page}>
+    <ScrollView contentContainerStyle={styles.page}>
       <View style={styles.card}>
         <Text style={styles.eyebrow}>PETCOOKIEGO PREMIUM</Text>
         <Text style={styles.title}>{c.title}</Text>
         <Text style={styles.sub}>{c.sub}</Text>
+        <Pressable accessibilityRole="button" onPress={enterDemo} style={styles.cta}>
+          <Text style={styles.ctaText}>{c.demo}</Text>
+        </Pressable>
+        <Text style={styles.setup}>{c.demoSub}</Text>
         <View style={styles.benefits}>
           {c.benefits.map((item) => (
             <Text key={item} style={styles.benefit}>
@@ -205,12 +222,12 @@ export function SubscriptionGate() {
         {!billingAvailable ? <Text style={styles.setup}>{c.setup}</Text> : null}
         <Text style={styles.legal}>{c.legal}</Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { alignItems: "center", backgroundColor: colors.background, flex: 1, justifyContent: "center", padding: 22 },
+  page: { alignItems: "center", backgroundColor: colors.background, flexGrow: 1, justifyContent: "center", padding: 22 },
   card: { ...shadow, backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 26, borderWidth: 1, maxWidth: 560, padding: 22, width: "100%" },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: "900", letterSpacing: 1.2 },
   title: { color: colors.text, fontSize: 28, fontWeight: "900", lineHeight: 34, marginTop: 7 },

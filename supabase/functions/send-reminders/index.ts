@@ -28,24 +28,24 @@ type ExpoPushTicket = {
 
 const copy = {
   tr: {
-    title: "Pawly hatırlatması",
-    body: "Yaklaşan bir sağlık hatırlatmanız var. Ayrıntılar için Pawly’ı açın.",
+    title: "PetCookieGo hatırlatması",
+    body: "Yaklaşan bir sağlık hatırlatmanız var. Ayrıntılar için PetCookieGo’ı açın.",
   },
   en: {
-    title: "Pawly reminder",
-    body: "You have an upcoming health reminder. Open Pawly for details.",
+    title: "PetCookieGo reminder",
+    body: "You have an upcoming health reminder. Open PetCookieGo for details.",
   },
   de: {
-    title: "Pawly-Erinnerung",
-    body: "Eine Gesundheitserinnerung steht an. Öffne Pawly für Details.",
+    title: "PetCookieGo-Erinnerung",
+    body: "Eine Gesundheitserinnerung steht an. Öffne PetCookieGo für Details.",
   },
   es: {
-    title: "Recordatorio de Pawly",
-    body: "Tienes un recordatorio de salud próximo. Abre Pawly para ver los detalles.",
+    title: "Recordatorio de PetCookieGo",
+    body: "Tienes un recordatorio de salud próximo. Abre PetCookieGo para ver los detalles.",
   },
   ja: {
-    title: "Pawlyのリマインダー",
-    body: "まもなく健康管理の予定があります。詳しくはPawlyを開いてください。",
+    title: "PetCookieGoのリマインダー",
+    body: "まもなく健康管理の予定があります。詳しくはPetCookieGoを開いてください。",
   },
 } as const;
 

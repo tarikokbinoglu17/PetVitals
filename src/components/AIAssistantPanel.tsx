@@ -20,7 +20,7 @@ const copy = {
     ask: "Sor",
     error: "AI yanıtı alınamadı.",
     disclaimer:
-      "Pawly AI eğitim amaçlı destek sunar; veteriner tanısının yerini tutmaz.",
+      "PetCookieGo AI eğitim amaçlı destek sunar; veteriner tanısının yerini tutmaz.",
   },
   en: {
     close: "Close",
@@ -30,7 +30,7 @@ const copy = {
     ask: "Ask",
     error: "Could not get an AI response.",
     disclaimer:
-      "Pawly AI provides educational support and does not replace veterinary diagnosis.",
+      "PetCookieGo AI provides educational support and does not replace veterinary diagnosis.",
   },
   de: {
     close: "Schließen",
@@ -40,7 +40,7 @@ const copy = {
     ask: "Fragen",
     error: "AI-Antwort konnte nicht geladen werden.",
     disclaimer:
-      "Pawly AI bietet pädagogische Unterstützung und ersetzt keine tierärztliche Diagnose.",
+      "PetCookieGo AI bietet pädagogische Unterstützung und ersetzt keine tierärztliche Diagnose.",
   },
   es: {
     close: "Cerrar",
@@ -50,7 +50,7 @@ const copy = {
     ask: "Preguntar",
     error: "No se pudo obtener una respuesta de IA.",
     disclaimer:
-      "Pawly AI ofrece apoyo educativo y no sustituye el diagnóstico veterinario.",
+      "PetCookieGo AI ofrece apoyo educativo y no sustituye el diagnóstico veterinario.",
   },
   ja: {
     close: "閉じる",
@@ -60,7 +60,7 @@ const copy = {
     ask: "質問する",
     error: "AIの回答を取得できませんでした。",
     disclaimer:
-      "Pawly AIは情報提供を目的としており、獣医師の診断に代わるものではありません。",
+      "PetCookieGo AIは情報提供を目的としており、獣医師の診断に代わるものではありません。",
   },
 } as const;
 export function AIAssistantPanel({

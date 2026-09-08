@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "Pawly",
-    "NSLocationWhenInUseUsageDescription": "Pawly, yakındaki veterinerleri ve petshopları göstermek için konumunuzu yalnızca uygulamayı kullanırken kullanır.",
-    "NSPhotoLibraryUsageDescription": "Pawly, profil fotoğrafı ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
-    "NSCameraUsageDescription": "Pawly, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
-    "NSMicrophoneUsageDescription": "Pawly, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir."
+    "CFBundleDisplayName": "PetCookieGo",
+    "NSLocationWhenInUseUsageDescription": "PetCookieGo, yakındaki veterinerleri ve petshopları göstermek için konumunuzu yalnızca uygulamayı kullanırken kullanır.",
+    "NSPhotoLibraryUsageDescription": "PetCookieGo, profil fotoğrafı ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
+    "NSCameraUsageDescription": "PetCookieGo, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
+    "NSMicrophoneUsageDescription": "PetCookieGo, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir."
   },
-  "android": { "app_name": "Pawly" }
+  "android": { "app_name": "PetCookieGo" }
 }

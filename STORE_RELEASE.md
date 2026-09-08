@@ -1,9 +1,9 @@
-# Pawly Store Release Plan
+# PetCookieGo Store Release Plan
 
 ## V1 release target
 - iOS App Store + Google Play
 - Version 1.0.0
-- Bundle/package ID: `com.tarikokbinoglu.pawly`
+- Bundle/package ID: `com.tarikokbinoglu.petcookiego`
 
 ## Required before submission
 1. Production EAS project and credentials

@@ -5,9 +5,9 @@ import Purchases, {
   type PurchasesPackage,
 } from "react-native-purchases";
 
-export const PAWLY_PRO_ENTITLEMENT = "pawly_pro";
-export const PAWLY_PRO_MONTHLY_PRODUCT = "pawly_pro_monthly";
-export const PAWLY_PRO_ANNUAL_PRODUCT = "pawly_pro_annual";
+export const PETCOOKIEGO_PRO_ENTITLEMENT = "pawly_pro";
+export const PETCOOKIEGO_PRO_MONTHLY_PRODUCT = "pawly_pro_monthly";
+export const PETCOOKIEGO_PRO_ANNUAL_PRODUCT = "pawly_pro_annual";
 
 const iosApiKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY?.trim();
 const androidApiKey =
@@ -37,14 +37,14 @@ export type BillingPrices = Partial<Record<BillingPlanId, string>>;
 export const billingPlans: BillingPlan[] = [
   {
     id: "annual",
-    productId: PAWLY_PRO_ANNUAL_PRODUCT,
+    productId: PETCOOKIEGO_PRO_ANNUAL_PRODUCT,
     title: "Yıllık Pro",
     subtitle: "En avantajlı plan",
     badge: "ÖNERİLEN",
   },
   {
     id: "monthly",
-    productId: PAWLY_PRO_MONTHLY_PRODUCT,
+    productId: PETCOOKIEGO_PRO_MONTHLY_PRODUCT,
     title: "Aylık Pro",
     subtitle: "Esnek aylık abonelik",
   },
@@ -54,7 +54,7 @@ let configuredUserId: string | null = null;
 
 export function hasProEntitlement(customerInfo: CustomerInfo) {
   return Boolean(
-    customerInfo.entitlements.active[PAWLY_PRO_ENTITLEMENT]?.isActive,
+    customerInfo.entitlements.active[PETCOOKIEGO_PRO_ENTITLEMENT]?.isActive,
   );
 }
 
@@ -85,8 +85,8 @@ function packageForPlan(
 ) {
   const productId =
     plan === "annual"
-      ? PAWLY_PRO_ANNUAL_PRODUCT
-      : PAWLY_PRO_MONTHLY_PRODUCT;
+      ? PETCOOKIEGO_PRO_ANNUAL_PRODUCT
+      : PETCOOKIEGO_PRO_MONTHLY_PRODUCT;
   return packages.find((item) => item.product.identifier === productId);
 }
 

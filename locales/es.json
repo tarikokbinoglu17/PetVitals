@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "Pawly",
-    "NSLocationWhenInUseUsageDescription": "Pawly usa tu ubicación solo mientras utilizas la app para mostrar veterinarios y tiendas de mascotas cercanos.",
-    "NSPhotoLibraryUsageDescription": "Pawly accede a tus fotos para que puedas elegir una foto de perfil o un documento veterinario.",
-    "NSCameraUsageDescription": "Pawly usa la cámara para escanear cartillas de vacunación y documentos veterinarios.",
-    "NSMicrophoneUsageDescription": "Pawly accede al micrófono solo con tu consentimiento explícito para grabar y transcribir una consulta veterinaria."
+    "CFBundleDisplayName": "PetCookieGo",
+    "NSLocationWhenInUseUsageDescription": "PetCookieGo usa tu ubicación solo mientras utilizas la app para mostrar veterinarios y tiendas de mascotas cercanos.",
+    "NSPhotoLibraryUsageDescription": "PetCookieGo accede a tus fotos para que puedas elegir una foto de perfil o un documento veterinario.",
+    "NSCameraUsageDescription": "PetCookieGo usa la cámara para escanear cartillas de vacunación y documentos veterinarios.",
+    "NSMicrophoneUsageDescription": "PetCookieGo accede al micrófono solo con tu consentimiento explícito para grabar y transcribir una consulta veterinaria."
   },
-  "android": { "app_name": "Pawly" }
+  "android": { "app_name": "PetCookieGo" }
 }

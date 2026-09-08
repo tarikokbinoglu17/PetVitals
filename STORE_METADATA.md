@@ -1,8 +1,8 @@
-# Pawly — Store Metadata (V1)
+# PetCookieGo — Store Metadata (V1)
 
 ## App name
 
-Pawly
+PetCookieGo
 
 ## Subtitle / Short description
 
@@ -14,7 +14,7 @@ Aşılar, sağlık kayıtları, günlük yaşam takibi, akıllı hatırlatmalar 
 
 ## Full description — Turkish
 
-Pawly, evcil dostunuzun sağlık ve bakım bilgilerini tek yerde düzenlemenize yardımcı olur.
+PetCookieGo, evcil dostunuzun sağlık ve bakım bilgilerini tek yerde düzenlemenize yardımcı olur.
 
 • Birden fazla evcil hayvan profili oluşturun.
 • Aşı, veteriner ziyareti, tedavi, ilaç ve alerji kayıtlarını takip edin.
@@ -25,23 +25,23 @@ Pawly, evcil dostunuzun sağlık ve bakım bilgilerini tek yerde düzenlemenize 
 • Acil durumda açık görünen veterinerleri hızlıca filtreleyin.
 • Verilerinizi dışa aktarın veya hesabınızı uygulama içinden silin.
 
-Pawly veteriner hekimin yerini almaz. Sağlıkla ilgili önemli veya acil durumlarda yetkili bir veteriner hekime başvurun.
+PetCookieGo veteriner hekimin yerini almaz. Sağlıkla ilgili önemli veya acil durumlarda yetkili bir veteriner hekime başvurun.
 
 ## Full description — English
 
-Pawly organizes your pet's health and care journey in one secure place. Track vaccinations, medications, veterinary visits, allergies, weight, food, water, activity, sleep and daily wellbeing. Personal baseline alerts highlight meaningful changes; document scanning, visit summaries, family roles, revocable Health Passport links, chronic-care programs and an offline emergency guide help you arrive at the veterinarian prepared. Pawly supports cats, dogs, birds, rabbits, reptiles, fish and other companion animals. Pawly does not diagnose, treat or replace licensed veterinary care.
+PetCookieGo organizes your pet's health and care journey in one secure place. Track vaccinations, medications, veterinary visits, allergies, weight, food, water, activity, sleep and daily wellbeing. Personal baseline alerts highlight meaningful changes; document scanning, visit summaries, family roles, revocable Health Passport links, chronic-care programs and an offline emergency guide help you arrive at the veterinarian prepared. PetCookieGo supports cats, dogs, birds, rabbits, reptiles, fish and other companion animals. PetCookieGo does not diagnose, treat or replace licensed veterinary care.
 
 ## Full description — German
 
-Pawly organisiert die Gesundheit und Pflege Ihres Tieres sicher an einem Ort. Erfassen Sie Impfungen, Medikamente, Tierarztbesuche, Allergien, Gewicht, Futter, Wasser, Aktivität, Schlaf und das tägliche Befinden. Persönliche Basiswert-Warnungen zeigen wichtige Veränderungen; Dokumentenscan, Besuchszusammenfassungen, Familienrollen, widerrufbare Gesundheitspässe, Programme für chronische Erkrankungen und ein Offline-Notfallleitfaden helfen bei der Vorbereitung auf den Tierarzt. Pawly ersetzt keine tierärztliche Diagnose oder Behandlung.
+PetCookieGo organisiert die Gesundheit und Pflege Ihres Tieres sicher an einem Ort. Erfassen Sie Impfungen, Medikamente, Tierarztbesuche, Allergien, Gewicht, Futter, Wasser, Aktivität, Schlaf und das tägliche Befinden. Persönliche Basiswert-Warnungen zeigen wichtige Veränderungen; Dokumentenscan, Besuchszusammenfassungen, Familienrollen, widerrufbare Gesundheitspässe, Programme für chronische Erkrankungen und ein Offline-Notfallleitfaden helfen bei der Vorbereitung auf den Tierarzt. PetCookieGo ersetzt keine tierärztliche Diagnose oder Behandlung.
 
 ## Full description — Spanish
 
-Pawly organiza la salud y los cuidados de tu mascota de forma segura en un solo lugar. Registra vacunas, medicamentos, consultas, alergias, peso, comida, agua, actividad, sueño y bienestar diario. Las alertas basadas en su patrón personal señalan cambios importantes; el escáner de documentos, los resúmenes de consulta, los roles familiares, el Pasaporte de Salud revocable, los programas para enfermedades crónicas y la guía de emergencia sin conexión te ayudan a llegar preparado al veterinario. Pawly no diagnostica, trata ni sustituye la atención veterinaria profesional.
+PetCookieGo organiza la salud y los cuidados de tu mascota de forma segura en un solo lugar. Registra vacunas, medicamentos, consultas, alergias, peso, comida, agua, actividad, sueño y bienestar diario. Las alertas basadas en su patrón personal señalan cambios importantes; el escáner de documentos, los resúmenes de consulta, los roles familiares, el Pasaporte de Salud revocable, los programas para enfermedades crónicas y la guía de emergencia sin conexión te ayudan a llegar preparado al veterinario. PetCookieGo no diagnostica, trata ni sustituye la atención veterinaria profesional.
 
 ## Full description — Japanese
 
-Pawlyは、ペットの健康とケアの履歴を安全に一か所で管理するアプリです。ワクチン、薬、診察、アレルギー、体重、食事、水分、活動、睡眠、毎日の体調を記録できます。ペットごとの通常パターンをもとにした変化通知、書類スキャン、診察サマリー、家族ごとの権限、取り消し可能な健康パスポート、慢性疾患ケア、オフライン緊急ガイドで、動物病院への準備を支援します。猫、犬、鳥、ウサギ、爬虫類、魚などに対応します。Pawlyは診断や治療を行わず、獣医師の診療に代わるものではありません。
+PetCookieGoは、ペットの健康とケアの履歴を安全に一か所で管理するアプリです。ワクチン、薬、診察、アレルギー、体重、食事、水分、活動、睡眠、毎日の体調を記録できます。ペットごとの通常パターンをもとにした変化通知、書類スキャン、診察サマリー、家族ごとの権限、取り消し可能な健康パスポート、慢性疾患ケア、オフライン緊急ガイドで、動物病院への準備を支援します。猫、犬、鳥、ウサギ、爬虫類、魚などに対応します。PetCookieGoは診断や治療を行わず、獣医師の診療に代わるものではありません。
 
 ## Keywords — iOS
 
@@ -65,8 +65,8 @@ https://tarikokbinoglu17.github.io/PetVitals/support.html
 
 ## Review notes
 
-Pawly allows users to create pet profiles and record pet health information. Demo mode is available for review without creating an account. Location permission is requested only when the user opens nearby services. Notification permission is used for vaccine and care reminders. Account deletion is available inside the Profile screen.
+PetCookieGo allows users to create pet profiles and record pet health information. Demo mode is available for review without creating an account. Location permission is requested only when the user opens nearby services. Notification permission is used for vaccine and care reminders. Account deletion is available inside the Profile screen.
 
 ## Content / medical positioning
 
-Pawly is an organizational pet-health companion and does not diagnose, treat, or replace veterinary advice.
+PetCookieGo is an organizational pet-health companion and does not diagnose, treat, or replace veterinary advice.

@@ -18,15 +18,30 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function demoRequested() {
+  return typeof window !== 'undefined' &&
+    new URLSearchParams(window.location?.search ?? '').get('demo') === '1';
+}
+
+function updateDemoUrl(enabled: boolean) {
+  if (typeof window === 'undefined' || !window.location?.href || !window.history?.replaceState) return;
+  const url = new URL(window.location.href);
+  if (enabled) url.searchParams.set('demo', '1');
+  else url.searchParams.delete('demo');
+  window.history.replaceState(window.history.state, '', url.toString());
+}
+
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(demoRequested);
 
   useEffect(() => {
     if (!supabase) return;
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
+      setLoading(false);
+    }).catch(() => {
       setLoading(false);
     });
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
@@ -37,11 +52,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({
-    user: session?.user ?? null,
-    session,
-    loading,
+    user: demoMode ? null : session?.user ?? null,
+    session: demoMode ? null : session,
+    loading: loading && !demoMode,
     demoMode,
-    enterDemo: () => setDemoMode(true),
+    enterDemo: () => { updateDemoUrl(true); setDemoMode(true); },
     signInWithSocial: signInWithSocialProvider,
     signIn: async (email, password) => {
       if (!supabase) return { error: 'Supabase ayarları eksik. Demo modu ile devam edebilirsiniz.' };
@@ -59,7 +74,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return data.session ? {} : { message: 'E-posta adresinize gönderilen onay bağlantısını açın.' };
     },
     signOut: async () => {
-      if (demoMode) setDemoMode(false);
+      if (demoMode) {
+        updateDemoUrl(false);
+        setDemoMode(false);
+        return;
+      }
       if (supabase) await supabase.auth.signOut();
     },
   }), [demoMode, loading, session]);

@@ -22,11 +22,11 @@ function hasNotificationPermission(status: Notifications.NotificationPermissions
   return iosStatus === Notifications.IosAuthorizationStatus.AUTHORIZED || iosStatus === Notifications.IosAuthorizationStatus.PROVISIONAL || iosStatus === Notifications.IosAuthorizationStatus.EPHEMERAL;
 }
 
-async function ensureNotificationPermission(channelId = VACCINE_CHANNEL_ID, channelName = 'Pawly hatırlatmaları') {
+async function ensureNotificationPermission(channelId = VACCINE_CHANNEL_ID, channelName = 'PetCookieGo hatırlatmaları') {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(channelId, {
       name: channelName,
-      description: 'Pawly tarafından planlanan hatırlatmalar',
+      description: 'PetCookieGo tarafından planlanan hatırlatmalar',
       importance: Notifications.AndroidImportance.HIGH,
       sound: 'default',
       vibrationPattern: [0, 250, 250, 250],
@@ -39,11 +39,11 @@ async function ensureNotificationPermission(channelId = VACCINE_CHANNEL_ID, chan
 }
 
 export async function sendIntelligenceAlertNotification(petName: string, title: string, message: string, severity: string) {
-  const granted = await ensureNotificationPermission(INTELLIGENCE_CHANNEL_ID, 'Pawly Intelligence');
+  const granted = await ensureNotificationPermission(INTELLIGENCE_CHANNEL_ID, 'PetCookieGo Intelligence');
   if (!granted) return null;
   return Notifications.scheduleNotificationAsync({
     content: {
-      title: `Pawly Intelligence · ${petName}`,
+      title: `PetCookieGo Intelligence · ${petName}`,
       body: `${title}: ${message}`,
       sound: 'default',
       data: { screen: 'home', recordType: 'pawly-intelligence', severity, petName },
@@ -59,7 +59,7 @@ export async function scheduleSmartReminderNotification(remindAt: string) {
   if (!granted) return null;
   return Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Pawly hatırlatması 🐾',
+      title: 'PetCookieGo hatırlatması 🐾',
       body: 'Dostunuz için planladığınız bir hatırlatma var.',
       sound: 'default',
       data: { screen: 'home', recordType: 'smart-reminder' },

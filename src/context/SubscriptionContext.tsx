@@ -20,7 +20,7 @@ import { supabase } from "../lib/supabase";
 
 const TRIAL_LENGTH_MS = 7 * 24 * 60 * 60 * 1000;
 
-export type AccessState = "loading" | "trial" | "expired" | "subscribed";
+export type AccessState = "loading" | "demo" | "trial" | "expired" | "subscribed";
 type SubscriptionRow = { trial_started_at: string; subscribed: boolean };
 type CachedAccess = SubscriptionRow & { cached_at: string };
 type SubscriptionContextValue = {
@@ -68,7 +68,7 @@ export function SubscriptionProvider({
   children: React.ReactNode;
   userKey: string;
 }) {
-  const [accessState, setAccessState] = useState<AccessState>("loading");
+  const [accessState, setAccessState] = useState<AccessState>(userKey === "demo" ? "demo" : "loading");
   const [trialDaysRemaining, setTrialDaysRemaining] = useState(7);
   const [trialEndsAt, setTrialEndsAt] = useState<number | undefined>();
   const [billingAvailable, setBillingAvailable] = useState(
@@ -97,7 +97,9 @@ export function SubscriptionProvider({
     if (userKey === "demo") {
       setBillingAvailable(false);
       setPrices({});
-      apply(Date.now(), false);
+      setAccessState("demo");
+      setTrialDaysRemaining(0);
+      setTrialEndsAt(undefined);
       return;
     }
 
