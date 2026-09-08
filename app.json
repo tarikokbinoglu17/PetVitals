@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "Pawly",
-    "slug": "pawly",
+    "name": "PetCookieGo",
+    "slug": "petcookiego",
     "version": "1.0.0",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "scheme": "pawly",
+    "scheme": "petcookiego",
     "splash": {
       "image": "./assets/icon.png",
       "resizeMode": "contain",
@@ -16,7 +16,7 @@
       "policy": "appVersion"
     },
     "ios": {
-      "bundleIdentifier": "com.tarikokbinoglu.pawly",
+      "bundleIdentifier": "com.tarikokbinoglu.petcookiego",
       "buildNumber": "1",
       "supportsTablet": true,
       "usesAppleSignIn": true,
@@ -26,7 +26,7 @@
       }
     },
     "android": {
-      "package": "com.tarikokbinoglu.pawly",
+      "package": "com.tarikokbinoglu.petcookiego",
       "versionCode": 1,
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
@@ -40,43 +40,11 @@
     },
     "plugins": [
       "expo-apple-authentication",
-      [
-        "expo-location",
-        {
-          "locationWhenInUsePermission": "Pawly, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
-        }
-      ],
-      [
-        "expo-maps",
-        {
-          "requestLocationPermission": true,
-          "locationPermission": "Pawly, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Pawly, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.",
-          "cameraPermission": "Pawly, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.",
-          "microphonePermission": false
-        }
-      ],
-      [
-        "expo-audio",
-        {
-          "microphonePermission": "Pawly, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.",
-          "recordAudioAndroid": true,
-          "enableBackgroundRecording": false,
-          "enableBackgroundPlayback": false
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "color": "#1C735B",
-          "defaultChannel": "vaccine-reminders"
-        }
-      ]
+      ["expo-location", {"locationWhenInUsePermission": "PetCookieGo, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."}],
+      ["expo-maps", {"requestLocationPermission": true, "locationPermission": "PetCookieGo, size en yakın veterinerleri ve petshopları gösterebilmek için konumunuzu yalnızca uygulamayı kullanırken kullanır."}],
+      ["expo-image-picker", {"photosPermission": "PetCookieGo, dostunuzun profil fotoğrafını ve veteriner belgelerini seçebilmeniz için fotoğraflarınıza erişir.", "cameraPermission": "PetCookieGo, aşı karnesi ve veteriner belgelerini tarayabilmeniz için kamerayı kullanır.", "microphonePermission": false}],
+      ["expo-audio", {"microphonePermission": "PetCookieGo, yalnızca açık onayınızla veteriner görüşmesini kaydedip yazıya dökmek için mikrofona erişir.", "recordAudioAndroid": true, "enableBackgroundRecording": false, "enableBackgroundPlayback": false}],
+      ["expo-notifications", {"color": "#1C735B", "defaultChannel": "vaccine-reminders"}]
     ],
     "locales": {
       "tr": "./locales/tr.json",
@@ -85,11 +53,7 @@
       "es": "./locales/es.json",
       "ja": "./locales/ja.json"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "experiments": {
-      "baseUrl": "/PetVitals"
-    }
+    "web": {"favicon": "./assets/favicon.png"},
+    "experiments": {"baseUrl": "/PetCookieGo"}
   }
 }
