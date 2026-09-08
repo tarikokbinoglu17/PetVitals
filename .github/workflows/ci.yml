@@ -1,4 +1,4 @@
-name: Pawly CI
+name: PetCookieGo CI
 
 on:
   pull_request:
