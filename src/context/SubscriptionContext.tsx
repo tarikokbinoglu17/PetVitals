@@ -94,6 +94,13 @@ export function SubscriptionProvider({
     setBillingError(undefined);
     let storeSubscribed = false;
 
+    if (userKey === "demo") {
+      setBillingAvailable(false);
+      setPrices({});
+      apply(Date.now(), false);
+      return;
+    }
+
     if (userKey !== "demo") {
       try {
         const store = await getBillingState(userKey);
