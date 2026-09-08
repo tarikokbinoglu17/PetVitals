@@ -14,13 +14,13 @@ import { colors, shadow } from "../theme";
 const copy = {
   tr: {
     title: "7 günlük ücretsiz denemeniz sona erdi.",
-    sub: "Dostunuzun sağlık geçmişine, hatırlatmalarına, AI araçlarına ve Pawly'ın tüm özelliklerine devam etmek için Premium'u etkinleştirin.",
+    sub: "Dostunuzun sağlık geçmişine, hatırlatmalarına, AI araçlarına ve PetCookieGo'nun tüm özelliklerine devam etmek için Premium'u etkinleştirin.",
     benefits: [
       "Tüm evcil hayvanlar ve sağlık kayıtları",
       "Aşı ve ilaç hatırlatmaları",
       "AI Health Assistant ve belge tarama",
       "Health Passport, paylaşım ve sağlık trendleri",
-      "Yakındaki veterinerler ve Pawly Life",
+      "Yakındaki veterinerler ve PetCookieGo Life",
     ],
     annual: "Yıllık Premium",
     monthly: "Aylık Premium",
@@ -36,13 +36,13 @@ const copy = {
   },
   en: {
     title: "Your 7-day free trial has ended.",
-    sub: "Activate Premium to keep access to health history, reminders, AI tools and all Pawly features.",
+    sub: "Activate Premium to keep access to health history, reminders, AI tools and all PetCookieGo features.",
     benefits: [
       "All pets and health records",
       "Vaccine and medication reminders",
       "AI Health Assistant and document scanning",
       "Health Passport, sharing and health trends",
-      "Nearby veterinarians and Pawly Life",
+      "Nearby veterinarians and PetCookieGo Life",
     ],
     annual: "Annual Premium",
     monthly: "Monthly Premium",
@@ -58,13 +58,13 @@ const copy = {
   },
   de: {
     title: "Ihre 7-tägige kostenlose Testphase ist beendet.",
-    sub: "Aktivieren Sie Premium, um Gesundheitsdaten, Erinnerungen, AI-Tools und alle Pawly-Funktionen weiter zu nutzen.",
+    sub: "Aktivieren Sie Premium, um Gesundheitsdaten, Erinnerungen, AI-Tools und alle PetCookieGo-Funktionen weiter zu nutzen.",
     benefits: [
       "Alle Tiere und Gesundheitsdaten",
       "Impf- und Medikamentenerinnerungen",
       "AI Health Assistant und Dokumentenscan",
       "Health Passport, Freigabe und Gesundheitstrends",
-      "Tierärzte in der Nähe und Pawly Life",
+      "Tierärzte in der Nähe und PetCookieGo Life",
     ],
     annual: "Premium jährlich",
     monthly: "Premium monatlich",
@@ -80,13 +80,13 @@ const copy = {
   },
   es: {
     title: "Tu prueba gratuita de 7 días ha terminado.",
-    sub: "Activa Premium para seguir accediendo al historial de salud, recordatorios, herramientas de IA y todas las funciones de Pawly.",
+    sub: "Activa Premium para seguir accediendo al historial de salud, recordatorios, herramientas de IA y todas las funciones de PetCookieGo.",
     benefits: [
       "Todas las mascotas y registros de salud",
       "Recordatorios de vacunas y medicamentos",
       "AI Health Assistant y escaneo de documentos",
       "Health Passport, uso compartido y tendencias",
-      "Veterinarios cercanos y Pawly Life",
+      "Veterinarios cercanos y PetCookieGo Life",
     ],
     annual: "Premium anual",
     monthly: "Premium mensual",
@@ -102,8 +102,8 @@ const copy = {
   },
   ja: {
     title: "7日間の無料体験が終了しました。",
-    sub: "健康履歴、リマインダー、AIツール、Pawlyのすべての機能を引き続き利用するにはPremiumを有効にしてください。",
-    benefits: ["すべてのペットと健康記録", "ワクチンと投薬のリマインダー", "AI Health Assistantと書類スキャン", "健康パスポート、共有、健康傾向", "周辺の動物病院とPawly Life"],
+    sub: "健康履歴、リマインダー、AIツール、PetCookieGoのすべての機能を引き続き利用するにはPremiumを有効にしてください。",
+    benefits: ["すべてのペットと健康記録", "ワクチンと投薬のリマインダー", "AI Health Assistantと書類スキャン", "健康パスポート、共有、健康傾向", "周辺の動物病院とPetCookieGo Life"],
     annual: "年間Premium", monthly: "月間Premium", annualSub: "最もお得なプラン", monthlySub: "柔軟な月額プラン", recommended: "おすすめ",
     continue: "Premiumを続ける", pending: "決済設定を準備中", processing: "ストアで購入処理中…", restore: "購入を復元",
     setup: "ストア商品を接続すると、現地価格と購入機能が表示されます。", legal: "サブスクリプションは自動更新され、ストアアカウントで管理されます。購入前に価格と更新条件が表示されます。",
@@ -127,7 +127,7 @@ export function SubscriptionGate() {
   return (
     <View style={styles.page}>
       <View style={styles.card}>
-        <Text style={styles.eyebrow}>PAWLY PREMIUM</Text>
+        <Text style={styles.eyebrow}>PETCOOKIEGO PREMIUM</Text>
         <Text style={styles.title}>{c.title}</Text>
         <Text style={styles.sub}>{c.sub}</Text>
         <View style={styles.benefits}>
