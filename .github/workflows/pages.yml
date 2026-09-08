@@ -1,4 +1,4 @@
-name: Deploy Pawly App
+name: Deploy PetCookieGo App
 
 on:
   push:
