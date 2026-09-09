@@ -7,6 +7,8 @@ import type { Pet, PetDraft, SavePetResult } from "../types";
 import { FormField } from "./FormField";
 import { PrimaryButton } from "./PrimaryButton";
 import { usePreferences } from "../context/PreferencesContext";
+import { tagCopy } from "../lib/petTagCopy";
+import { normalizeMicrochip } from "../lib/petIdentity";
 import { t } from "../lib/i18n";
 
 const speciesOptions: Pet["species"][] = [
@@ -35,6 +37,7 @@ export function PetForm({
   );
   const [breed, setBreed] = useState(initialPet?.breed ?? "");
   const [birthDate, setBirthDate] = useState(initialPet?.birthDate ?? "");
+  const [microchipId, setMicrochipId] = useState(initialPet?.microchipId ?? "");
   const [weight, setWeight] = useState("");
   const [photo, setPhoto] = useState<PetDraft["photo"]>();
   const [error, setError] = useState("");
@@ -44,6 +47,7 @@ export function PetForm({
   useEffect(() => {
     if (!initialPet) return;
     setName(initialPet.name);
+    setMicrochipId(initialPet.microchipId ?? "");
     setSpecies(initialPet.species);
     setBreed(initialPet.breed || "");
     setBirthDate(initialPet.birthDate || "");
@@ -123,6 +127,7 @@ export function PetForm({
       birthDate: birthDate.trim() || undefined,
       weight: normalizedWeight,
       photo,
+      microchipId: normalizeMicrochip(microchipId),
     };
     const validationError = validatePetDraft(draft, new Date(), language);
     if (validationError) {
@@ -143,6 +148,7 @@ export function PetForm({
       );
       if (!initialPet) {
         setName("");
+        setMicrochipId("");
         setBreed("");
         setBirthDate("");
         setWeight("");
@@ -273,6 +279,16 @@ export function PetForm({
         placeholder={unitSystem === "imperial" ? "10.1" : "4,6"}
         value={weight}
       />
+      <FormField
+        label={tagCopy[language].chip}
+        value={microchipId}
+        onChangeText={setMicrochipId}
+        autoCapitalize="characters"
+        autoCorrect={false}
+        maxLength={24}
+        placeholder="000123456789012"
+      />
+      <Text style={styles.chipHelp}>{tagCopy[language].chipHelp}</Text>
       {error ? (
         <Text accessibilityRole="alert" style={styles.error}>
           {error}
@@ -370,6 +386,7 @@ const styles = StyleSheet.create({
   },
   choiceText: { color: colors.text, fontWeight: "700" },
   choiceTextActive: { color: colors.white },
+  chipHelp: { color: colors.muted, fontSize: 14, lineHeight: 21, marginBottom: 18 },
   error: { color: colors.danger, fontSize: 13, marginBottom: 12 },
   success: {
     color: colors.primary,

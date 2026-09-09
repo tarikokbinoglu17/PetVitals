@@ -1,3 +1,4 @@
+import type { PetTag } from "../lib/petTags";
 export type Json =
   | string
   | number
@@ -14,6 +15,13 @@ export type Database = {
   }
   public: {
     Tables: {
+      pet_tags: {
+        Row: PetTag
+        Insert: Pick<PetTag, 'pet_id' | 'owner_id' | 'contact_phone'> & Partial<Omit<PetTag, 'pet_id' | 'owner_id' | 'contact_phone'>>
+        Update: Partial<PetTag>
+        Relationships: [{ foreignKeyName: 'pet_tags_pet_id_fkey'; columns: ['pet_id']; isOneToOne: true; referencedRelation: 'pets'; referencedColumns: ['id'] }]
+      }
+
       health_records: {
         Row: {
           attachment_url: string | null

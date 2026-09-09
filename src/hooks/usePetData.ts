@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { demoPets, demoRecords } from '../data/demo';
 import { cancelVaccineNotifications, scheduleVaccineNotifications } from '../lib/notifications';
+import { speciesToDatabase, petSpeciesFromDatabase } from '../lib/petSpecies';
+import { normalizeMicrochip } from '../lib/petIdentity';
 import { validatePetDraft } from '../lib/pets';
 import { supabase } from '../lib/supabase';
 import { getPetPhotoUrl, removePetPhoto, uploadPetPhoto } from '../lib/storage';
@@ -10,16 +12,17 @@ import type { HealthRecord, Pet, PetDraft, SavePetResult, SaveVaccineResult, Vac
 
 const DEMO_VACCINES_KEY = '@pawly/demo-vaccines/v1';
 const DEMO_PETS_KEY = '@pawly/demo-pets/v1';
+const DEMO_PET_OVERRIDES_KEY = '@petcookiego/demo-pet-overrides/v1';
+function mergeDemoPets(custom: Pet[], overrides: Pet[]) { return [...demoPets.map(p => overrides.find(o => o.id === p.id) ?? p), ...custom]; }
 const VACCINE_SELECT = 'id,pet_id,vaccine_name,vaccine_type,administered_date,next_due_date,repeat_interval_months,veterinarian,notes,document_url,notifications_enabled,reminder_30_days_id,reminder_7_days_id,reminder_1_day_id,reminder_same_day_id,created_at';
 type MutationResult = { error?: string; message?: string };
 
-type PetRow = { id: string; name: string; species: string; breed: string | null; birth_date: string | null; weight: number | string | null; photo_url: string | null };
+type PetRow = { id: string; name: string; species: string; breed: string | null; birth_date: string | null; weight: number | string | null; photo_url: string | null; microchip_id?: string | null };
 type VaccineRow = { id: string; pet_id: string; vaccine_name: string; vaccine_type: string | null; administered_date: string | null; next_due_date: string | null; repeat_interval_months: number | null; veterinarian: string | null; notes: string | null; document_url: string | null; notifications_enabled: boolean; reminder_30_days_id: string | null; reminder_7_days_id: string | null; reminder_1_day_id: string | null; reminder_same_day_id: string | null; created_at: string };
-const petSpecies: Pet['species'][] = ['Kedi', 'Köpek', 'Kuş', 'Tavşan', 'Sürüngen', 'Balık', 'Diğer'];
 
 function mapPet(row: PetRow, photoUrl?: string): Pet {
-  const species = petSpecies.includes(row.species as Pet['species']) ? (row.species as Pet['species']) : 'Diğer';
-  return { id: row.id, name: row.name, species, breed: row.breed ?? '', birthDate: row.birth_date ?? '', weight: Number(row.weight ?? 0), photoPath: row.photo_url ?? undefined, photoUrl };
+  const species = petSpeciesFromDatabase(row.species);
+  return { id: row.id, name: row.name, species, breed: row.breed ?? '', birthDate: row.birth_date ?? '', weight: Number(row.weight ?? 0), microchipId: row.microchip_id ?? undefined, photoPath: row.photo_url ?? undefined, photoUrl };
 }
 function mapVaccine(row: VaccineRow): HealthRecord {
   const notificationIds = [row.reminder_30_days_id,row.reminder_7_days_id,row.reminder_1_day_id,row.reminder_same_day_id].filter((value): value is string => Boolean(value));
@@ -60,11 +63,12 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
     let active = true;
     if (demoMode) {
       setLoading(true);
-      Promise.all([AsyncStorage.getItem(DEMO_PETS_KEY),AsyncStorage.getItem(DEMO_VACCINES_KEY)]).then(([petsValue,vaccinesValue]) => {
+      Promise.all([AsyncStorage.getItem(DEMO_PETS_KEY),AsyncStorage.getItem(DEMO_VACCINES_KEY),AsyncStorage.getItem(DEMO_PET_OVERRIDES_KEY)]).then(([petsValue,vaccinesValue,overridesValue]) => {
         if (!active) return;
         const storedPets = petsValue ? JSON.parse(petsValue) : [];
         const storedVaccines = vaccinesValue ? JSON.parse(vaccinesValue) : [];
-        setPets([...demoPets,...(Array.isArray(storedPets)?storedPets:[])]);
+        const overrides = overridesValue ? JSON.parse(overridesValue) : [];
+        setPets(mergeDemoPets(Array.isArray(storedPets)?storedPets:[], Array.isArray(overrides)?overrides:[]));
         setRecords(sortRecords([...demoRecords,...(Array.isArray(storedVaccines)?storedVaccines:[])]));
         setError(null);
       }).catch(() => { if(active){setPets(demoPets);setRecords(demoRecords);setError(null);} }).finally(() => { if(active)setLoading(false); });
@@ -75,7 +79,7 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
     const load=async()=>{
       setLoading(true);setError(null);
       const [petsResult,recordsResult]=await Promise.all([
-        client.from('pets').select('id,name,species,breed,birth_date,weight,photo_url').eq('owner_id',userId).order('created_at',{ascending:true}),
+        client.from('pets').select('id,name,species,breed,birth_date,weight,photo_url,microchip_id').eq('owner_id',userId).order('created_at',{ascending:true}),
         client.from('vaccines').select(VACCINE_SELECT).eq('owner_id',userId).order('next_due_date',{ascending:true,nullsFirst:false}),
       ]);
       if(!active)return;
@@ -90,23 +94,30 @@ export function usePetData({ demoMode, userId }: { demoMode: boolean; userId?: s
   const addPet=async(draft:PetDraft):Promise<SavePetResult>=>{
     const validationError=validatePetDraft(draft);if(validationError)return{error:validationError};setSavingPet(true);
     try{
-      if(demoMode){const pet:Pet={id:createDemoPetId(),name:draft.name.trim(),species:draft.species,breed:draft.breed?.trim()||'',birthDate:draft.birthDate||'',weight:draft.weight??0,photoUrl:draft.photo?.uri};const custom=[...pets.filter(p=>p.id.startsWith('demo-pet-')),pet];await AsyncStorage.setItem(DEMO_PETS_KEY,JSON.stringify(custom));setPets([...demoPets,...custom]);return{message:`${pet.name} başarıyla eklendi.`};}
+      if(demoMode){const pet:Pet={id:createDemoPetId(),name:draft.name.trim(),species:draft.species,breed:draft.breed?.trim()||'',birthDate:draft.birthDate||'',weight:draft.weight??0,photoUrl:draft.photo?.uri,microchipId:normalizeMicrochip(draft.microchipId ?? '')};const custom=[...pets.filter(p=>p.id.startsWith('demo-pet-')),pet];await AsyncStorage.setItem(DEMO_PETS_KEY,JSON.stringify(custom));setPets([...pets,pet]);return{message:`${pet.name} başarıyla eklendi.`};}
       const client=supabase;if(!client||!userId)return{error:'Oturum bulunamadı. Lütfen yeniden giriş yapın.'};let uploaded:string|undefined;
-      try{if(draft.photo)uploaded=await uploadPetPhoto(client,userId,draft.photo);const result=await client.from('pets').insert({owner_id:userId,name:draft.name.trim(),species:draft.species,breed:draft.breed?.trim()||null,birth_date:draft.birthDate||null,weight:draft.weight??null,photo_url:uploaded??null}).select('id,name,species,breed,birth_date,weight,photo_url').single();if(result.error||!result.data){await removePetPhoto(client,uploaded);return{error:'Dost profili eklenemedi. Lütfen tekrar deneyin.'};}const pet=mapPet(result.data as PetRow,draft.photo?.uri??await getPetPhotoUrl(client,uploaded));setPets(prev=>[...prev,pet]);return{message:`${pet.name} başarıyla eklendi.`};}catch(e){await removePetPhoto(client,uploaded);return{error:e instanceof Error&&e.message==='PHOTO_TOO_LARGE'?'Fotoğraf 10 MB’den küçük olmalı.':'Dost profili eklenemedi. Lütfen tekrar deneyin.'};}
+      try{if(draft.photo)uploaded=await uploadPetPhoto(client,userId,draft.photo);const result=await client.from('pets').insert({owner_id:userId,name:draft.name.trim(),species:speciesToDatabase[draft.species],breed:draft.breed?.trim()||null,birth_date:draft.birthDate||null,weight:draft.weight??null,microchip_id:normalizeMicrochip(draft.microchipId ?? '') || null,photo_url:uploaded??null}).select('id,name,species,breed,birth_date,weight,photo_url,microchip_id').single();if(result.error||!result.data){await removePetPhoto(client,uploaded);return{error:'Dost profili eklenemedi. Lütfen tekrar deneyin.'};}const pet=mapPet(result.data as PetRow,draft.photo?.uri??await getPetPhotoUrl(client,uploaded));setPets(prev=>[...prev,pet]);return{message:`${pet.name} başarıyla eklendi.`};}catch(e){await removePetPhoto(client,uploaded);return{error:e instanceof Error&&e.message==='PHOTO_TOO_LARGE'?'Fotoğraf 10 MB’den küçük olmalı.':'Dost profili eklenemedi. Lütfen tekrar deneyin.'};}
     }finally{setSavingPet(false);}
   };
 
   const updatePet=async(petId:string,draft:PetDraft):Promise<MutationResult>=>{
     const validationError=validatePetDraft(draft);if(validationError)return{error:validationError};setSavingPet(true);
     try{
-      if(demoMode){if(!petId.startsWith('demo-pet-'))return{error:'Yerleşik demo profilleri düzenlenemez.'};const updated:Pet={id:petId,name:draft.name.trim(),species:draft.species,breed:draft.breed?.trim()||'',birthDate:draft.birthDate||'',weight:draft.weight??0,photoUrl:draft.photo?.uri??pets.find(p=>p.id===petId)?.photoUrl};const custom=pets.filter(p=>p.id.startsWith('demo-pet-')).map(p=>p.id===petId?updated:p);await AsyncStorage.setItem(DEMO_PETS_KEY,JSON.stringify(custom));setPets([...demoPets,...custom]);return{message:'Dost profili güncellendi.'};}
-      const client=supabase;if(!client||!userId)return{error:'Oturum bulunamadı.'};const result=await client.from('pets').update({name:draft.name.trim(),species:draft.species,breed:draft.breed?.trim()||null,birth_date:draft.birthDate||null,weight:draft.weight??null}).eq('id',petId).eq('owner_id',userId).select('id,name,species,breed,birth_date,weight,photo_url').single();if(result.error||!result.data)return{error:'Dost profili güncellenemedi.'};const updated=mapPet(result.data as PetRow,await getPetPhotoUrl(client,(result.data as PetRow).photo_url));setPets(prev=>prev.map(p=>p.id===petId?updated:p));return{message:'Dost profili güncellendi.'};
+      if(demoMode){
+        const current = pets.find(p=>p.id===petId);
+        if(!current)return{error:'Dost bulunamadı.'};
+        const updated:Pet={...current,name:draft.name.trim(),species:draft.species,breed:draft.breed?.trim()||'',birthDate:draft.birthDate||'',weight:draft.weight??0,microchipId:normalizeMicrochip(draft.microchipId ?? ''),photoUrl:draft.photo?.uri??current.photoUrl};
+        const next=pets.map(p=>p.id===petId?updated:p);
+        await AsyncStorage.setItem(petId.startsWith('demo-pet-') ? DEMO_PETS_KEY : DEMO_PET_OVERRIDES_KEY,JSON.stringify(next.filter(p=>petId.startsWith('demo-pet-') ? p.id.startsWith('demo-pet-') : !p.id.startsWith('demo-pet-'))));
+        setPets(next);return{message:'Dost profili güncellendi.'};
+      }
+      const client=supabase;if(!client||!userId)return{error:'Oturum bulunamadı.'};const result=await client.from('pets').update({name:draft.name.trim(),species:speciesToDatabase[draft.species],breed:draft.breed?.trim()||null,birth_date:draft.birthDate||null,weight:draft.weight??null,microchip_id:normalizeMicrochip(draft.microchipId ?? '') || null}).eq('id',petId).eq('owner_id',userId).select('id,name,species,breed,birth_date,weight,photo_url,microchip_id').single();if(result.error||!result.data)return{error:'Dost profili güncellenemedi.'};const updated=mapPet(result.data as PetRow,await getPetPhotoUrl(client,(result.data as PetRow).photo_url));setPets(prev=>prev.map(p=>p.id===petId?updated:p));return{message:'Dost profili güncellendi.'};
     }finally{setSavingPet(false);}
   };
 
   const deletePet=async(petId:string):Promise<MutationResult>=>{
     const pet=pets.find(p=>p.id===petId);if(!pet)return{error:'Dost bulunamadı.'};
-    if(demoMode){if(!petId.startsWith('demo-pet-'))return{error:'Yerleşik demo profilleri silinemez.'};const customPets=pets.filter(p=>p.id.startsWith('demo-pet-')&&p.id!==petId);const customRecords=records.filter(r=>r.id.startsWith('demo-vaccine-')&&r.petId!==petId);await Promise.all([AsyncStorage.setItem(DEMO_PETS_KEY,JSON.stringify(customPets)),AsyncStorage.setItem(DEMO_VACCINES_KEY,JSON.stringify(customRecords))]);setPets([...demoPets,...customPets]);setRecords(sortRecords([...demoRecords,...customRecords]));return{message:'Dost profili silindi.'};}
+    if(demoMode){if(!petId.startsWith('demo-pet-'))return{error:'Yerleşik demo profilleri silinemez.'};const customPets=pets.filter(p=>p.id.startsWith('demo-pet-')&&p.id!==petId);const customRecords=records.filter(r=>r.id.startsWith('demo-vaccine-')&&r.petId!==petId);await Promise.all([AsyncStorage.setItem(DEMO_PETS_KEY,JSON.stringify(customPets)),AsyncStorage.setItem(DEMO_VACCINES_KEY,JSON.stringify(customRecords))]);setPets(pets.filter(p=>p.id!==petId));setRecords(sortRecords([...demoRecords,...customRecords]));return{message:'Dost profili silindi.'};}
     const client=supabase;if(!client||!userId)return{error:'Oturum bulunamadı.'};const related=records.filter(r=>r.petId===petId);await cancelVaccineNotifications(related.flatMap(r=>r.notificationIds??[]));const vaccineDelete=await client.from('vaccines').delete().eq('pet_id',petId).eq('owner_id',userId);if(vaccineDelete.error)return{error:'Sağlık kayıtları silinemedi.'};const result=await client.from('pets').delete().eq('id',petId).eq('owner_id',userId);if(result.error)return{error:'Dost profili silinemedi.'};await removePetPhoto(client,pet.photoPath);setPets(prev=>prev.filter(p=>p.id!==petId));setRecords(prev=>prev.filter(r=>r.petId!==petId));return{message:'Dost profili silindi.'};
   };
 

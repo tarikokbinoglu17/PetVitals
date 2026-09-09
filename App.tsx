@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { AppShell } from "./src/components/AppShell";
 import { AppErrorBoundary } from "./src/components/AppErrorBoundary";
+import { PublicPetTagScreen } from "./src/screens/PublicPetTagScreen";
 import { colors } from "./src/theme";
 import { PreferencesProvider } from "./src/context/PreferencesContext";
 import { SubscriptionProvider } from "./src/context/SubscriptionContext";
@@ -29,14 +30,15 @@ export function Root() {
 }
 
 export default function App() {
+  const tagToken = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("tag") : null;
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
       <PreferencesProvider>
         <AppErrorBoundary>
-          <AuthProvider>
+          {tagToken !== null ? <PublicPetTagScreen token={tagToken} /> : <AuthProvider>
             <Root />
-          </AuthProvider>
+          </AuthProvider>}
         </AppErrorBoundary>
       </PreferencesProvider>
     </SafeAreaProvider>

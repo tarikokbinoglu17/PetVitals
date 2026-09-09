@@ -5,6 +5,7 @@ export type Pet = {
   breed: string;
   birthDate: string;
   weight: number;
+  microchipId?: string;
   photoPath?: string;
   photoUrl?: string;
   ownerId?: string;
@@ -25,6 +26,7 @@ export type PetDraft = {
   breed?: string;
   birthDate?: string;
   weight?: number;
+  microchipId?: string;
   photo?: LocalImage;
 };
 

@@ -6,6 +6,20 @@ Evcil hayvanların profil, aşı, kontrol ve ilaç kayıtlarını tek yerde izle
 
 [PetCookieGo demosunu aç](https://tarikokbinoglu17.github.io/PetVitals/?demo=1). Demo, örnek verilerle süresiz kullanılabilir. Açık bir hesap veya daha önce dolmuş deneme süresi demo erişimini etkilemez. Gerçek hesapların 7 günlük deneme ve Premium kuralları devam eder.
 
+## Mikroçip ve NFC / QR tasma
+
+**Dostlarım → bir hayvan → Düzenle** ekranından mikroçip numarası kaydedilir. Başındaki sıfırlar korunur; ISO 15 haneli ve yaygın eski 9 / 10 karakterli numaralar desteklenir. Bu işlem resmî mikroçip sicili kaydı oluşturmaz.
+
+Hayvan detayındaki **NFC / QR tasma** bölümünde ülke koduyla iletişim telefonu girilir ve paylaşılacak bilgiler onaylanır. Sahibi, kalıcı bağlantının QR görselini kaydedebilir veya aynı URL’yi yazılabilir NDEF etikete bir NFC yazma uygulamasıyla yazabilir. Safari üzerinden NFC yazma ve deri altı mikroçip okuma desteklenmez; fiziksel etiket ayrıca gerekir.
+
+Bulan kişinin sayfası `?tag=<rastgele-token>` adresinde giriş ve abonelik kapısından bağımsız açılır. Yalnızca hayvanın adı, türü, ırkı ve sahibinin açıkça paylaştığı iletişim bilgileri gösterilir. Mikroçip ve sağlık kayıtları paylaşılmaz. Kayıp modu, telefon / SMS düğmeleri ve duraklatma desteklenir; duraklatma sonrası aynı bağlantı yeniden etkinleştirilebilir. QR / NFC konum takibi yapmaz.
+
+Kısa kullanım adımları ve yeni ekranların tamamı Türkçe, İngilizce, Almanca, İspanyolca ve Japoncadır. Demoda örnek profillerin mikroçipleri ve tasma ayarları cihazda saklanır; gerçek iletişim bağlantısı yayımlanmaz. Gerçek bağlantılar için oturum açılmalıdır.
+
+Yeni backend: `pet_tags` için sahibi ve hayvan sahipliğini birlikte doğrulayan RLS; rastgele bağlantı anahtarını doğrulayan `public-pet-tag` okuma işlevi. Anonim kullanıcılar tabloyu listeleyemez. İki şema güncellemesi ve Edge Function canlı projeye uygulandı.
+
+Donanım ve API referansları: [AVMA mikroçip açıklaması](https://www.avma.org/resources-tools/pet-owners/petcare/microchips-reunite-pets-families/microchipping-faq), [Apple NFC URL okuma](https://developer.apple.com/videos/play/tech-talks/702/), [Supabase Edge yetkilendirme](https://supabase.com/docs/guides/functions/auth).
+
 ## Başlangıç
 
 ```bash

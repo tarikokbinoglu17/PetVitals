@@ -1,3 +1,4 @@
+import { PetTagPanel } from "../components/PetTagPanel";
 import React, { useState } from "react";
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import {
@@ -211,10 +212,12 @@ export function PetDetailScreen({
         />
         <DetailLine
           label={t(language, "Mikroçip")}
-          value={t(language, "Henüz eklenmedi")}
+          value={pet.microchipId || t(language, "Henüz eklenmedi")}
           last
         />
       </View>
+
+      <PetTagPanel key={pet.id} pet={pet} />
 
       <Text style={styles.sectionTitle}>{t(language, "Sağlık özeti")}</Text>
       <View style={styles.healthCard}>

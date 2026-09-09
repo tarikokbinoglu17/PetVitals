@@ -1,5 +1,7 @@
 import type { PetDraft } from "../types";
 import type { SupportedLocale } from "./globalization";
+import { tagCopy } from "./petTagCopy";
+import { normalizeMicrochip, isValidMicrochip } from "./petIdentity";
 import { parseIsoDate } from "./vaccineReminders";
 
 export function validatePetDraft(
@@ -67,6 +69,8 @@ export function validatePetDraft(
   ) {
     return copy.weight;
   }
+
+  if (!isValidMicrochip(normalizeMicrochip(draft.microchipId ?? ""))) return tagCopy[language].chipError;
 
   return null;
 }
